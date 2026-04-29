@@ -46,6 +46,13 @@ function renderSidebar({ sections, activeId, isCollapsed }) {
       <nav class="sidebar-nav" role="navigation" aria-label="Menú principal">
         ${sections.map((s) => renderSection(s, activeId)).join('')}
       </nav>
+
+      <div class="sidebar-bottom">
+        <div class="nav-row" data-action="logout" data-has-children="false">
+          <div class="icon">${getIcon('logout')}</div>
+          <span class="lbl">Cerrar sesión</span>
+        </div>
+      </div>
     </aside>
   `;
 }
@@ -277,13 +284,6 @@ export function mountHeader({ headerEl, role }) {
           <span class="profile-dd__icon">${getIcon('bell')}</span>
           <span>Notificaciones</span>
         </a>
-
-        <div class="profile-dd__sep"></div>
-
-        <a class="profile-dd__item profile-dd__item--danger" href="#logout" data-action="logout">
-          <span class="profile-dd__icon">${getIcon('logout')}</span>
-          <span>Cerrar sesión</span>
-        </a>
       </div>
     </div>
   `;
@@ -297,6 +297,65 @@ function bindHeaderEvents(headerEl) {
   if (!switcher || !trigger) return;
 
   trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    switcher.classList.toggle('open');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!switcher.contains(e.target)) switcher.classList.remove('open');
+  });
+}
+
+/* ─── Demo role switcher (pill flotante — solo sandbox) ────────────────
+   Permite alternar entre los 14 roles disponibles sin volver a index.html.
+   Marcado claramente como "Demo" para diferenciarlo del avatar dropdown
+   (que en producción sería el cambio entre roles asignados al usuario real).
+   ─────────────────────────────────────────────────────────────────── */
+export function mountDemoRoleSwitcher({ rootEl, currentRoleCode }) {
+  const roles = Object.values(ROLES);
+  const itemsHtml = roles.map((r) => {
+    const ini = (r.userName || r.label).split(/\s+/).filter(Boolean).slice(0, 2)
+      .map((w) => w[0]).join('').toUpperCase();
+    const isActive = r.code === currentRoleCode;
+    return `
+      <a class="demo-role-switcher__item ${isActive ? 'is-active' : ''}"
+         href="perfil.html?role=${r.code}">
+        <span class="demo-role-switcher__avatar"
+              style="background:${r.color}22;color:${r.color}">${ini}</span>
+        <div class="demo-role-switcher__meta">
+          <strong>${r.label}</strong>
+          <small>${r.userName}</small>
+        </div>
+        ${isActive ? `<span class="demo-role-switcher__check">${getIcon('check')}</span>` : ''}
+      </a>
+    `;
+  }).join('');
+
+  rootEl.innerHTML = `
+    <div class="demo-role-switcher" id="demoRoleSwitcher">
+      <button class="demo-role-switcher__toggle" type="button" id="demoSwitcherToggle">
+        <span class="demo-role-switcher__badge">DEMO</span>
+        <span class="demo-role-switcher__lbl">Cambiar usuario simulado</span>
+        <span class="demo-role-switcher__chev">${getIcon('chevron')}</span>
+      </button>
+      <div class="demo-role-switcher__panel" role="menu">
+        <div class="demo-role-switcher__panel-label">14 usuarios disponibles</div>
+        <div class="demo-role-switcher__list">
+          ${itemsHtml}
+        </div>
+      </div>
+    </div>
+  `;
+
+  bindDemoRoleSwitcherEvents(rootEl);
+}
+
+function bindDemoRoleSwitcherEvents(rootEl) {
+  const switcher = rootEl.querySelector('#demoRoleSwitcher');
+  const toggle = rootEl.querySelector('#demoSwitcherToggle');
+  if (!switcher || !toggle) return;
+
+  toggle.addEventListener('click', (e) => {
     e.stopPropagation();
     switcher.classList.toggle('open');
   });

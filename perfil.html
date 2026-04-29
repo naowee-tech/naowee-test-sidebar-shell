@@ -30,6 +30,9 @@
   </div>
 </div>
 
+<!-- Demo role switcher — solo sandbox, no producción -->
+<div id="demoRoleSwitcherRoot"></div>
+
 <!-- Footer flotante Naowee (paridad con incentivos/escenarios/digitacion) -->
 <div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">
   <img src="shared/logos/naowee.svg" alt="Naowee" class="naowee-floating-footer__logo"/>
@@ -38,7 +41,7 @@
 </div>
 
 <script type="module">
-  import { mountSidebar, mountHeader, getRoleFromQuery } from './shared/sidebar.js';
+  import { mountSidebar, mountHeader, mountDemoRoleSwitcher, getRoleFromQuery } from './shared/sidebar.js';
 
   const roleCode = getRoleFromQuery();
   const activeId = new URLSearchParams(window.location.search).get('active') || 'inicio';
@@ -52,6 +55,11 @@
   mountHeader({
     headerEl: document.getElementById('topHeader'),
     role
+  });
+
+  mountDemoRoleSwitcher({
+    rootEl: document.getElementById('demoRoleSwitcherRoot'),
+    currentRoleCode: roleCode
   });
 
   document.getElementById('pageTitle').textContent = `Vista — ${role.label}`;

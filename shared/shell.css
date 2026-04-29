@@ -370,6 +370,107 @@ a{color:inherit;text-decoration:none}
 /* PAGE */
 .page{flex:1;overflow-y:auto;overflow-x:hidden;padding:28px 32px 72px}
 
+/* ═══ Demo role switcher (pill flotante — solo sandbox) ═══
+   Permite alternar entre los 14 roles para fines de demo, sin volver
+   a index.html. Marcado claramente como "Demo" (badge naranja) para
+   diferenciarlo del avatar dropdown de producción. */
+.demo-role-switcher{
+  position:fixed;
+  bottom:14px;left:20px;z-index:60;
+}
+.demo-role-switcher__toggle{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 12px 8px 8px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-full);
+  box-shadow:0 4px 12px rgba(40,40,52,.08);
+  font-family:inherit;font-size:12px;font-weight:600;
+  color:var(--text-primary);
+  cursor:pointer;
+  transition:transform .2s cubic-bezier(.32,.72,0,1),
+             box-shadow .2s ease,
+             border-color .2s ease;
+}
+.demo-role-switcher__toggle:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(40,40,52,.12);
+  border-color:var(--border-dark);
+}
+.demo-role-switcher__badge{
+  font-size:9.5px;font-weight:800;letter-spacing:.6px;
+  background:var(--naranja);color:#fff;
+  padding:3px 7px;border-radius:var(--radius-full);
+  flex-shrink:0;
+}
+.demo-role-switcher__lbl{font-weight:600}
+.demo-role-switcher__chev{
+  display:inline-flex;align-items:center;justify-content:center;
+  color:var(--text-secondary);
+  transition:transform .2s ease;
+}
+.demo-role-switcher__chev svg{width:14px;height:14px}
+.demo-role-switcher.open .demo-role-switcher__chev{transform:rotate(180deg)}
+
+.demo-role-switcher__panel{
+  position:absolute;
+  bottom:calc(100% + 8px);left:0;
+  width:320px;max-height:60vh;
+  background:#fff;
+  border:1px solid var(--border);border-radius:12px;
+  box-shadow:0 12px 32px rgba(40,40,52,.16);
+  opacity:0;transform:translateY(6px);pointer-events:none;
+  transition:opacity .2s,transform .2s;
+  padding:8px 6px;
+  display:flex;flex-direction:column;
+}
+.demo-role-switcher.open .demo-role-switcher__panel{
+  opacity:1;transform:translateY(0);pointer-events:auto;
+}
+.demo-role-switcher__panel-label{
+  font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  color:#b5b9d4;padding:6px 12px 8px;flex-shrink:0;
+}
+.demo-role-switcher__list{
+  overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:var(--border-dark) transparent;
+}
+.demo-role-switcher__list::-webkit-scrollbar{width:6px}
+.demo-role-switcher__list::-webkit-scrollbar-thumb{background:var(--border-dark);border-radius:3px}
+
+.demo-role-switcher__item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;border-radius:8px;
+  text-decoration:none;color:var(--text-primary);
+  transition:background .12s;
+}
+.demo-role-switcher__item:hover{background:#f5f6fa;text-decoration:none}
+.demo-role-switcher__item.is-active{background:#fff3e6}
+.demo-role-switcher__item.is-active:hover{background:#ffe4cf}
+
+.demo-role-switcher__avatar{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;flex-shrink:0;
+}
+.demo-role-switcher__meta{
+  display:flex;flex-direction:column;gap:1px;min-width:0;flex:1;
+}
+.demo-role-switcher__meta strong{
+  font-size:13px;font-weight:600;color:var(--text-primary);
+  line-height:1.2;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.demo-role-switcher__meta small{
+  font-size:11px;color:var(--text-secondary);font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.demo-role-switcher__check{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;color:var(--accent);flex-shrink:0;
+}
+.demo-role-switcher__check svg{width:16px;height:16px}
+
 /* Floating footer (paridad con incentivos/escenarios/digitacion) */
 .naowee-floating-footer{
   position:fixed;bottom:14px;right:20px;z-index:50;
