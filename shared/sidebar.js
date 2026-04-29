@@ -76,7 +76,8 @@ function renderItem(item, activeId) {
   return `
     <div class="nav-row ${isParentSelected ? 'active' : ''} ${expanded ? 'expanded' : ''}"
          data-id="${item.id}"
-         data-route="${item.route || ''}">
+         data-route="${item.route || ''}"
+         data-has-children="${hasChildren ? 'true' : 'false'}">
       ${isParentSelected ? '<div class="active-bar"></div>' : ''}
       <div class="icon">${getIcon(item.icon)}</div>
       <span class="lbl">${item.label}</span>
@@ -113,23 +114,26 @@ function bindSidebarEvents(rootEl) {
   }
 
   /* Nav-row click:
-     - Si tiene sub-nav (children): expandir / colapsar (no navega)
-     - Si no tiene children: navegar (preview-only) actualizando ?active=  */
+     - Si data-has-children="true" → expandir / colapsar (no navega)
+     - Si no → navegar (preview-only) actualizando ?active=
+     Usamos atributos explícitos en lugar de DOM walking para evitar
+     issues con whitespace text nodes entre hermanos. */
   rootEl.querySelectorAll('.nav-row').forEach((row) => {
     row.addEventListener('click', (e) => {
       if (sidebar.classList.contains('collapsed')) return;
       e.stopPropagation();
-      const next = row.nextElementSibling;
-      const hasChildren = next && next.classList.contains('sub-nav');
+      e.preventDefault();
+
+      const hasChildren = row.getAttribute('data-has-children') === 'true';
 
       if (hasChildren) {
-        e.preventDefault();
         row.classList.toggle('expanded');
         return;
       }
 
       const id = row.getAttribute('data-id');
-      if (!id || id === 'logout') return;
+      const action = row.getAttribute('data-action');
+      if (action === 'logout' || !id) return;
       navigateToActive(id);
     });
   });
@@ -138,6 +142,7 @@ function bindSidebarEvents(rootEl) {
   rootEl.querySelectorAll('.sub-row').forEach((row) => {
     row.addEventListener('click', (e) => {
       e.stopPropagation();
+      e.preventDefault();
       const id = row.getAttribute('data-id');
       if (!id) return;
       navigateToActive(id);
