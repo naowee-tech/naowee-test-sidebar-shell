@@ -67,13 +67,17 @@ function renderItem(item, activeId) {
   const isActive = item.id === activeId;
   const hasChildren = item.children && item.children.length > 0;
   const childActive = hasChildren && item.children.some((c) => c.id === activeId);
+  /* Cuando un sub-item está activo, el parent también se pinta como activo
+     (barra naranja + label/icon en accent). El sub-item activo muestra un
+     dot adicional como indicador secundario. */
+  const isParentSelected = isActive || childActive;
   const expanded = childActive;
 
   return `
-    <div class="nav-row ${isActive ? 'active' : ''} ${expanded ? 'expanded' : ''}"
+    <div class="nav-row ${isParentSelected ? 'active' : ''} ${expanded ? 'expanded' : ''}"
          data-id="${item.id}"
          data-route="${item.route || ''}">
-      ${isActive ? '<div class="active-bar"></div>' : ''}
+      ${isParentSelected ? '<div class="active-bar"></div>' : ''}
       <div class="icon">${getIcon(item.icon)}</div>
       <span class="lbl">${item.label}</span>
       ${hasChildren ? `<span class="nav-arrow">${getIcon('chevron')}</span>` : ''}
@@ -108,18 +112,43 @@ function bindSidebarEvents(rootEl) {
     });
   }
 
-  // Toggle expansion of items with children
+  /* Nav-row click:
+     - Si tiene sub-nav (children): expandir / colapsar (no navega)
+     - Si no tiene children: navegar (preview-only) actualizando ?active=  */
   rootEl.querySelectorAll('.nav-row').forEach((row) => {
     row.addEventListener('click', (e) => {
       if (sidebar.classList.contains('collapsed')) return;
+      e.stopPropagation();
       const next = row.nextElementSibling;
       const hasChildren = next && next.classList.contains('sub-nav');
-      if (!hasChildren) return;
-      e.preventDefault();
-      e.stopPropagation();
-      row.classList.toggle('expanded');
+
+      if (hasChildren) {
+        e.preventDefault();
+        row.classList.toggle('expanded');
+        return;
+      }
+
+      const id = row.getAttribute('data-id');
+      if (!id || id === 'logout') return;
+      navigateToActive(id);
     });
   });
+
+  /* Sub-row click: navegar al hijo (preview-only) */
+  rootEl.querySelectorAll('.sub-row').forEach((row) => {
+    row.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = row.getAttribute('data-id');
+      if (!id) return;
+      navigateToActive(id);
+    });
+  });
+}
+
+function navigateToActive(activeId) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('active', activeId);
+  window.location.href = url.toString();
 }
 
 /* ─── Header user-chip ("Phil") ───────────────────────────────────────

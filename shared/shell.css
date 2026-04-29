@@ -35,7 +35,7 @@ a{color:inherit;text-decoration:none}
 .sidebar{
   width:var(--sidebar-w);min-width:var(--sidebar-w);
   background:var(--surface);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;height:100vh;overflow-y:auto;
+  display:flex;flex-direction:column;height:100vh;overflow:hidden;
   /* Apple-style smooth easing */
   transition:width .36s cubic-bezier(.32,.72,0,1),min-width .36s cubic-bezier(.32,.72,0,1);
 }
@@ -61,7 +61,17 @@ a{color:inherit;text-decoration:none}
 .sb-logo-img{height:46px;width:auto;display:block;flex-shrink:0}
 .logo-sep{width:1px;height:36px;background:var(--border);flex-shrink:0}
 
-.sidebar-nav{flex:1;padding:20px 0 10px;display:flex;flex-direction:column;gap:6px}
+/* Sidebar-nav scrollable; sidebar-bottom (Cerrar sesión) fijo abajo */
+.sidebar-nav{
+  flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
+  padding:20px 0 10px;display:flex;flex-direction:column;gap:6px;
+  /* Scrollbar discreto */
+  scrollbar-width:thin;scrollbar-color:var(--border-dark) transparent;
+}
+.sidebar-nav::-webkit-scrollbar{width:6px}
+.sidebar-nav::-webkit-scrollbar-track{background:transparent}
+.sidebar-nav::-webkit-scrollbar-thumb{background:var(--border-dark);border-radius:3px}
+.sidebar-nav::-webkit-scrollbar-thumb:hover{background:var(--text-secondary)}
 .nav-section{
   font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
   color:#b5b9d4;padding:0 28px;line-height:16px;margin:10px 0 6px;
@@ -79,7 +89,8 @@ a{color:inherit;text-decoration:none}
 .nav-row .icon{
   width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
   margin-left:28px;
-  transition:margin-left .25s cubic-bezier(.4,0,.2,1);
+  color:var(--text-secondary); /* gris medio para iconos en estado idle (paridad con incentivos) */
+  transition:margin-left .25s cubic-bezier(.4,0,.2,1), color .25s ease;
 }
 .nav-row .lbl{
   flex:1;font-size:14px;font-weight:600;color:var(--text-primary);
@@ -120,7 +131,11 @@ a{color:inherit;text-decoration:none}
 .nav-row.active .icon svg polyline,
 .nav-row.active .icon svg polygon{stroke:var(--accent);transition:stroke .25s ease}
 
-.sidebar-bottom{padding:8px 0;border-top:1px solid var(--border)}
+.sidebar-bottom{
+  flex-shrink:0;
+  padding:8px 0;border-top:1px solid var(--border);
+  background:var(--surface);
+}
 
 /* ═══ Sub-nav (children) ═══ */
 .sub-nav{
@@ -131,6 +146,7 @@ a{color:inherit;text-decoration:none}
 }
 .nav-row.expanded + .sub-nav{max-height:500px;opacity:1}
 .sub-row{
+  position:relative;
   display:flex;align-items:center;gap:10px;
   padding:8px 12px 8px 60px;
   border-radius:var(--radius-sm);cursor:pointer;
@@ -139,7 +155,24 @@ a{color:inherit;text-decoration:none}
   margin:1px 0;
 }
 .sub-row:hover{background:#f5f6fa;color:var(--text-primary)}
-.sub-row.active{background:#fff3e6;color:var(--accent);font-weight:700}
+.sub-row.active{color:var(--accent);font-weight:700;background:transparent}
+.sub-row.active:hover{background:#fff3e6}
+
+/* Dot indicador en sub-row activo (alineado verticalmente con el icono del parent) */
+.sub-row.active::before{
+  content:'';
+  position:absolute;
+  left:40px;top:50%;
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--accent);
+  transform:translateY(-50%);
+  animation:subDotIn .32s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes subDotIn{
+  0%   {opacity:0;transform:translate(-4px,-50%) scale(.4)}
+  100% {opacity:1;transform:translate(0,-50%) scale(1)}
+}
 .sidebar.collapsed .sub-nav{display:none}
 
 /* ═══ Collapsed: fade sutil + hover/active como cuadrado del icono ═══ */
