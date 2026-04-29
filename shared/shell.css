@@ -33,6 +33,7 @@ a{color:inherit;text-decoration:none}
 
 /* ═══ SIDEBAR con logos oficiales ═══ */
 .sidebar{
+  position:relative; /* anchor para .scroll-hint absolutely positioned */
   width:var(--sidebar-w);min-width:var(--sidebar-w);
   background:var(--surface);border-right:1px solid var(--border);
   display:flex;flex-direction:column;height:100vh;overflow:hidden;
@@ -140,6 +141,76 @@ a{color:inherit;text-decoration:none}
   flex-shrink:0;
   padding:8px 0;border-top:1px solid var(--border);
   background:var(--surface);
+}
+
+/* ═══ Scroll hint — badge bajo contraste fijo al fondo ═══
+   Aparece cuando .sidebar-nav tiene overflow Y el usuario no está al
+   final. Indica que hay más opciones abajo. Posicionado encima del
+   sidebar-bottom. Sutilmente animado (bounce). */
+.scroll-hint{
+  position:absolute;
+  bottom:64px; /* sidebar-bottom (~56px) + 8px gap */
+  left:50%;
+  transform:translateX(-50%);
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(40,40,52,.06);
+  color:var(--text-secondary);
+  border:none;cursor:pointer;padding:0;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s ease, background .15s ease;
+  z-index:5;
+}
+.scroll-hint svg{width:14px;height:14px}
+.scroll-hint.is-visible{
+  opacity:1;
+  pointer-events:auto;
+  animation:scrollHintBounce 1.6s ease-in-out infinite;
+}
+.scroll-hint:hover{
+  background:rgba(40,40,52,.12);
+  color:var(--text-primary);
+}
+@keyframes scrollHintBounce{
+  0%, 100% { transform:translateX(-50%) translateY(0); }
+  50%      { transform:translateX(-50%) translateY(3px); }
+}
+.sidebar.collapsed .scroll-hint{display:none}
+@media (prefers-reduced-motion: reduce){
+  .scroll-hint.is-visible{animation:none}
+}
+
+/* ═══ Tooltip para sidebar colapsado ═══
+   Posicionado dinámicamente vía JS (position:fixed, no clipped por
+   overflow del sidebar). Aparece a la altura del .nav-row hovereado,
+   pegado al lado derecho del sidebar. */
+.nav-tooltip{
+  position:fixed;
+  background:var(--text-primary);
+  color:#fff;
+  padding:6px 10px;
+  border-radius:6px;
+  font-size:12px;font-weight:500;
+  white-space:nowrap;
+  pointer-events:none;
+  z-index:200;
+  box-shadow:0 4px 14px rgba(40,40,52,.18);
+  opacity:0;
+  transform:translateY(-50%) translateX(-4px);
+  transition:opacity .15s ease, transform .15s ease;
+}
+.nav-tooltip.is-visible{
+  opacity:1;
+  transform:translateY(-50%) translateX(0);
+}
+/* Pequeña flecha apuntando al sidebar */
+.nav-tooltip::before{
+  content:'';
+  position:absolute;
+  right:100%;top:50%;
+  transform:translateY(-50%);
+  border:5px solid transparent;
+  border-right-color:var(--text-primary);
 }
 
 /* ═══ Sub-nav (children) ═══ */
@@ -328,7 +399,9 @@ a{color:inherit;text-decoration:none}
 
 .profile-dd__sep{
   height:1px;background:var(--border);
-  margin:4px 4px;
+  /* Margin negativo horizontal para compensar el padding:6px del .profile-dd
+     y que el divider quede de borde a borde. */
+  margin:4px -6px;
 }
 
 .profile-dd__label{

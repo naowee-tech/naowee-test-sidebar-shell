@@ -8,7 +8,7 @@
  * - Header con profile-switcher (user-chip "Phil" estilo: avatar+dot+nombre+rol+chevron)
  * - Dropdown del profile-switcher con la lista de los roles disponibles
  */
-import { ROLES, getMenuForRole, getIcon } from './menu-data.js';
+import { ROLES, getMenuForRole, getIcon, findParentOfChild } from './menu-data.js';
 
 const COLLAPSED_KEY = 'naowee-sidebar-collapsed';
 
@@ -23,13 +23,16 @@ export function mountSidebar({ rootEl, roleCode, activeId }) {
 
   _state.rootEl = rootEl;
   _state.role = role;
+  _state.activeId = activeId;
 
   rootEl.innerHTML = renderSidebar({ sections, activeId, isCollapsed });
   bindSidebarEvents(rootEl);
+  setupTooltips(rootEl);
+  setupScrollHint(rootEl);
   return { role, sections };
 }
 
-function renderSidebar({ sections, activeId, isCollapsed }) {
+function renderSidebar({ sections, activeId, isCollapsed, options }) {
   return `
     <aside class="sidebar ${isCollapsed ? 'collapsed' : ''}" id="naoweeSidebar">
       <div class="sidebar-logo">
@@ -43,9 +46,13 @@ function renderSidebar({ sections, activeId, isCollapsed }) {
         <img src="shared/logos/suid.png" alt="SUID" class="sb-logo-img"/>
       </div>
 
-      <nav class="sidebar-nav" role="navigation" aria-label="Menú principal">
-        ${sections.map((s) => renderSection(s, activeId)).join('')}
+      <nav class="sidebar-nav" id="sidebarNav" role="navigation" aria-label="Menú principal">
+        ${sections.map((s) => renderSection(s, activeId, options)).join('')}
       </nav>
+
+      <button class="scroll-hint" id="scrollHint" type="button" aria-label="Hay más opciones — desplazate">
+        ${getIcon('chevron')}
+      </button>
 
       <div class="sidebar-bottom">
         <div class="nav-row" data-action="logout" data-has-children="false">
@@ -57,8 +64,8 @@ function renderSidebar({ sections, activeId, isCollapsed }) {
   `;
 }
 
-function renderSection(section, activeId) {
-  const itemsHtml = section.items.map((item) => renderItem(item, activeId)).join('');
+function renderSection(section, activeId, options) {
+  const itemsHtml = section.items.map((item) => renderItem(item, activeId, options)).join('');
   if (!section.section) return itemsHtml;
   return `
     <div class="nav-section">${section.section}</div>
@@ -66,7 +73,7 @@ function renderSection(section, activeId) {
   `;
 }
 
-function renderItem(item, activeId) {
+function renderItem(item, activeId, options) {
   const isActive = item.id === activeId;
   const hasChildren = item.children && item.children.length > 0;
   const childActive = hasChildren && item.children.some((c) => c.id === activeId);
@@ -86,20 +93,28 @@ function renderItem(item, activeId) {
       <span class="lbl">${item.label}</span>
       ${hasChildren ? `<span class="nav-arrow">${getIcon('chevron')}</span>` : ''}
     </div>
-    ${hasChildren ? renderChildren(item.children, activeId) : ''}
+    ${hasChildren ? renderChildren(item.children, activeId, options) : ''}
   `;
 }
 
-function renderChildren(children, activeId) {
+function renderChildren(children, activeId, options) {
+  /* options.skipDotMorph = true → el dot del activo NO tiene
+     view-transition-name (no morphea slide; entra con la animación CSS
+     subDotIn = scale 0→1). Aplica cuando el cambio de active es entre
+     sub-items de PARENTS distintos (cross-parent). */
+  const skipDotMorph = options && options.skipDotMorph;
   return `
     <div class="sub-nav">
       ${children.map((c) => {
         const isActive = c.id === activeId;
+        const dotStyle = (isActive && skipDotMorph)
+          ? ' style="view-transition-name:none"'
+          : '';
         return `
         <div class="sub-row ${isActive ? 'active' : ''}"
              data-id="${c.id}"
              data-route="${c.route || ''}">
-          ${isActive ? '<span class="sub-row__dot" aria-hidden="true"></span>' : ''}
+          ${isActive ? `<span class="sub-row__dot" aria-hidden="true"${dotStyle}></span>` : ''}
           <span class="lbl">${c.label}</span>
         </div>
       `;
@@ -158,15 +173,25 @@ function bindSidebarEvents(rootEl) {
 }
 
 /* Cambio de active SIN recargar la página, envuelto en View Transition.
-   El browser captura snapshots del antes/después y morpha los elementos
-   con view-transition-name (active-bar y sub-row__dot) entre posiciones.
-   Resultado: la barra naranja y el punto SE DESLIZAN entre items. */
+   - Active-bar: siempre slidea entre parents (view-transition-name siempre).
+   - Dot sub-item:
+       · Mismo parent (intra-parent) → slidea entre hermanas
+       · Distinto parent (cross-parent) → grow desde 0 (CSS subDotIn) */
 function navigateToActive(activeId) {
   const url = new URL(window.location.href);
   url.searchParams.set('active', activeId);
   history.pushState({ activeId }, '', url.toString());
 
-  const update = () => updateActive(activeId);
+  const role = _state.role;
+  const oldActiveId = _state.activeId;
+  const oldParent = role ? findParentOfChild(role.code, oldActiveId) : null;
+  const newParent = role ? findParentOfChild(role.code, activeId) : null;
+  /* skipDotMorph = true cuando NO podemos hacer slide del dot:
+       · uno de los dos no es sub-item (oldParent o newParent es null)
+       · ambos son sub-items pero de parents diferentes */
+  const skipDotMorph = !oldParent || !newParent || oldParent !== newParent;
+
+  const update = () => updateActive(activeId, { skipDotMorph });
 
   if (document.startViewTransition) {
     document.startViewTransition(update);
@@ -175,15 +200,19 @@ function navigateToActive(activeId) {
   }
 }
 
-function updateActive(activeId) {
+function updateActive(activeId, options) {
   const { rootEl, role } = _state;
   if (!rootEl || !role) return;
 
   const sections = getMenuForRole(role.code);
   const isCollapsed = rootEl.querySelector('.sidebar')?.classList.contains('collapsed') || false;
 
-  rootEl.innerHTML = renderSidebar({ sections, activeId, isCollapsed });
+  rootEl.innerHTML = renderSidebar({ sections, activeId, isCollapsed, options });
   bindSidebarEvents(rootEl);
+  setupTooltips(rootEl);
+  setupScrollHint(rootEl);
+
+  _state.activeId = activeId;
 
   /* Sync title del placeholder por si la página lo usa */
   const titleEl = document.getElementById('pageTitle');
@@ -304,6 +333,86 @@ function bindHeaderEvents(headerEl) {
   document.addEventListener('click', (e) => {
     if (!switcher.contains(e.target)) switcher.classList.remove('open');
   });
+}
+
+/* ─── Tooltips para sidebar colapsado ──────────────────────────────────
+   En collapsed, hover sobre un item muestra tooltip a la altura del item
+   pero al lado derecho (fuera del sidebar). Implementado con un único
+   <div> en <body> + position:fixed para evitar issues con overflow:hidden
+   del sidebar. */
+let _tooltipEl = null;
+
+function setupTooltips(rootEl) {
+  const sidebar = rootEl.querySelector('.sidebar');
+  if (!sidebar) return;
+
+  if (!_tooltipEl) {
+    _tooltipEl = document.createElement('div');
+    _tooltipEl.className = 'nav-tooltip';
+    document.body.appendChild(_tooltipEl);
+  }
+
+  function showTooltip(row) {
+    if (!sidebar.classList.contains('collapsed')) return;
+    const lblEl = row.querySelector('.lbl');
+    if (!lblEl) return;
+    _tooltipEl.textContent = lblEl.textContent.trim();
+    const rect = row.getBoundingClientRect();
+    _tooltipEl.style.left = `${rect.right + 12}px`;
+    _tooltipEl.style.top = `${rect.top + rect.height / 2}px`;
+    _tooltipEl.classList.add('is-visible');
+  }
+  function hideTooltip() {
+    if (_tooltipEl) _tooltipEl.classList.remove('is-visible');
+  }
+
+  rootEl.querySelectorAll('.nav-row').forEach((row) => {
+    row.addEventListener('mouseenter', () => showTooltip(row));
+    row.addEventListener('mouseleave', hideTooltip);
+  });
+
+  /* Ocultar tooltip al colapsar/expandir el sidebar (estado cambió) */
+  const observer = new MutationObserver(hideTooltip);
+  observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+}
+
+/* ─── Scroll hint (badge inferior cuando hay overflow) ─────────────────
+   Aparece cuando .sidebar-nav tiene overflow Y el usuario no está cerca
+   del bottom. Click en el badge → scrollea suave al final. */
+function setupScrollHint(rootEl) {
+  const nav = rootEl.querySelector('#sidebarNav');
+  const hint = rootEl.querySelector('#scrollHint');
+  if (!nav || !hint) return;
+
+  function update() {
+    const sidebar = rootEl.querySelector('.sidebar');
+    if (sidebar?.classList.contains('collapsed')) {
+      hint.classList.remove('is-visible');
+      return;
+    }
+    const hasOverflow = nav.scrollHeight > nav.clientHeight + 2;
+    const distanceFromBottom = nav.scrollHeight - nav.scrollTop - nav.clientHeight;
+    const isNearBottom = distanceFromBottom < 12;
+    hint.classList.toggle('is-visible', hasOverflow && !isNearBottom);
+  }
+
+  nav.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+
+  hint.addEventListener('click', () => {
+    nav.scrollTo({ top: nav.scrollHeight, behavior: 'smooth' });
+  });
+
+  /* Re-evaluar cuando cambia el estado del sidebar (collapsed) */
+  const sidebar = rootEl.querySelector('.sidebar');
+  if (sidebar) {
+    const observer = new MutationObserver(update);
+    observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  /* Ejecutar una vez para estado inicial — usar requestAnimationFrame
+     para que las dimensiones ya estén calculadas */
+  requestAnimationFrame(update);
 }
 
 /* ─── Demo role switcher (pill flotante — solo sandbox) ────────────────

@@ -55,7 +55,11 @@ const ICONS = {
   chevron:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
   burger:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>',
   bell:        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
-  check:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+  check:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  /* Una persona + lápiz — para "Digitadores" (los que digitan resultados) */
+  userPen:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.5"/><path d="M3 21v-2a4 4 0 0 1 4-4h5"/><path d="M17.5 11.5a2.121 2.121 0 1 1 3 3L14 21l-4 1 1-4 6.5-6.5z"/></svg>',
+  /* Una persona + check — para "Coordinadores" (rol de validación/aprobación) */
+  userCheck:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.5"/><path d="M3 21v-2a4 4 0 0 1 4-4h5"/><polyline points="15 12 17 14 21 10"/></svg>'
 };
 
 export function getIcon(name) {
@@ -96,9 +100,9 @@ const ITEMS = {
   inspeccion:       { id: 'inspector',       label: 'Inspección',            icon: 'shield',   route: '/home/inspector' },
 
   // DIGITACIÓN
-  miDigitacion:     { id: 'mi-digitacion',   label: 'Mi digitación',         icon: 'whistle',  route: '/home/digitacion/mi-digitacion' },
-  digitadores:      { id: 'digitadores',     label: 'Digitadores',           icon: 'users',    route: '/home/digitacion/digitadores' },
-  coordinadores:    { id: 'coordinadores',   label: 'Coordinadores',         icon: 'users',    route: '/home/digitacion/coordinadores' },
+  miDigitacion:     { id: 'mi-digitacion',   label: 'Mi digitación',         icon: 'whistle',   route: '/home/digitacion/mi-digitacion' },
+  digitadores:      { id: 'digitadores',     label: 'Digitadores',           icon: 'userPen',   route: '/home/digitacion/digitadores' },
+  coordinadores:    { id: 'coordinadores',   label: 'Coordinadores',         icon: 'userCheck', route: '/home/digitacion/coordinadores' },
 
   // USUARIOS
   gestionUsuarios:  { id: 'user-management', label: 'Gestión de usuarios',   icon: 'users',    route: '/home/user-management' },
@@ -203,4 +207,20 @@ export const MENU_BY_ROLE = {
 
 export function getMenuForRole(roleCode) {
   return MENU_BY_ROLE[roleCode] || MENU_BY_ROLE.ATHLETE;
+}
+
+/* Para un childId dado, retorna el id del item padre (parent) que lo contiene.
+   Si el id es de un parent (no child) o no existe, retorna null.
+   Usado para detectar si un cambio de active es intra-parent (slide del dot)
+   o cross-parent (scale-in del dot desde 0). */
+export function findParentOfChild(roleCode, childId) {
+  const sections = MENU_BY_ROLE[roleCode] || MENU_BY_ROLE.ATHLETE;
+  for (const section of sections) {
+    for (const item of section.items) {
+      if (item.children && item.children.some((c) => c.id === childId)) {
+        return item.id;
+      }
+    }
+  }
+  return null;
 }
