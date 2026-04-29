@@ -9,32 +9,29 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="shared/tokens.css">
 <link rel="stylesheet" href="shared/shell.css">
 
 <style>
-  /* Floating "back to selector" pill */
   .back-pill {
     position: fixed;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-    padding: 8px 16px;
+    bottom: 14px;
+    left: 20px;
+    z-index: 60;
+    padding: 8px 14px;
     background: var(--azul);
     color: #fff;
     border-radius: var(--radius-full);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     text-decoration: none;
     box-shadow: var(--shadow-md);
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    transition: transform var(--duration-normal) var(--easing-smoothout);
+    gap: 6px;
+    transition: transform .2s cubic-bezier(.32,.72,0,1);
   }
   .back-pill:hover {
-    transform: translateX(-50%) translateY(-2px);
+    transform: translateY(-2px);
     text-decoration: none;
   }
 </style>
@@ -50,12 +47,19 @@
       <div class="page-placeholder">
         <h1 id="pageTitle">Vista del rol</h1>
         <p>Esta es una superficie placeholder — el foco de este sandbox es el <strong>sidebar y su jerarquía</strong> según el rol seleccionado.</p>
-        <p style="margin-top:12px;color:var(--text-muted);font-size:13px">
-          Probá colapsar el menú con el botón ☰ del logo · hacer click en items con sub-items para expandirlos · cambiar de rol desde el selector inferior.
+        <p style="margin-top:12px;color:#9ca0b8;font-size:13px">
+          Probá colapsar el menú con el botón ☰ del logo · expandir items con sub-items · cambiar de rol desde el chevron del user-chip o desde la pill inferior.
         </p>
       </div>
     </div>
   </div>
+</div>
+
+<!-- Footer flotante Naowee (paridad con incentivos/escenarios/digitacion) -->
+<div class="naowee-floating-footer" role="contentinfo" aria-label="Pie de página Naowee">
+  <img src="shared/logos/naowee.svg" alt="Naowee" class="naowee-floating-footer__logo"/>
+  <div class="naowee-floating-footer__sep"></div>
+  <span class="naowee-floating-footer__text">Todos los derechos reservados <strong>&copy; 2026</strong></span>
 </div>
 
 <a href="index.html" class="back-pill">← Cambiar de rol</a>
@@ -74,8 +78,7 @@
 
   mountHeader({
     headerEl: document.getElementById('topHeader'),
-    role,
-    breadcrumb: activeId === 'inicio' ? 'Inicio' : activeId
+    role
   });
 
   document.getElementById('pageTitle').textContent = `Vista — ${role.label}`;

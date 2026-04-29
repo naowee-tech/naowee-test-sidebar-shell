@@ -7,20 +7,20 @@
 
 /* ─── Catálogo de roles ────────────────────────────────────────────── */
 export const ROLES = {
-  ROOT:                     { code: 'ROOT',                     label: 'Super Admin',           color: '#7c3aed' },
-  ADMIN:                    { code: 'ADMIN',                    label: 'Admin',                 color: '#1f8923' },
-  USER_MANAGER:             { code: 'USER_MANAGER',             label: 'Gestor de usuarios',    color: '#1f78d1' },
-  EVENT_MANAGER:            { code: 'EVENT_MANAGER',            label: 'Gestor de eventos',     color: '#FF7500' },
-  EVENT_COORDINATOR:        { code: 'EVENT_COORDINATOR',        label: 'Coord. competencias',   color: '#FF7500' },
-  DIGITIZER:                { code: 'DIGITIZER',                label: 'Digitador',             color: '#d74009' },
-  DOCUMENTATION_MANAGER:    { code: 'DOCUMENTATION_MANAGER',    label: 'Gestor de docs',        color: '#1f78d1' },
-  DOCUMENTATION_REVIEWER:   { code: 'DOCUMENTATION_REVIEWER',   label: 'Revisor de docs',       color: '#1f78d1' },
-  ATHLETE:                  { code: 'ATHLETE',                  label: 'Deportista',            color: '#1f8923' },
-  LEGAL_GUARDIAN:           { code: 'LEGAL_GUARDIAN',           label: 'Acudiente legal',       color: '#1f8923' },
-  ORGANIZATION_MANAGER:     { code: 'ORGANIZATION_MANAGER',     label: 'Gestor organización',   color: '#002B5B' },
-  SUPPORT_STAFF:            { code: 'SUPPORT_STAFF',            label: 'Operador (soporte)',    color: '#7c3aed' },
-  VENUE_SURVEYOR:           { code: 'VENUE_SURVEYOR',           label: 'Levantador escenarios', color: '#646587' },
-  VENUE_INSPECTOR:          { code: 'VENUE_INSPECTOR',          label: 'Inspector escenarios',  color: '#646587' }
+  ROOT:                     { code: 'ROOT',                     label: 'Super Admin',           color: '#7c3aed', userName: 'Sofía Rodríguez' },
+  ADMIN:                    { code: 'ADMIN',                    label: 'Admin',                 color: '#1f8923', userName: 'Carlos Méndez'   },
+  USER_MANAGER:             { code: 'USER_MANAGER',             label: 'Gestor de usuarios',    color: '#1f78d1', userName: 'Laura Martínez'  },
+  EVENT_MANAGER:            { code: 'EVENT_MANAGER',            label: 'Gestor de eventos',     color: '#FF7500', userName: 'Andrés Gómez'    },
+  EVENT_COORDINATOR:        { code: 'EVENT_COORDINATOR',        label: 'Coord. competencias',   color: '#FF7500', userName: 'María Castillo'  },
+  DIGITIZER:                { code: 'DIGITIZER',                label: 'Digitador',             color: '#d74009', userName: 'Diego Torres'    },
+  DOCUMENTATION_MANAGER:    { code: 'DOCUMENTATION_MANAGER',    label: 'Gestor de docs',        color: '#1f78d1', userName: 'Camila Vélez'    },
+  DOCUMENTATION_REVIEWER:   { code: 'DOCUMENTATION_REVIEWER',   label: 'Revisor de docs',       color: '#1f78d1', userName: 'Felipe Ríos'     },
+  ATHLETE:                  { code: 'ATHLETE',                  label: 'Deportista',            color: '#1f8923', userName: 'Valentina Ortiz' },
+  LEGAL_GUARDIAN:           { code: 'LEGAL_GUARDIAN',           label: 'Acudiente legal',       color: '#1f8923', userName: 'Patricia López'  },
+  ORGANIZATION_MANAGER:     { code: 'ORGANIZATION_MANAGER',     label: 'Gestor organización',   color: '#002B5B', userName: 'Juan Hernández'  },
+  SUPPORT_STAFF:            { code: 'SUPPORT_STAFF',            label: 'Operador (soporte)',    color: '#7c3aed', userName: 'Lucía Herrera'   },
+  VENUE_SURVEYOR:           { code: 'VENUE_SURVEYOR',           label: 'Levantador escenarios', color: '#646587', userName: 'Miguel Quintero' },
+  VENUE_INSPECTOR:          { code: 'VENUE_INSPECTOR',          label: 'Inspector escenarios',  color: '#646587', userName: 'Ana Salazar'     }
 };
 
 /* ─── Iconos inline (SVG) ──────────────────────────────────────────── */
