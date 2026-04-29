@@ -12,6 +12,11 @@ import { ROLES, getMenuForRole, getIcon, findParentOfChild } from './menu-data.j
 
 const COLLAPSED_KEY = 'naowee-sidebar-collapsed';
 
+/* URL del login público (auth-screens-ui en GitHub Pages).
+   Al hacer "Cerrar sesión" desde el sidebar bottom, redirige acá para
+   cerrar el ciclo end-to-end del demo: Login → Sidebar → Logout → Login. */
+const LOGIN_URL = 'https://naowee-tech.github.io/auth-screens-ui/01-login.html';
+
 /* Estado del módulo para que navigateToActive pueda re-renderizar
    sin recargar la página (View Transitions hacen morph suave entre estados). */
 const _state = { rootEl: null, role: null };
@@ -156,7 +161,11 @@ function bindSidebarEvents(rootEl) {
 
       const id = row.getAttribute('data-id');
       const action = row.getAttribute('data-action');
-      if (action === 'logout' || !id) return;
+      if (action === 'logout') {
+        window.location.href = LOGIN_URL;
+        return;
+      }
+      if (!id) return;
       navigateToActive(id);
     });
   });
