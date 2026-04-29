@@ -46,17 +46,6 @@ function renderSidebar({ sections, activeId, isCollapsed }) {
       <nav class="sidebar-nav" role="navigation" aria-label="Menú principal">
         ${sections.map((s) => renderSection(s, activeId)).join('')}
       </nav>
-
-      <div class="sidebar-bottom">
-        <div class="nav-row" data-action="logout">
-          <div class="icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B5B9D4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/>
-            </svg>
-          </div>
-          <span class="lbl">Cerrar sesión</span>
-        </div>
-      </div>
     </aside>
   `;
 }
@@ -205,27 +194,43 @@ window.addEventListener('popstate', () => {
   }
 });
 
-/* ─── Header user-chip ("Phil") ───────────────────────────────────────
-   Replica el patrón de incentivos: avatar circular + dot verde + nombre + rol + chevron.
-   El chevron abre un dropdown con los demás roles para cambiar de perfil rápido.
-   ─────────────────────────────────────────────────────────────────── */
+/* ─── Header user-chip + dropdown ──────────────────────────────────────
+   Modelo A — el dropdown muestra solo los roles asignados al usuario.
+   Estructura:
+     · Header: avatar grande + nombre + email + rol activo (✓)
+     · "Cambiar a" → solo si assignedRoles.length > 1
+     · Mi perfil / Configuraciones / Notificaciones
+     · Cerrar sesión (single source of truth — no más sidebar bottom)
+   ────────────────────────────────────────────────────────────────────── */
 export function mountHeader({ headerEl, role }) {
   const initials = (role.userName || role.label)
     .split(/\s+/).filter(Boolean).slice(0, 2)
     .map((w) => w[0]).join('').toUpperCase();
 
-  const ddItems = Object.values(ROLES).map((r) => `
-    <a class="profile-dd__item ${r.code === role.code ? 'active' : ''}"
-       href="perfil.html?role=${r.code}">
-      <span class="ava-ring" style="width:28px;height:28px;font-size:11px;background:${r.color}22;color:${r.color}">
-        ${(r.userName || r.label).split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase()}
-      </span>
-      <div class="role-meta">
-        <span>${r.userName || r.label}</span>
-        <small>${r.label}</small>
-      </div>
-    </a>
-  `).join('');
+  const assignedCodes = role.assignedRoles && role.assignedRoles.length > 0
+    ? role.assignedRoles
+    : [role.code];
+  const otherAssignedRoles = assignedCodes
+    .map((code) => ROLES[code])
+    .filter(Boolean)
+    .filter((r) => r.code !== role.code);
+
+  const switchSection = otherAssignedRoles.length > 0 ? `
+    <div class="profile-dd__sep"></div>
+    <div class="profile-dd__label">Cambiar a</div>
+    ${otherAssignedRoles.map((r) => {
+      const ini = (r.userName || r.label).split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+      return `
+        <a class="profile-dd__item profile-dd__item--role" href="perfil.html?role=${r.code}">
+          <span class="ava-ring" style="width:30px;height:30px;font-size:11px;background:${r.color}22;color:${r.color}">${ini}</span>
+          <div class="role-meta">
+            <span>${r.label}</span>
+            <small>${r.userName}</small>
+          </div>
+        </a>
+      `;
+    }).join('')}
+  ` : '';
 
   headerEl.innerHTML = `
     <div class="profile-switcher" id="profileSwitcher">
@@ -238,13 +243,47 @@ export function mountHeader({ headerEl, role }) {
           <span class="user-name">${role.userName || role.label}</span>
           <span class="user-role">${role.label}</span>
         </div>
-        <button class="user-chip__chevron" type="button" aria-label="Cambiar de rol">
+        <button class="user-chip__chevron" type="button" aria-label="Abrir menú de cuenta">
           ${getIcon('chevron')}
         </button>
       </div>
       <div class="profile-dd" role="menu">
-        <div class="profile-dd__label">Cambiar de rol (preview)</div>
-        ${ddItems}
+        <!-- Header con info del usuario y rol activo -->
+        <div class="profile-dd__header">
+          <span class="ava-ring" style="width:42px;height:42px;font-size:14px;background:${role.color}22;color:${role.color}">${initials}</span>
+          <div class="profile-dd__user">
+            <strong>${role.userName || role.label}</strong>
+            <small>${role.userEmail || ''}</small>
+            <span class="profile-dd__current-role" style="color:${role.color}">
+              <span class="profile-dd__check-ico">${getIcon('check')}</span>
+              ${role.label}
+            </span>
+          </div>
+        </div>
+
+        ${switchSection}
+
+        <div class="profile-dd__sep"></div>
+
+        <a class="profile-dd__item" href="#mi-perfil">
+          <span class="profile-dd__icon">${getIcon('user')}</span>
+          <span>Mi perfil</span>
+        </a>
+        <a class="profile-dd__item" href="#configuracion">
+          <span class="profile-dd__icon">${getIcon('gear')}</span>
+          <span>Configuraciones</span>
+        </a>
+        <a class="profile-dd__item" href="#notificaciones">
+          <span class="profile-dd__icon">${getIcon('bell')}</span>
+          <span>Notificaciones</span>
+        </a>
+
+        <div class="profile-dd__sep"></div>
+
+        <a class="profile-dd__item profile-dd__item--danger" href="#logout" data-action="logout">
+          <span class="profile-dd__icon">${getIcon('logout')}</span>
+          <span>Cerrar sesión</span>
+        </a>
       </div>
     </div>
   `;

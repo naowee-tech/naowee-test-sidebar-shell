@@ -6,21 +6,32 @@
  */
 
 /* ─── Catálogo de roles ────────────────────────────────────────────── */
+/**
+ * Cada rol simula un usuario con un nombre, email y los `assignedRoles`
+ * que tendría asignados en producción (Modelo A — ver role-menu-matrix.md).
+ *
+ * Si `assignedRoles.length > 1`, el dropdown del avatar muestra una sección
+ * "Cambiar a" con los demás roles. Si tiene 1 solo, esa sección no aparece.
+ *
+ * Las combinaciones reflejan casos típicos: gestores que también operan
+ * (EVENT_MANAGER + EVENT_COORDINATOR), agentes de documentación que también
+ * revisan, surveyors que también inspeccionan, etc.
+ */
 export const ROLES = {
-  ROOT:                     { code: 'ROOT',                     label: 'Super Admin',           color: '#7c3aed', userName: 'Sofía Rodríguez' },
-  ADMIN:                    { code: 'ADMIN',                    label: 'Admin',                 color: '#1f8923', userName: 'Carlos Méndez'   },
-  USER_MANAGER:             { code: 'USER_MANAGER',             label: 'Gestor de usuarios',    color: '#1f78d1', userName: 'Laura Martínez'  },
-  EVENT_MANAGER:            { code: 'EVENT_MANAGER',            label: 'Gestor de eventos',     color: '#FF7500', userName: 'Andrés Gómez'    },
-  EVENT_COORDINATOR:        { code: 'EVENT_COORDINATOR',        label: 'Coord. competencias',   color: '#FF7500', userName: 'María Castillo'  },
-  DIGITIZER:                { code: 'DIGITIZER',                label: 'Digitador',             color: '#d74009', userName: 'Diego Torres'    },
-  DOCUMENTATION_MANAGER:    { code: 'DOCUMENTATION_MANAGER',    label: 'Gestor de docs',        color: '#1f78d1', userName: 'Camila Vélez'    },
-  DOCUMENTATION_REVIEWER:   { code: 'DOCUMENTATION_REVIEWER',   label: 'Revisor de docs',       color: '#1f78d1', userName: 'Felipe Ríos'     },
-  ATHLETE:                  { code: 'ATHLETE',                  label: 'Deportista',            color: '#1f8923', userName: 'Valentina Ortiz' },
-  LEGAL_GUARDIAN:           { code: 'LEGAL_GUARDIAN',           label: 'Acudiente legal',       color: '#1f8923', userName: 'Patricia López'  },
-  ORGANIZATION_MANAGER:     { code: 'ORGANIZATION_MANAGER',     label: 'Gestor organización',   color: '#002B5B', userName: 'Juan Hernández'  },
-  SUPPORT_STAFF:            { code: 'SUPPORT_STAFF',            label: 'Operador (soporte)',    color: '#7c3aed', userName: 'Lucía Herrera'   },
-  VENUE_SURVEYOR:           { code: 'VENUE_SURVEYOR',           label: 'Levantador escenarios', color: '#646587', userName: 'Miguel Quintero' },
-  VENUE_INSPECTOR:          { code: 'VENUE_INSPECTOR',          label: 'Inspector escenarios',  color: '#646587', userName: 'Ana Salazar'     }
+  ROOT:                   { code: 'ROOT',                   label: 'Super Admin',           color: '#7c3aed', userName: 'Sofía Rodríguez',  userEmail: 'sofia.rodriguez@mindeporte.gov.co',   assignedRoles: ['ROOT'] },
+  ADMIN:                  { code: 'ADMIN',                  label: 'Admin',                 color: '#1f8923', userName: 'Carlos Méndez',    userEmail: 'carlos.mendez@mindeporte.gov.co',     assignedRoles: ['ADMIN', 'EVENT_MANAGER'] },
+  USER_MANAGER:           { code: 'USER_MANAGER',           label: 'Gestor de usuarios',    color: '#1f78d1', userName: 'Laura Martínez',   userEmail: 'laura.martinez@mindeporte.gov.co',    assignedRoles: ['USER_MANAGER'] },
+  EVENT_MANAGER:          { code: 'EVENT_MANAGER',          label: 'Gestor de eventos',     color: '#FF7500', userName: 'Andrés Gómez',     userEmail: 'andres.gomez@mindeporte.gov.co',      assignedRoles: ['EVENT_MANAGER', 'EVENT_COORDINATOR'] },
+  EVENT_COORDINATOR:      { code: 'EVENT_COORDINATOR',      label: 'Coord. competencias',   color: '#FF7500', userName: 'María Castillo',   userEmail: 'maria.castillo@mindeporte.gov.co',    assignedRoles: ['EVENT_COORDINATOR'] },
+  DIGITIZER:              { code: 'DIGITIZER',              label: 'Digitador',             color: '#d74009', userName: 'Diego Torres',     userEmail: 'diego.torres@mindeporte.gov.co',      assignedRoles: ['DIGITIZER'] },
+  DOCUMENTATION_MANAGER:  { code: 'DOCUMENTATION_MANAGER',  label: 'Gestor de docs',        color: '#1f78d1', userName: 'Camila Vélez',     userEmail: 'camila.velez@mindeporte.gov.co',      assignedRoles: ['DOCUMENTATION_MANAGER', 'DOCUMENTATION_REVIEWER'] },
+  DOCUMENTATION_REVIEWER: { code: 'DOCUMENTATION_REVIEWER', label: 'Revisor de docs',       color: '#1f78d1', userName: 'Felipe Ríos',      userEmail: 'felipe.rios@mindeporte.gov.co',       assignedRoles: ['DOCUMENTATION_REVIEWER'] },
+  ATHLETE:                { code: 'ATHLETE',                label: 'Deportista',            color: '#1f8923', userName: 'Valentina Ortiz',  userEmail: 'valentina.ortiz@gmail.com',           assignedRoles: ['ATHLETE'] },
+  LEGAL_GUARDIAN:         { code: 'LEGAL_GUARDIAN',         label: 'Acudiente legal',       color: '#1f8923', userName: 'Patricia López',   userEmail: 'patricia.lopez@gmail.com',            assignedRoles: ['LEGAL_GUARDIAN'] },
+  ORGANIZATION_MANAGER:   { code: 'ORGANIZATION_MANAGER',   label: 'Gestor organización',   color: '#002B5B', userName: 'Juan Hernández',   userEmail: 'juan.hernandez@liganacional.org.co',  assignedRoles: ['ORGANIZATION_MANAGER'] },
+  SUPPORT_STAFF:          { code: 'SUPPORT_STAFF',          label: 'Operador (soporte)',    color: '#7c3aed', userName: 'Lucía Herrera',    userEmail: 'lucia.herrera@mindeporte.gov.co',     assignedRoles: ['SUPPORT_STAFF'] },
+  VENUE_SURVEYOR:         { code: 'VENUE_SURVEYOR',         label: 'Levantador escenarios', color: '#646587', userName: 'Miguel Quintero',  userEmail: 'miguel.quintero@mindeporte.gov.co',   assignedRoles: ['VENUE_SURVEYOR', 'VENUE_INSPECTOR'] },
+  VENUE_INSPECTOR:        { code: 'VENUE_INSPECTOR',        label: 'Inspector escenarios',  color: '#646587', userName: 'Ana Salazar',      userEmail: 'ana.salazar@mindeporte.gov.co',       assignedRoles: ['VENUE_INSPECTOR'] }
 };
 
 /* ─── Iconos inline (SVG) ──────────────────────────────────────────── */
@@ -42,7 +53,9 @@ const ICONS = {
   gift:        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>',
   logout:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
   chevron:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
-  burger:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>'
+  burger:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>',
+  bell:        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
+  check:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
 };
 
 export function getIcon(name) {
