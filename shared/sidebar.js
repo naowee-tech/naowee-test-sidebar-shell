@@ -12,10 +12,18 @@ import { ROLES, getMenuForRole, getIcon, findParentOfChild } from './menu-data.j
 
 const COLLAPSED_KEY = 'naowee-sidebar-collapsed';
 
-/* URL del login público (auth-screens-ui en GitHub Pages).
-   Al hacer "Cerrar sesión" desde el sidebar bottom, redirige acá para
-   cerrar el ciclo end-to-end del demo: Login → Sidebar → Logout → Login. */
-const LOGIN_URL = 'https://naowee-tech.github.io/auth-screens-ui/01-login.html';
+/* URL del login al hacer "Cerrar sesión".
+   - localhost (demo personal): preview local en :4400 (Keycloak theme)
+   - producción (GitHub Pages): auth-screens-ui público
+   Esto permite que ambos flujos cierren su ciclo end-to-end:
+     Login → Sidebar shell → Logout → Login. */
+const LOGIN_URL = (() => {
+  const host = window.location.hostname;
+  const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
+  return isLocal
+    ? 'http://localhost:4400/.local-preview/login-preview.html'
+    : 'https://naowee-tech.github.io/auth-screens-ui/01-login.html';
+})();
 
 /* Estado del módulo para que navigateToActive pueda re-renderizar
    sin recargar la página (View Transitions hacen morph suave entre estados). */
