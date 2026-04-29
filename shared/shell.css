@@ -508,7 +508,7 @@ a{color:inherit;text-decoration:none}
   position:absolute;
   bottom:calc(100% + 8px);
   left:50%;
-  width:320px;max-height:60vh;
+  width:320px;max-height:72vh;
   background:#fff;
   border:1px solid var(--border);border-radius:12px;
   box-shadow:0 12px 32px rgba(40,40,52,.16);
@@ -524,6 +524,20 @@ a{color:inherit;text-decoration:none}
   transform:translate(-50%, 0);
   pointer-events:auto;
 }
+/* Gradient fade en el bottom — solo visible cuando hay contenido oculto abajo
+   (clase .has-overflow toggleada por JS). Indica que la lista es scrolleable. */
+.demo-role-switcher__panel::after{
+  content:'';
+  position:absolute;
+  bottom:8px;left:8px;right:8px;
+  height:34px;
+  background:linear-gradient(to top, #fff 30%, rgba(255,255,255,0));
+  border-radius:0 0 10px 10px;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .2s ease;
+}
+.demo-role-switcher__panel.has-overflow::after{opacity:1}
 .demo-role-switcher__panel-label{
   font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
   color:#b5b9d4;padding:6px 12px 8px;flex-shrink:0;

@@ -12,6 +12,19 @@ import { ROLES, getMenuForRole, getIcon, findParentOfChild } from './menu-data.j
 
 const COLLAPSED_KEY = 'naowee-sidebar-collapsed';
 
+/* URL del login al hacer "Cerrar sesión".
+   - localhost (demo personal): preview local en :4400 (Keycloak theme)
+   - producción (GitHub Pages): auth-screens-ui público
+   Esto permite que ambos flujos cierren su ciclo end-to-end:
+     Login → Sidebar shell → Logout → Login. */
+const LOGIN_URL = (() => {
+  const host = window.location.hostname;
+  const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
+  return isLocal
+    ? 'http://localhost:4400/.local-preview/login-preview.html'
+    : 'https://naowee-tech.github.io/auth-screens-ui/01-login.html';
+})();
+
 /* Estado del módulo para que navigateToActive pueda re-renderizar
    sin recargar la página (View Transitions hacen morph suave entre estados). */
 const _state = { rootEl: null, role: null };
@@ -156,7 +169,11 @@ function bindSidebarEvents(rootEl) {
 
       const id = row.getAttribute('data-id');
       const action = row.getAttribute('data-action');
-      if (action === 'logout' || !id) return;
+      if (action === 'logout') {
+        window.location.href = LOGIN_URL;
+        return;
+      }
+      if (!id) return;
       navigateToActive(id);
     });
   });
@@ -465,12 +482,33 @@ export function mountDemoRoleSwitcher({ rootEl, currentRoleCode }) {
 function bindDemoRoleSwitcherEvents(rootEl) {
   const switcher = rootEl.querySelector('#demoRoleSwitcher');
   const toggle = rootEl.querySelector('#demoSwitcherToggle');
+  const panel = rootEl.querySelector('.demo-role-switcher__panel');
+  const list = rootEl.querySelector('.demo-role-switcher__list');
   if (!switcher || !toggle) return;
+
+  /* Toggle has-overflow basado en scroll position de la lista.
+     Indica visualmente (gradient fade en bottom) que hay más usuarios
+     debajo de la zona visible. */
+  function updateOverflow() {
+    if (!panel || !list) return;
+    const hasOverflow = list.scrollHeight > list.clientHeight + 4;
+    const distanceFromBottom = list.scrollHeight - list.scrollTop - list.clientHeight;
+    const isNearBottom = distanceFromBottom < 8;
+    panel.classList.toggle('has-overflow', hasOverflow && !isNearBottom);
+  }
 
   toggle.addEventListener('click', (e) => {
     e.stopPropagation();
     switcher.classList.toggle('open');
+    if (switcher.classList.contains('open')) {
+      requestAnimationFrame(updateOverflow);
+    }
   });
+
+  if (list) {
+    list.addEventListener('scroll', updateOverflow, { passive: true });
+  }
+  window.addEventListener('resize', updateOverflow);
 
   document.addEventListener('click', (e) => {
     if (!switcher.contains(e.target)) switcher.classList.remove('open');
