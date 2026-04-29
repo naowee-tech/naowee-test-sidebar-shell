@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naowee Sidebar Shell — Vista por rol</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="shared/tokens.css">
+<link rel="stylesheet" href="shared/shell.css">
+
+<style>
+  /* Floating "back to selector" pill */
+  .back-pill {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    padding: 8px 16px;
+    background: var(--azul);
+    color: #fff;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: var(--shadow-md);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform var(--duration-normal) var(--easing-smoothout);
+  }
+  .back-pill:hover {
+    transform: translateX(-50%) translateY(-2px);
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div id="sidebarRoot"></div>
+
+  <div class="main">
+    <header class="top-header" id="topHeader"></header>
+    <div class="page">
+      <div class="page-placeholder">
+        <h1 id="pageTitle">Vista del rol</h1>
+        <p>Esta es una superficie placeholder — el foco de este sandbox es el <strong>sidebar y su jerarquía</strong> según el rol seleccionado.</p>
+        <p style="margin-top:12px;color:var(--text-muted);font-size:13px">
+          Probá colapsar el menú con el botón ☰ del logo · hacer click en items con sub-items para expandirlos · cambiar de rol desde el selector inferior.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<a href="index.html" class="back-pill">← Cambiar de rol</a>
+
+<script type="module">
+  import { mountSidebar, mountHeader, getRoleFromQuery } from './shared/sidebar.js';
+
+  const roleCode = getRoleFromQuery();
+  const activeId = new URLSearchParams(window.location.search).get('active') || 'inicio';
+
+  const { role } = mountSidebar({
+    rootEl: document.getElementById('sidebarRoot'),
+    roleCode,
+    activeId
+  });
+
+  mountHeader({
+    headerEl: document.getElementById('topHeader'),
+    role,
+    breadcrumb: activeId === 'inicio' ? 'Inicio' : activeId
+  });
+
+  document.getElementById('pageTitle').textContent = `Vista — ${role.label}`;
+  document.title = `Naowee Sidebar — ${role.label}`;
+</script>
+
+</body>
+</html>
