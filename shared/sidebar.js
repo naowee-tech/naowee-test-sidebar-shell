@@ -465,12 +465,33 @@ export function mountDemoRoleSwitcher({ rootEl, currentRoleCode }) {
 function bindDemoRoleSwitcherEvents(rootEl) {
   const switcher = rootEl.querySelector('#demoRoleSwitcher');
   const toggle = rootEl.querySelector('#demoSwitcherToggle');
+  const panel = rootEl.querySelector('.demo-role-switcher__panel');
+  const list = rootEl.querySelector('.demo-role-switcher__list');
   if (!switcher || !toggle) return;
+
+  /* Toggle has-overflow basado en scroll position de la lista.
+     Indica visualmente (gradient fade en bottom) que hay más usuarios
+     debajo de la zona visible. */
+  function updateOverflow() {
+    if (!panel || !list) return;
+    const hasOverflow = list.scrollHeight > list.clientHeight + 4;
+    const distanceFromBottom = list.scrollHeight - list.scrollTop - list.clientHeight;
+    const isNearBottom = distanceFromBottom < 8;
+    panel.classList.toggle('has-overflow', hasOverflow && !isNearBottom);
+  }
 
   toggle.addEventListener('click', (e) => {
     e.stopPropagation();
     switcher.classList.toggle('open');
+    if (switcher.classList.contains('open')) {
+      requestAnimationFrame(updateOverflow);
+    }
   });
+
+  if (list) {
+    list.addEventListener('scroll', updateOverflow, { passive: true });
+  }
+  window.addEventListener('resize', updateOverflow);
 
   document.addEventListener('click', (e) => {
     if (!switcher.contains(e.target)) switcher.classList.remove('open');
