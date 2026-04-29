@@ -108,12 +108,15 @@ a{color:inherit;text-decoration:none}
 }
 .nav-row.expanded .nav-arrow{transform:rotate(180deg);color:var(--accent);opacity:1}
 
-/* ═══ Indicador activo: barra naranja con animación de entrada ═══ */
+/* ═══ Indicador activo: barra naranja con animación de entrada ═══
+   El nombre `shell-active-bar` permite que el browser haga morph suave
+   entre la posición vieja y la nueva via View Transitions API.   */
 .active-bar{
   position:absolute;left:-6px;top:8px;width:4px;height:28px;
   background:var(--accent);border-radius:25px;
   transform-origin:center;
   animation:activeBarIn .42s cubic-bezier(.16,1,.3,1) both;
+  view-transition-name: shell-active-bar;
 }
 @keyframes activeBarIn{
   0%   {opacity:0;transform:translateX(-8px) scaleY(.2)}
@@ -161,9 +164,9 @@ a{color:inherit;text-decoration:none}
 .sub-row.active{color:var(--accent);font-weight:700;background:transparent}
 .sub-row.active:hover{background:#fff3e6}
 
-/* Dot indicador en sub-row activo (alineado verticalmente con el icono del parent) */
-.sub-row.active::before{
-  content:'';
+/* Dot indicador en sub-row activo — elemento real (no ::before) para que
+   el view-transition-name pueda hacer morph suave entre posiciones. */
+.sub-row__dot{
   position:absolute;
   left:40px;top:50%;
   width:6px;height:6px;
@@ -171,10 +174,34 @@ a{color:inherit;text-decoration:none}
   background:var(--accent);
   transform:translateY(-50%);
   animation:subDotIn .32s cubic-bezier(.16,1,.3,1) both;
+  view-transition-name: shell-active-dot;
 }
 @keyframes subDotIn{
   0%   {opacity:0;transform:translate(-4px,-50%) scale(.4)}
   100% {opacity:1;transform:translate(0,-50%) scale(1)}
+}
+
+/* ═══ View Transitions — slide del active-bar y del dot ═══
+   Cuando el activeId cambia (sin recargar la página), el browser hace
+   morph suave entre la posición vieja y la nueva. Solo slide, sin fade
+   (paridad con incentivos). */
+::view-transition-group(shell-active-bar),
+::view-transition-group(shell-active-dot){
+  animation-duration: 360ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 5;
+}
+::view-transition-old(shell-active-bar),
+::view-transition-new(shell-active-bar),
+::view-transition-old(shell-active-dot),
+::view-transition-new(shell-active-dot){
+  animation: none; /* solo slide del group, sin fade del old/new */
+}
+@media (prefers-reduced-motion: reduce){
+  ::view-transition-group(shell-active-bar),
+  ::view-transition-group(shell-active-dot){
+    animation-duration: 1ms !important;
+  }
 }
 .sidebar.collapsed .sub-nav{display:none}
 

@@ -10,31 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="shared/shell.css">
-
-<style>
-  .back-pill {
-    position: fixed;
-    bottom: 14px;
-    left: 20px;
-    z-index: 60;
-    padding: 8px 14px;
-    background: var(--azul);
-    color: #fff;
-    border-radius: var(--radius-full);
-    font-size: 12px;
-    font-weight: 600;
-    text-decoration: none;
-    box-shadow: var(--shadow-md);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    transition: transform .2s cubic-bezier(.32,.72,0,1);
-  }
-  .back-pill:hover {
-    transform: translateY(-2px);
-    text-decoration: none;
-  }
-</style>
 </head>
 <body>
 
@@ -61,8 +36,6 @@
   <div class="naowee-floating-footer__sep"></div>
   <span class="naowee-floating-footer__text">Todos los derechos reservados <strong>&copy; 2026</strong></span>
 </div>
-
-<a href="index.html" class="back-pill">← Cambiar de rol</a>
 
 <script type="module">
   import { mountSidebar, mountHeader, getRoleFromQuery } from './shared/sidebar.js';

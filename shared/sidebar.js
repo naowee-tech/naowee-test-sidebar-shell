@@ -12,10 +12,17 @@ import { ROLES, getMenuForRole, getIcon } from './menu-data.js';
 
 const COLLAPSED_KEY = 'naowee-sidebar-collapsed';
 
+/* Estado del módulo para que navigateToActive pueda re-renderizar
+   sin recargar la página (View Transitions hacen morph suave entre estados). */
+const _state = { rootEl: null, role: null };
+
 export function mountSidebar({ rootEl, roleCode, activeId }) {
   const role = ROLES[roleCode] || ROLES.ATHLETE;
   const sections = getMenuForRole(role.code);
   const isCollapsed = localStorage.getItem(COLLAPSED_KEY) === '1';
+
+  _state.rootEl = rootEl;
+  _state.role = role;
 
   rootEl.innerHTML = renderSidebar({ sections, activeId, isCollapsed });
   bindSidebarEvents(rootEl);
@@ -90,13 +97,17 @@ function renderItem(item, activeId) {
 function renderChildren(children, activeId) {
   return `
     <div class="sub-nav">
-      ${children.map((c) => `
-        <div class="sub-row ${c.id === activeId ? 'active' : ''}"
+      ${children.map((c) => {
+        const isActive = c.id === activeId;
+        return `
+        <div class="sub-row ${isActive ? 'active' : ''}"
              data-id="${c.id}"
              data-route="${c.route || ''}">
+          ${isActive ? '<span class="sub-row__dot" aria-hidden="true"></span>' : ''}
           <span class="lbl">${c.label}</span>
         </div>
-      `).join('')}
+      `;
+      }).join('')}
     </div>
   `;
 }
@@ -150,11 +161,49 @@ function bindSidebarEvents(rootEl) {
   });
 }
 
+/* Cambio de active SIN recargar la página, envuelto en View Transition.
+   El browser captura snapshots del antes/después y morpha los elementos
+   con view-transition-name (active-bar y sub-row__dot) entre posiciones.
+   Resultado: la barra naranja y el punto SE DESLIZAN entre items. */
 function navigateToActive(activeId) {
   const url = new URL(window.location.href);
   url.searchParams.set('active', activeId);
-  window.location.href = url.toString();
+  history.pushState({ activeId }, '', url.toString());
+
+  const update = () => updateActive(activeId);
+
+  if (document.startViewTransition) {
+    document.startViewTransition(update);
+  } else {
+    update();
+  }
 }
+
+function updateActive(activeId) {
+  const { rootEl, role } = _state;
+  if (!rootEl || !role) return;
+
+  const sections = getMenuForRole(role.code);
+  const isCollapsed = rootEl.querySelector('.sidebar')?.classList.contains('collapsed') || false;
+
+  rootEl.innerHTML = renderSidebar({ sections, activeId, isCollapsed });
+  bindSidebarEvents(rootEl);
+
+  /* Sync title del placeholder por si la página lo usa */
+  const titleEl = document.getElementById('pageTitle');
+  if (titleEl) titleEl.textContent = `Vista — ${role.label}`;
+}
+
+/* Soportar navegación browser back/forward sin perder estado */
+window.addEventListener('popstate', () => {
+  const params = new URLSearchParams(window.location.search);
+  const activeId = params.get('active') || 'inicio';
+  if (document.startViewTransition) {
+    document.startViewTransition(() => updateActive(activeId));
+  } else {
+    updateActive(activeId);
+  }
+});
 
 /* ─── Header user-chip ("Phil") ───────────────────────────────────────
    Replica el patrón de incentivos: avatar circular + dot verde + nombre + rol + chevron.
