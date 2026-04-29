@@ -120,7 +120,7 @@ const ITEMS = {
   rolesPermisos:    { id: 'admin-roles',      label: 'Roles y permisos',     icon: 'shield',   route: '/home/admin/roles' },
   usuariosPlatform: { id: 'admin-users',      label: 'Usuarios platform',    icon: 'users',    route: '/home/admin/users' },
   auditoria:        { id: 'admin-audit',      label: 'Auditoría',            icon: 'doc',      route: '/home/admin/audit' },
-  administracion:   { id: 'administration',   label: 'Administration',       icon: 'gear',     route: '/home/administration' }
+  administracion:   { id: 'administration',   label: 'Administración',       icon: 'gear',     route: '/home/administration' }
 };
 
 /* Each role's menu = array of { sectionLabel, items[] }.
