@@ -392,9 +392,11 @@ function setupScrollHint(rootEl) {
       return;
     }
     const hasOverflow = nav.scrollHeight > nav.clientHeight + 2;
-    const distanceFromBottom = nav.scrollHeight - nav.scrollTop - nav.clientHeight;
-    const isNearBottom = distanceFromBottom < 12;
-    hint.classList.toggle('is-visible', hasOverflow && !isNearBottom);
+    /* Solo visible cuando hay overflow Y estamos arriba del todo.
+       Al primer scroll desaparece — el usuario ya sabe que hay más
+       opciones y el hint dejaría de ser útil para empezar a estorbar. */
+    const isAtTop = nav.scrollTop < 4;
+    hint.classList.toggle('is-visible', hasOverflow && isAtTop);
   }
 
   nav.addEventListener('scroll', update, { passive: true });
