@@ -119,7 +119,9 @@ const ITEMS = {
   administracion:   { id: 'administration',   label: 'Administration',       icon: 'gear',     route: '/home/administration' }
 };
 
-/* Each role’s menu = array of { sectionLabel, items[] } */
+/* Each role's menu = array of { sectionLabel, items[] }.
+   "Mi perfil" NO va en el sidebar — vive solo en el dropdown del avatar
+   (single source of truth, patrón global UX). */
 export const MENU_BY_ROLE = {
   ROOT: [
     { section: null,                items: [ITEMS.inicio] },
@@ -139,57 +141,62 @@ export const MENU_BY_ROLE = {
   ],
 
   USER_MANAGER: [
-    { section: null,                items: [ITEMS.inicio, ITEMS.perfil] },
+    { section: null,                items: [ITEMS.inicio] },
     { section: 'Usuarios',          items: [ITEMS.gestionUsuarios] }
   ],
 
   EVENT_MANAGER: [
-    { section: null,                items: [ITEMS.inicio, ITEMS.perfil] },
+    { section: null,                items: [ITEMS.inicio] },
     { section: 'Gestión deportiva', items: [ITEMS.eventos, ITEMS.cupos] }
   ],
 
   EVENT_COORDINATOR: [
-    { section: null,                items: [ITEMS.inicio, ITEMS.perfil] },
+    { section: null,                items: [ITEMS.inicio] },
     { section: 'Gestión deportiva', items: [ITEMS.competencias] }
   ],
 
   DIGITIZER: [
-    { section: null,                items: [ITEMS.inicio, ITEMS.perfil] },
+    { section: null,                items: [ITEMS.inicio] },
     { section: 'Digitación',        items: [ITEMS.miDigitacion] }
   ],
 
   DOCUMENTATION_MANAGER: [
-    { section: null,                items: [ITEMS.inicio, ITEMS.perfil] },
+    { section: null,                items: [ITEMS.inicio] },
+    { section: 'Documentación',     items: [ITEMS.documentacion] }
+  ],
+
+  DOCUMENTATION_REVIEWER: [
+    { section: null,                items: [ITEMS.inicio] },
     { section: 'Documentación',     items: [ITEMS.documentacion] }
   ],
 
   ATHLETE: [
     { section: null,                items: [ITEMS.inicio] },
-    { section: 'Mi espacio',        items: [ITEMS.perfil, ITEMS.misInscripciones, ITEMS.incentivosMios] }
+    { section: 'Mi espacio',        items: [ITEMS.misInscripciones, ITEMS.incentivosMios] }
   ],
 
   LEGAL_GUARDIAN: [
     { section: null,                items: [ITEMS.inicio] },
-    { section: 'Mi espacio',        items: [ITEMS.perfil, ITEMS.misDependientes, ITEMS.misInscripciones] }
+    { section: 'Mi espacio',        items: [ITEMS.misDependientes, ITEMS.misInscripciones] }
   ],
 
   ORGANIZATION_MANAGER: [
     { section: null,                items: [ITEMS.inicio] },
-    { section: 'Mi espacio',        items: [ITEMS.perfil, ITEMS.miOrganizacion, ITEMS.misInscripciones] }
+    { section: 'Mi espacio',        items: [ITEMS.miOrganizacion, ITEMS.misInscripciones] }
   ],
 
   SUPPORT_STAFF: [
-    { section: null,                items: [ITEMS.inicio, ITEMS.perfil] },
+    { section: null,                items: [ITEMS.inicio] },
     { section: 'Operación',         items: [ITEMS.asignarIncentivos] }
   ],
 
   VENUE_SURVEYOR: [
-    { section: null,                items: [ITEMS.inicio, ITEMS.perfil] },
+    { section: null,                items: [ITEMS.inicio] },
     { section: 'Escenarios',        items: [ITEMS.sedes] }
   ],
 
   VENUE_INSPECTOR: [
-    { section: null,                items: [ITEMS.inicio, ITEMS.perfil] },
+    { section: null,                items: [ITEMS.inicio] },
     { section: 'Escenarios',        items: [ITEMS.inspeccion] }
   ]
 };
