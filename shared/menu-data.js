@@ -59,7 +59,17 @@ const ICONS = {
   /* Una persona + lápiz — para "Digitadores" (los que digitan resultados) */
   userPen:     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.5"/><path d="M3 21v-2a4 4 0 0 1 4-4h5"/><path d="M17.5 11.5a2.121 2.121 0 1 1 3 3L14 21l-4 1 1-4 6.5-6.5z"/></svg>',
   /* Una persona + check — para "Coordinadores" (rol de validación/aprobación) */
-  userCheck:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.5"/><path d="M3 21v-2a4 4 0 0 1 4-4h5"/><polyline points="15 12 17 14 21 10"/></svg>'
+  userCheck:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.5"/><path d="M3 21v-2a4 4 0 0 1 4-4h5"/><polyline points="15 12 17 14 21 10"/></svg>',
+  /* ID card — para módulo Acreditación */
+  idCard:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 16.5c.7-1.5 2-2.5 3.5-2.5s2.8 1 3.5 2.5"/><line x1="15" y1="10" x2="19" y2="10"/><line x1="15" y1="13" x2="18" y2="13"/></svg>',
+  /* Bar chart — para módulo Reportería */
+  chart:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5"/><rect x="12" y="9" width="3" height="9"/><rect x="17" y="6" width="3" height="12"/></svg>',
+  /* Podium — para módulo Resultados & Ranking */
+  podium:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="14" width="6" height="7"/><rect x="9" y="9" width="6" height="12"/><rect x="15" y="11" width="6" height="10"/><path d="M12 5v2"/><circle cx="12" cy="4" r="1.5"/></svg>',
+  /* File search — para módulo Auditoría */
+  audit:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h7"/><path d="M14 2l6 6"/><path d="M14 2v6h6"/><circle cx="17" cy="17" r="3"/><path d="M19.2 19.2L21 21"/></svg>',
+  /* Module — para "Activación de módulos" */
+  module:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>'
 };
 
 export function getIcon(name) {
@@ -116,92 +126,134 @@ const ITEMS = {
   // OPERADOR
   asignarIncentivos:{ id: 'asignar-incentivos', label: 'Asignar incentivos', icon: 'gift',     route: '/home/incentivos/asignar' },
 
-  // ADMINISTRACIÓN PLATFORM
+  // ACREDITACIÓN (módulo nuevo — roadmap)
+  acreditaciones:   { id: 'acreditaciones',   label: 'Acreditaciones',       icon: 'idCard',   route: '/home/acreditaciones' },
+  miAcreditacion:   { id: 'mi-acreditacion',  label: 'Mi acreditación',      icon: 'idCard',   route: '/home/mi-acreditacion' },
+
+  // REPORTERÍA (módulo nuevo — roadmap)
+  dashboards:       { id: 'dashboards',       label: 'Dashboards',           icon: 'chart',    route: '/home/reportes/dashboards' },
+  reportes:         { id: 'reportes',         label: 'Reportes',             icon: 'chart',    route: '/home/reportes' },
+
+  // RESULTADOS & RANKING (módulo nuevo — roadmap)
+  resultados:       { id: 'resultados',       label: 'Resultados',           icon: 'podium',   route: '/home/resultados' },
+  ranking:          { id: 'ranking',          label: 'Ranking',              icon: 'podium',   route: '/home/ranking' },
+
+  // PLATAFORMA (admin de plataforma — solo ROOT)
   rolesPermisos:    { id: 'admin-roles',      label: 'Roles y permisos',     icon: 'shield',   route: '/home/admin/roles' },
   usuariosPlatform: { id: 'admin-users',      label: 'Usuarios platform',    icon: 'users',    route: '/home/admin/users' },
-  auditoria:        { id: 'admin-audit',      label: 'Auditoría',            icon: 'doc',      route: '/home/admin/audit' },
-  administracion:   { id: 'administration',   label: 'Administración',       icon: 'gear',     route: '/home/administration' }
+  activacionModulos:{ id: 'admin-modules',    label: 'Activación de módulos',icon: 'module',   route: '/home/admin/modules' },
+  configInstancia:  { id: 'admin-config',     label: 'Configuración',        icon: 'gear',     route: '/home/admin/config' },
+  administracion:   { id: 'administration',   label: 'Administración',       icon: 'gear',     route: '/home/administration' },
+
+  // AUDITORÍA (módulo cross-cutting — roadmap)
+  logsActividad:    { id: 'audit-logs',       label: 'Logs de actividad',    icon: 'audit',    route: '/home/auditoria/logs' }
 };
 
 /* Each role's menu = array of { sectionLabel, items[] }.
+   Las "secciones" son ahora MÓDULOS formalizados según
+   docs/architecture/role-menu-matrix.md V0.2.
    "Mi perfil" NO va en el sidebar — vive solo en el dropdown del avatar
    (single source of truth, patrón global UX). */
 export const MENU_BY_ROLE = {
   ROOT: [
-    { section: null,                items: [ITEMS.inicio] },
-    { section: 'Gestión deportiva', items: [ITEMS.eventos, ITEMS.competencias, ITEMS.cupos, ITEMS.inscripciones, ITEMS.documentacion] },
-    { section: 'Escenarios',        items: [ITEMS.sedes] },
-    { section: 'Digitación',        items: [ITEMS.miDigitacion, ITEMS.digitadores, ITEMS.coordinadores] },
-    { section: 'Usuarios',          items: [ITEMS.gestionUsuarios] },
-    { section: 'Administración',    items: [ITEMS.administracion, ITEMS.rolesPermisos, ITEMS.usuariosPlatform, ITEMS.auditoria] }
+    { section: null,                       items: [ITEMS.inicio] },
+    { section: 'EVENTOS',                  items: [ITEMS.eventos, ITEMS.cupos] },
+    { section: 'COMPETENCIAS',             items: [ITEMS.competencias] },
+    { section: 'INSCRIPCIONES',            items: [ITEMS.inscripciones] },
+    { section: 'DIGITACIÓN',               items: [ITEMS.miDigitacion, ITEMS.digitadores, ITEMS.coordinadores] },
+    { section: 'DOCUMENTACIÓN',            items: [ITEMS.documentacion] },
+    { section: 'ESCENARIOS',               items: [ITEMS.sedes] },
+    { section: 'INCENTIVOS',               items: [ITEMS.asignarIncentivos] },
+    { section: 'ACREDITACIÓN',             items: [ITEMS.acreditaciones] },
+    { section: 'REPORTERÍA',               items: [ITEMS.dashboards, ITEMS.reportes] },
+    { section: 'RESULTADOS & RANKING',     items: [ITEMS.resultados, ITEMS.ranking] },
+    { section: 'USUARIOS',                 items: [ITEMS.gestionUsuarios] },
+    { section: 'PLATAFORMA',               items: [ITEMS.rolesPermisos, ITEMS.usuariosPlatform, ITEMS.activacionModulos, ITEMS.configInstancia, ITEMS.administracion] },
+    { section: 'AUDITORÍA',                items: [ITEMS.logsActividad] }
   ],
 
   ADMIN: [
-    { section: null,                items: [ITEMS.inicio] },
-    { section: 'Gestión deportiva', items: [ITEMS.eventos, ITEMS.competencias, ITEMS.cupos, ITEMS.inscripciones, ITEMS.documentacion] },
-    { section: 'Escenarios',        items: [ITEMS.sedes] },
-    { section: 'Digitación',        items: [ITEMS.miDigitacion, ITEMS.digitadores, ITEMS.coordinadores] },
-    { section: 'Usuarios',          items: [ITEMS.gestionUsuarios] }
+    { section: null,                       items: [ITEMS.inicio] },
+    { section: 'EVENTOS',                  items: [ITEMS.eventos, ITEMS.cupos] },
+    { section: 'COMPETENCIAS',             items: [ITEMS.competencias] },
+    { section: 'INSCRIPCIONES',            items: [ITEMS.inscripciones] },
+    { section: 'DIGITACIÓN',               items: [ITEMS.miDigitacion, ITEMS.digitadores, ITEMS.coordinadores] },
+    { section: 'DOCUMENTACIÓN',            items: [ITEMS.documentacion] },
+    { section: 'ESCENARIOS',               items: [ITEMS.sedes] },
+    { section: 'INCENTIVOS',               items: [ITEMS.asignarIncentivos] },
+    { section: 'ACREDITACIÓN',             items: [ITEMS.acreditaciones] },
+    { section: 'REPORTERÍA',               items: [ITEMS.dashboards, ITEMS.reportes] },
+    { section: 'RESULTADOS & RANKING',     items: [ITEMS.resultados, ITEMS.ranking] },
+    { section: 'USUARIOS',                 items: [ITEMS.gestionUsuarios] },
+    { section: 'AUDITORÍA',                items: [ITEMS.logsActividad] }
   ],
 
   USER_MANAGER: [
-    { section: null,                items: [ITEMS.inicio] },
-    { section: 'Usuarios',          items: [ITEMS.gestionUsuarios] }
+    { section: null,                       items: [ITEMS.inicio] },
+    { section: 'USUARIOS',                 items: [ITEMS.gestionUsuarios] }
   ],
 
   EVENT_MANAGER: [
-    { section: null,                items: [ITEMS.inicio] },
-    { section: 'Gestión deportiva', items: [ITEMS.eventos, ITEMS.cupos] }
+    { section: null,                       items: [ITEMS.inicio] },
+    { section: 'EVENTOS',                  items: [ITEMS.eventos, ITEMS.cupos] },
+    { section: 'REPORTERÍA',               items: [ITEMS.dashboards] }
   ],
 
   EVENT_COORDINATOR: [
-    { section: null,                items: [ITEMS.inicio] },
-    { section: 'Gestión deportiva', items: [ITEMS.competencias] }
+    { section: null,                       items: [ITEMS.inicio] },
+    { section: 'COMPETENCIAS',             items: [ITEMS.competencias] },
+    { section: 'RESULTADOS & RANKING',     items: [ITEMS.resultados] }
   ],
 
   DIGITIZER: [
-    { section: null,                items: [ITEMS.inicio] },
-    { section: 'Digitación',        items: [ITEMS.miDigitacion] }
+    { section: null,                       items: [ITEMS.inicio] },
+    { section: 'DIGITACIÓN',               items: [ITEMS.miDigitacion] }
   ],
 
   DOCUMENTATION_MANAGER: [
-    { section: null,                items: [ITEMS.inicio] },
-    { section: 'Documentación',     items: [ITEMS.documentacion] }
+    { section: null,                       items: [ITEMS.inicio] },
+    { section: 'DOCUMENTACIÓN',            items: [ITEMS.documentacion] }
   ],
 
   DOCUMENTATION_REVIEWER: [
-    { section: null,                items: [ITEMS.inicio] },
-    { section: 'Documentación',     items: [ITEMS.documentacion] }
+    { section: null,                       items: [ITEMS.inicio] },
+    { section: 'DOCUMENTACIÓN',            items: [ITEMS.documentacion] }
   ],
 
   ATHLETE: [
-    { section: null,                items: [ITEMS.inicio] },
-    { section: 'Mi espacio',        items: [ITEMS.misInscripciones, ITEMS.incentivosMios] }
+    { section: null,                       items: [ITEMS.inicio] },
+    { section: 'INSCRIPCIONES',            items: [ITEMS.misInscripciones] },
+    { section: 'INCENTIVOS',               items: [ITEMS.incentivosMios] },
+    { section: 'ACREDITACIÓN',             items: [ITEMS.miAcreditacion] },
+    { section: 'RESULTADOS & RANKING',     items: [ITEMS.resultados, ITEMS.ranking] }
   ],
 
   LEGAL_GUARDIAN: [
-    { section: null,                items: [ITEMS.inicio] },
-    { section: 'Mi espacio',        items: [ITEMS.misDependientes, ITEMS.misInscripciones] }
+    { section: null,                       items: [ITEMS.inicio] },
+    { section: 'IDENTIDAD',                items: [ITEMS.misDependientes] },
+    { section: 'INSCRIPCIONES',            items: [ITEMS.misInscripciones] }
   ],
 
   ORGANIZATION_MANAGER: [
-    { section: null,                items: [ITEMS.inicio] },
-    { section: 'Mi espacio',        items: [ITEMS.miOrganizacion, ITEMS.misInscripciones] }
+    { section: null,                       items: [ITEMS.inicio] },
+    { section: 'IDENTIDAD',                items: [ITEMS.miOrganizacion] },
+    { section: 'INSCRIPCIONES',            items: [ITEMS.misInscripciones] },
+    { section: 'RESULTADOS & RANKING',     items: [ITEMS.resultados, ITEMS.ranking] }
   ],
 
   SUPPORT_STAFF: [
-    { section: null,                items: [ITEMS.inicio] },
-    { section: 'Operación',         items: [ITEMS.asignarIncentivos] }
+    { section: null,                       items: [ITEMS.inicio] },
+    { section: 'INCENTIVOS',               items: [ITEMS.asignarIncentivos] }
   ],
 
   VENUE_SURVEYOR: [
-    { section: null,                items: [ITEMS.inicio] },
-    { section: 'Escenarios',        items: [ITEMS.sedes] }
+    { section: null,                       items: [ITEMS.inicio] },
+    { section: 'ESCENARIOS',               items: [ITEMS.sedes] }
   ],
 
   VENUE_INSPECTOR: [
-    { section: null,                items: [ITEMS.inicio] },
-    { section: 'Escenarios',        items: [ITEMS.inspeccion] }
+    { section: null,                       items: [ITEMS.inicio] },
+    { section: 'ESCENARIOS',               items: [ITEMS.inspeccion] }
   ]
 };
 
