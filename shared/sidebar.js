@@ -51,7 +51,8 @@ function renderSidebar({ sections, activeId, isCollapsed, options }) {
       </nav>
 
       <button class="scroll-hint" id="scrollHint" type="button" aria-label="Hay más opciones — desplazate">
-        ${getIcon('chevron')}
+        <span class="scroll-hint__lbl">Ver más</span>
+        <span class="scroll-hint__chev">${getIcon('chevron')}</span>
       </button>
 
       <div class="sidebar-bottom">
