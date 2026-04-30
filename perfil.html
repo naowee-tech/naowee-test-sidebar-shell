@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="shared/shell.css">
+<link rel="stylesheet" href="shared/pages/user-management.css">
 </head>
 <body>
 
@@ -18,7 +19,7 @@
 
   <div class="main">
     <header class="top-header" id="topHeader"></header>
-    <div class="page">
+    <div class="page" id="pageContent">
       <div class="page-placeholder">
         <h1 id="pageTitle">Vista del rol</h1>
         <p>Esta es una superficie placeholder — el foco de este sandbox es el <strong>sidebar y su jerarquía</strong> según el rol seleccionado.</p>
@@ -42,14 +43,38 @@
 
 <script type="module">
   import { mountSidebar, mountHeader, mountDemoRoleSwitcher, getRoleFromQuery } from './shared/sidebar.js';
+  import { renderUserManagementPage } from './shared/pages/user-management.js';
 
   const roleCode = getRoleFromQuery();
   const activeId = new URLSearchParams(window.location.search).get('active') || 'inicio';
 
+  /* Routing interno por activeId — qué página se renderiza en .page */
+  function renderPage(currentActive, role) {
+    const pageEl = document.getElementById('pageContent');
+    if (!pageEl) return;
+
+    if (currentActive === 'user-management') {
+      renderUserManagementPage(pageEl);
+      return;
+    }
+
+    /* Default placeholder */
+    pageEl.innerHTML = `
+      <div class="page-placeholder">
+        <h1 id="pageTitle">Vista — ${role.label}</h1>
+        <p>Esta es una superficie placeholder — el foco de este sandbox es el <strong>sidebar y su jerarquía</strong> según el rol seleccionado.</p>
+        <p style="margin-top:12px;color:#9ca0b8;font-size:13px">
+          Probá colapsar el menú con el botón ☰ del logo · expandir items con sub-items · cambiar de rol desde el chevron del user-chip o desde la pill inferior.
+        </p>
+      </div>
+    `;
+  }
+
   const { role } = mountSidebar({
     rootEl: document.getElementById('sidebarRoot'),
     roleCode,
-    activeId
+    activeId,
+    onActiveChange: renderPage
   });
 
   mountHeader({
@@ -62,7 +87,6 @@
     currentRoleCode: roleCode
   });
 
-  document.getElementById('pageTitle').textContent = `Vista — ${role.label}`;
   document.title = `Naowee Sidebar — ${role.label}`;
 </script>
 
