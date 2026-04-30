@@ -324,8 +324,10 @@ const _state = {
   /* Nav state machine:
      - country: mapa entero coroplético, sin city pins
      - depto: zoom into depto SVG, city pins overlay visible
+     - depto + zoomedCity: sub-zoom centrado en una ciudad para
+       separar pins solapados (1er click); 2do click ya entra a city
      - city: switch to Leaflet con tiles reales + scenario pins */
-  nav: { level: 'country', depto: null, city: null },
+  nav: { level: 'country', depto: null, city: null, zoomedCity: null },
   viewBox: { x: 0, y: 0, w: SVG_W, h: SVG_H },
   vbAnimId: null,
   selectedDepto: null,
@@ -401,21 +403,33 @@ function renderShell() {
 
 function renderBreadcrumb() {
   const lvl = _state.nav.level;
-  const sep = `<span class="me-breadcrumb__sep">${chevronRight()}</span>`;
+  /* DS naowee-breadcrumb — sin custom styling. El DS maneja:
+     - __item: text-primary, hover underline (no background pill)
+     - __sep: chevron 16px, text-secondary
+     - __current: text-accent, no cursor */
+  const sep = `<span class="naowee-breadcrumb__sep">${chevronRight()}</span>`;
+  const zoomedCity = _state.nav.zoomedCity;
   return `
-    <nav class="me-breadcrumb" aria-label="Navegación del mapa">
+    <nav class="naowee-breadcrumb me-breadcrumb" aria-label="Navegación del mapa">
       ${lvl === 'country'
-        ? `<span class="me-breadcrumb__current">Colombia</span>`
+        ? `<span class="naowee-breadcrumb__current">Colombia</span>`
+        : lvl === 'depto' && zoomedCity
+          ? /* Sub-zoom dentro de un depto: Colombia > Depto > Cerca de City */
+            `<a class="naowee-breadcrumb__item" data-bc="country">Colombia</a>
+             ${sep}
+             <a class="naowee-breadcrumb__item" data-bc="depto">${escapeHtml(_state.nav.depto)}</a>
+             ${sep}
+             <span class="naowee-breadcrumb__current">Cerca de ${escapeHtml(zoomedCity)}</span>`
         : lvl === 'depto'
-          ? `<button type="button" class="me-breadcrumb__link" data-bc="country">Colombia</button>
+          ? `<a class="naowee-breadcrumb__item" data-bc="country">Colombia</a>
              ${sep}
-             <span class="me-breadcrumb__current">${escapeHtml(_state.nav.depto)}</span>`
-          : /* city */
-            `<button type="button" class="me-breadcrumb__link" data-bc="country">Colombia</button>
+             <span class="naowee-breadcrumb__current">${escapeHtml(_state.nav.depto)}</span>`
+          : /* city level (Leaflet) */
+            `<a class="naowee-breadcrumb__item" data-bc="country">Colombia</a>
              ${sep}
-             <button type="button" class="me-breadcrumb__link" data-bc="depto">${escapeHtml(_state.nav.depto)}</button>
+             <a class="naowee-breadcrumb__item" data-bc="depto">${escapeHtml(_state.nav.depto)}</a>
              ${sep}
-             <span class="me-breadcrumb__current">${escapeHtml(_state.nav.city)}</span>`}
+             <span class="naowee-breadcrumb__current">${escapeHtml(_state.nav.city)}</span>`}
     </nav>
   `;
 }
@@ -839,6 +853,7 @@ function zoomToDepto(deptoName) {
   _state.nav.level = 'depto';
   _state.nav.depto = deptoName;
   _state.nav.city = null;
+  _state.nav.zoomedCity = null;       /* reset sub-zoom al cambiar de depto */
   _state.selectedScenarioId = null;
   hideLeafletLayer();
   showSvgLayer();
@@ -871,6 +886,7 @@ function resetZoom() {
   _state.nav.level = 'country';
   _state.nav.depto = null;
   _state.nav.city = null;
+  _state.nav.zoomedCity = null;
   _state.selectedScenarioId = null;
   hideLeafletLayer();
   showSvgLayer();
@@ -918,20 +934,21 @@ function renderCityPins() {
   const layer = _state.rootEl?.querySelector('#mePinLayer');
   if (!layer) return;
   const cities = CITIES.filter(c => c.depto === _state.nav.depto);
-  /* Pins de ciudades con scenarios filtrados */
   const html = cities.map(city => {
     const escs = ESCENARIOS.filter(e => e.cityName === city.name && passesScenarioFilters(e));
     if (escs.length === 0) return '';
     const hasCar = escs.some(e => e.car);
-    /* Tipo dominante en esta city */
     const tipoCount = {};
     escs.forEach(e => { tipoCount[e.tipo] = (tipoCount[e.tipo] || 0) + 1; });
     const dominant = Object.entries(tipoCount).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Otro';
     const tColor = TIPO_COLORS[dominant] || '#6b7280';
     const svg = projectCityPin(city);
     const pos = svgToPixel(svg.x, svg.y);
+    /* Pulse + ring extra cuando este pin es el zoomedCity (1er click)
+       — invita al segundo click para entrar al city level (Leaflet). */
+    const isZoomed = _state.nav.zoomedCity === city.name;
     return `
-      <button type="button" class="me-cluster-pin" style="
+      <button type="button" class="me-cluster-pin ${isZoomed ? 'me-cluster-pin--zoomed' : ''}" style="
         left:${pos.x}px;
         top:${pos.y}px;
         --tipo-color:${tColor};
@@ -944,21 +961,53 @@ function renderCityPins() {
     `;
   }).filter(Boolean).join('');
   layer.innerHTML = html;
-  /* Bind click handlers */
   layer.querySelectorAll('[data-city]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const cityName = btn.getAttribute('data-city');
       const city = CITIES.find(c => c.name === cityName && c.depto === _state.nav.depto);
-      if (city) enterCity(city);
+      if (city) tryEnterCity(city);
     });
   });
+}
+
+/* Two-click pattern: si esta city ya está sub-zoomed → entra a Leaflet.
+   Si es el primer click → sub-zoom para separar pins solapados. */
+function tryEnterCity(city) {
+  if (_state.nav.zoomedCity === city.name) {
+    enterCity(city);
+    return;
+  }
+  _state.nav.zoomedCity = city.name;
+  zoomToCityVicinity(city);
+  /* Re-render pins durante la animación así el --zoomed pulse aparece */
+  scheduleRenderPinsDuringAnim();
+  /* Update breadcrumb a "Colombia > [Depto] > Cerca de [City]" */
+  paintBreadcrumb();
+}
+
+/* Sub-zoom centrado en la city con radio ~0.25° (~28km) — suficiente
+   para separar visualmente las cities cercanas pero todavía mostrando
+   la silueta del depto alrededor. */
+function zoomToCityVicinity(city) {
+  const RADIUS = 0.25;
+  const center = projectCityPin(city);
+  const tl = projectLL(city.lat + RADIUS, city.lon - RADIUS);
+  const br = projectLL(city.lat - RADIUS, city.lon + RADIUS);
+  const w = br.x - tl.x;
+  const h = br.y - tl.y;
+  animateViewBoxTo(adjustVbToStage(
+    center.x - w / 2,
+    center.y - h / 2,
+    w, h
+  ), 700);
 }
 
 /* ─── City level (Leaflet) ─────────────────────────────────── */
 function enterCity(city) {
   _state.nav.level = 'city';
   _state.nav.city = city.name;
+  _state.nav.zoomedCity = null;       /* ya estamos al nivel city, no aplica */
   _state.selectedScenarioId = null;
   clearCityPins();
   hideSvgLayer();
