@@ -402,38 +402,45 @@ function bindLightboxEvents(overlay) {
   }
 }
 
-/* ─── Status banner (revision/rechazado) ──────────────────────── */
+/* ─── Status banner (revision/rechazado) — usa DS naowee-message ──
+   Layout pattern del reference: hero-card con title+ID arriba,
+   message banner full-width abajo. */
 function renderStatusBanner(sede, status) {
   const isRevision = status === 'revision';
-  const isRechazado = status === 'rechazado';
+  const messageVariant = isRevision ? 'caution' : 'negative';
+  const title = isRevision ? 'Registro en revisión' : 'Registro rechazado';
+  const text = isRevision
+    ? `Enviado el ${sede.enviadoEl || '—'}. Pendiente de validación por el revisor.`
+    : `Reenviado el ${sede.enviadoEl || '—'}. Corrige las observaciones y reenvía.`;
   return `
-    <div class="sd-detail__hero-simple">
-      <div class="sd-detail__hero-info">
-        <h1 class="sd-detail__hero-title">
-          ${escapeHtml(sede.nombre)}
-          ${sede.car ? `
-            <span class="sd-detail__car-badge">
-              <span class="sd-detail__car-star">★</span>
-              Escenario CAR
-            </span>
-          ` : ''}
-        </h1>
-        <p class="sd-detail__hero-id">ID único: <strong>${_state.sedeCode}</strong></p>
+    <div class="sd-detail__hero-card">
+      <div class="sd-detail__hero-row">
+        <div class="sd-detail__hero-info">
+          <h1 class="sd-detail__hero-title">
+            ${escapeHtml(sede.nombre)}
+            ${sede.car ? `
+              <span class="sd-detail__car-badge">
+                <span class="sd-detail__car-star">★</span>
+                Escenario CAR
+              </span>
+            ` : ''}
+          </h1>
+          <p class="sd-detail__hero-id">ID único: <strong>${_state.sedeCode}</strong></p>
+        </div>
       </div>
-      <div class="sd-detail__status-banner ${isRevision ? 'sd-detail__status-banner--revision' : 'sd-detail__status-banner--rechazado'}">
-        <div class="sd-detail__status-banner-icon">
-          ${isRevision ? clockIcon() : alertIcon()}
-        </div>
-        <div class="sd-detail__status-banner-text">
-          <div class="sd-detail__status-banner-title">
-            ${isRevision ? 'Registro en revisión' : 'Registro rechazado'}
+
+      <!-- DS naowee-message --caution / --negative -->
+      <div class="naowee-message naowee-message--${messageVariant} sd-detail__msg">
+        <div class="naowee-message__header">
+          <div class="naowee-message__icon">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="4" x2="8" y2="8"/>
+              <line x1="8" y1="11" x2="8" y2="11.01"/>
+            </svg>
           </div>
-          <div class="sd-detail__status-banner-sub">
-            ${isRevision
-              ? `Enviado el ${sede.enviadoEl || '—'}. Pendiente de validación por el revisor.`
-              : `Reenviado el ${sede.enviadoEl || '—'}. Corrige las observaciones y reenvía.`}
-          </div>
+          <div class="naowee-message__title">${title}</div>
         </div>
+        <p class="naowee-message__text">${text}</p>
       </div>
     </div>
   `;
