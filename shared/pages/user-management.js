@@ -142,7 +142,7 @@ export function renderUserManagementPage(rootEl) {
   if (!document._umClickOutBound) {
     document.addEventListener('click', () => {
       document.querySelectorAll('.um-dropdown.is-open').forEach((el) => el.classList.remove('is-open'));
-      document.querySelectorAll('.um-actions.is-open').forEach((el) => el.classList.remove('is-open'));
+      document.querySelectorAll('.naowee-table-card__row-actions.is-open').forEach((el) => el.classList.remove('is-open'));
     });
     document._umClickOutBound = true;
   }
@@ -169,15 +169,15 @@ function paintFull() {
         <p>Administra los usuarios y sus roles en el sistema</p>
       </div>
 
-      <div class="um-card">
+      <div class="naowee-table-card">
         ${renderTabs()}
-        <div class="um-toolbar" id="umToolbar">
+        <div class="naowee-table-card__toolbar" id="umToolbar">
           ${renderToolbarLeft()}
           <div class="naowee-pagination naowee-pagination--small" id="umPagination">
             ${renderPagination(filtered.length, totalPages)}
           </div>
         </div>
-        <div class="um-table-wrap" id="umTableWrap">
+        <div class="naowee-table-card__table-wrap" id="umTableWrap">
           ${filtered.length === 0 ? renderEmpty() : renderTable(filtered)}
         </div>
       </div>
@@ -210,7 +210,7 @@ function paintTableOnly() {
 /* ─── Render: tabs (DS oficial naowee-tabs--animated) ───────────── */
 function renderTabs() {
   return `
-    <div class="naowee-tabs naowee-tabs--animated um-tabs" id="umTabs" role="tablist">
+    <div class="naowee-tabs naowee-tabs--animated" id="umTabs" role="tablist">
       <button class="naowee-tab ${_state.tab === 'persona' ? 'naowee-tab--selected' : ''}"
               data-tab="persona" role="tab" type="button"
               aria-selected="${_state.tab === 'persona'}">
@@ -317,7 +317,7 @@ function renderTable(filtered) {
   const rows = filtered.slice(start, start + _state.pageSize);
 
   return `
-    <table class="um-table">
+    <table class="naowee-table--in-card">
       <thead>
         <tr>
           <th>${isPersona ? 'Nombre' : 'Razón social'}</th>
@@ -327,36 +327,36 @@ function renderTable(filtered) {
           ${isPersona ? '<th>Menor de edad</th>' : '<th>Tipo</th>'}
           <th>Roles</th>
           <th>Estatus</th>
-          <th class="um-th-actions"></th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
         ${rows.map((u, idx) => `
           <tr>
-            <td class="um-td-name">${escapeHtml(u.name)}</td>
-            <td class="um-td-email">${escapeHtml(u.email)}</td>
-            <td class="um-td-doc-type">${u.docType}</td>
-            <td class="um-td-doc-num">${u.docNum}</td>
+            <td class="naowee-table__cell-name">${escapeHtml(u.name)}</td>
+            <td class="naowee-table__cell-muted">${escapeHtml(u.email)}</td>
+            <td class="naowee-table__cell-muted" style="font-weight:500">${u.docType}</td>
+            <td>${u.docNum}</td>
             <td>${isPersona ? (u.minor ? 'Sí' : 'No') : u.role}</td>
             <td>${escapeHtml(u.role)}</td>
             <td>${renderBadge(u.status)}</td>
-            <td class="um-cell-actions">
-              <div class="um-actions" data-row="${idx}">
+            <td style="text-align:right">
+              <div class="naowee-table-card__row-actions" data-row="${idx}">
                 <button class="naowee-btn naowee-btn--icon naowee-btn--mute naowee-btn--small um-actions__trigger" type="button" aria-label="Acciones">
                   ${dotsIcon()}
                 </button>
-                <div class="um-actions__menu">
-                  <button class="um-actions__item" data-act="view">
-                    <span class="um-actions__item-icon">${getIcon('user')}</span> Ver perfil
+                <div class="naowee-table-card__row-actions-menu">
+                  <button class="naowee-table-card__row-actions-item" data-act="view">
+                    <span class="naowee-table-card__row-actions-item-icon">${getIcon('user')}</span> Ver perfil
                   </button>
-                  <button class="um-actions__item" data-act="edit">
-                    <span class="um-actions__item-icon">${editIcon()}</span> Editar
+                  <button class="naowee-table-card__row-actions-item" data-act="edit">
+                    <span class="naowee-table-card__row-actions-item-icon">${editIcon()}</span> Editar
                   </button>
-                  <button class="um-actions__item" data-act="role">
-                    <span class="um-actions__item-icon">${getIcon('shield')}</span> Cambiar rol
+                  <button class="naowee-table-card__row-actions-item" data-act="role">
+                    <span class="naowee-table-card__row-actions-item-icon">${getIcon('shield')}</span> Cambiar rol
                   </button>
-                  <button class="um-actions__item um-actions__item--danger" data-act="deactivate">
-                    <span class="um-actions__item-icon">${getIcon('logout')}</span> Desactivar
+                  <button class="naowee-table-card__row-actions-item naowee-table-card__row-actions-item--danger" data-act="deactivate">
+                    <span class="naowee-table-card__row-actions-item-icon">${getIcon('logout')}</span> Desactivar
                   </button>
                 </div>
               </div>
@@ -486,24 +486,24 @@ function bindPaginationEvents() {
 }
 
 function bindTableEvents() {
-  /* Action menus (3-dots) */
-  _state.rootEl.querySelectorAll('.um-actions').forEach((actions) => {
+  /* Action menus (3-dots) — clases del DS naowee-table-card__row-actions */
+  _state.rootEl.querySelectorAll('.naowee-table-card__row-actions').forEach((actions) => {
     const trigger = actions.querySelector('.um-actions__trigger');
     trigger?.addEventListener('click', (e) => {
       e.stopPropagation();
-      _state.rootEl.querySelectorAll('.um-actions.is-open').forEach((other) => {
+      _state.rootEl.querySelectorAll('.naowee-table-card__row-actions.is-open').forEach((other) => {
         if (other !== actions) other.classList.remove('is-open');
       });
       actions.classList.toggle('is-open');
     });
   });
-  _state.rootEl.querySelectorAll('.um-actions__item').forEach((item) => {
+  _state.rootEl.querySelectorAll('.naowee-table-card__row-actions-item').forEach((item) => {
     item.addEventListener('click', (e) => {
       e.stopPropagation();
       const act = item.getAttribute('data-act');
-      const row = item.closest('.um-actions').getAttribute('data-row');
+      const row = item.closest('.naowee-table-card__row-actions').getAttribute('data-row');
       console.info(`[user-management] action=${act} row=${row}`);
-      item.closest('.um-actions').classList.remove('is-open');
+      item.closest('.naowee-table-card__row-actions').classList.remove('is-open');
     });
   });
 }
