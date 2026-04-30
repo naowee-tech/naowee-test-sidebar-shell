@@ -761,11 +761,13 @@ function applyViewBox() {
   svg.setAttribute('viewBox', `${v.x} ${v.y} ${v.w} ${v.h}`);
 }
 
-function animateViewBoxTo(target, duration = 600) {
-  if (_state.vbAnimId) clearTimeout(_state.vbAnimId);
+function animateViewBoxTo(target, duration = 700) {
+  if (_state.vbAnimId) cancelAnimationFrame(_state.vbAnimId);
   const start = { ..._state.viewBox };
   const t0 = performance.now();
-  const ease = t => 1 - Math.pow(1 - t, 3);
+  /* Easing cubic-bezier(0.16, 1, 0.3, 1) — "out-expo" smooth para zoom
+     de mapa. Más natural que power-3 ease-out (mismo curve que Apple). */
+  const ease = t => 1 - Math.pow(1 - t, 4);
   function step() {
     const t = Math.min(1, (performance.now() - t0) / duration);
     const k = ease(t);
@@ -774,10 +776,12 @@ function animateViewBoxTo(target, duration = 600) {
     _state.viewBox.w = start.w + (target.w - start.w) * k;
     _state.viewBox.h = start.h + (target.h - start.h) * k;
     applyViewBox();
-    if (t < 1) _state.vbAnimId = setTimeout(step, 16);
+    if (t < 1) _state.vbAnimId = requestAnimationFrame(step);
     else _state.vbAnimId = null;
   }
-  step();
+  /* requestAnimationFrame en vez de setTimeout(step, 16) → sync con
+     display refresh rate, sin tearing ni stuttering. */
+  _state.vbAnimId = requestAnimationFrame(step);
 }
 
 /* Ajusta un viewBox a la relación de aspecto del stage para evitar letterboxing */
@@ -1210,7 +1214,9 @@ function passesScenarioFilters(esc) {
 
 /* ─── Iconos de soporte para detail panel ──────────────────── */
 function starIcon()       { return '<svg viewBox="0 0 24 24" fill="#fbbf24" stroke="#f59e0b" stroke-width="1.5"><polygon points="12 2 15 9 22 10 17 15 18 22 12 19 6 22 7 15 2 10 9 9"/></svg>'; }
-function starIconFilled() { return '<svg viewBox="0 0 24 24" fill="#fbbf24" stroke="#fff" stroke-width="1"><polygon points="12 2 15 9 22 10 17 15 18 22 12 19 6 22 7 15 2 10 9 9"/></svg>'; }
+/* Estrella sutil para CAR badge — solo fill amarillo claro, sin stroke
+   muy contrastado, así el badge se siente accent ligero, no llamativo. */
+function starIconFilled() { return '<svg viewBox="0 0 24 24" fill="#a16207" stroke="none"><polygon points="12 2 15 9 22 10 17 15 18 22 12 19 6 22 7 15 2 10 9 9"/></svg>'; }
 function docIcon()        { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>'; }
 
 /* ─── SVG events (hover + click) ──────────────────────────────── */
@@ -1306,6 +1312,43 @@ function paintToolbar() {
     bindToolbarEvents(_state.rootEl);
     /* Re-posicionar pill después del repaint */
     requestAnimationFrame(() => positionSegmentPill(_state.rootEl, false));
+  }
+}
+
+/* Update quirúrgico de la fila de chips + reset button disabled state.
+   Usado por handlers que NO deben repintar el row de filtros (para no
+   destruir animaciones CSS in-flight, ej: segment pill slide). */
+function paintToolbarChipsAndReset(pageEl) {
+  const toolbar = pageEl.querySelector('.me-toolbar');
+  if (!toolbar) return;
+  const hasActive = !!(_state.search || _state.region || _state.tipo || _state.estado !== 'todos' || _state.car !== 'all');
+  /* Reset button enabled */
+  const reset = toolbar.querySelector('#meReset');
+  if (reset) {
+    if (hasActive) reset.removeAttribute('disabled');
+    else reset.setAttribute('disabled', 'true');
+  }
+  /* Chips row: remove if no active filters, replace if active */
+  const existingChips = toolbar.querySelector('.me-toolbar__chips');
+  if (existingChips) existingChips.remove();
+  if (hasActive) {
+    const chipsHtml = renderActiveChips();
+    toolbar.insertAdjacentHTML('beforeend', chipsHtml);
+    /* Re-bind chip remove handlers */
+    toolbar.querySelectorAll('[data-chip-remove]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const key = el.getAttribute('data-chip-remove');
+        if (key === 'search')      _state.search = '';
+        else if (key === 'estado') _state.estado = 'todos';
+        else if (key === 'car')    _state.car = 'all';
+        else                       _state[key] = null;
+        paintToolbar();
+        applyChoroplethColors();
+        paintRankCard();
+        paintMapOverlays();
+      });
+    });
   }
 }
 function paintRankCard() {
@@ -1484,10 +1527,12 @@ function bindToolbarEvents(pageEl) {
   pageEl.querySelectorAll('[data-car]').forEach(btn => {
     btn.addEventListener('click', () => {
       const newCar = btn.getAttribute('data-car');
-      /* Update active state IN PLACE primero (sin repaint) para que el
-         pill animate suavemente al nuevo item. Luego applyChoroplethColors
-         y rank card sin tocar el toolbar. */
       _state.car = newCar;
+      /* Update active state IN PLACE — NO paintToolbar (recrea el DOM y
+         destruye la animación CSS del pill). En su lugar:
+         - Toggle clases del segment
+         - Animate el pill via positionSegmentPill(animate=true)
+         - Update quirúrgico de chips row + reset button disabled */
       const seg = pageEl.querySelector('.me-car-segment');
       if (seg) {
         seg.querySelectorAll('[data-car]').forEach(b => {
@@ -1497,8 +1542,7 @@ function bindToolbarEvents(pageEl) {
         });
         positionSegmentPill(pageEl, true);
       }
-      /* Update reset button enabled state + active chips fila sin tocar el row */
-      paintToolbar();
+      paintToolbarChipsAndReset(pageEl);
       applyChoroplethColors();
       paintRankCard();
       paintMapOverlays();
