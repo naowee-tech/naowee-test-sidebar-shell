@@ -1,0 +1,413 @@
+/* ═══════════════════════════════════════════════════════════════
+   SEDES Y ESCENARIOS — Listado + Modal Registrar
+   La mayoría viene del DS oficial. Acá solo lo específico:
+   - Cells custom de la tabla (nombre / código / car / modificación)
+   - Modal de pre-validación: step badge, grid 2-col, map placeholder
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Layout de la page ─────────────────────────────────────────────
+   Sedes usa todo el ancho disponible (no se centra como .um-page con
+   max-width:1400px) porque la tabla tiene 6 columnas y "Última
+   modificación" necesita mucho horizontal. Cap razonable de 1800px
+   para que en monitores ultra-wide no se estire excesivamente. */
+.sd-page{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  width:100%;
+  max-width:1800px;
+  margin:0 auto;
+}
+
+/* ─── Tabla: distribución de columnas ───────────────────────────────
+   Sin estos %, la tabla colapsa a auto-layout y "Última modificación"
+   queda comprimida mientras las cols cortas (CAR, Estado) toman
+   espacio innecesario. */
+.sd-page .naowee-table--in-card{ width:100%; }
+.sd-page .naowee-table--in-card thead th:nth-child(1){ width:28%; }   /* Nombre   */
+.sd-page .naowee-table--in-card thead th:nth-child(2){ width:18%; }   /* Código   */
+.sd-page .naowee-table--in-card thead th:nth-child(3){ width:8%;  }   /* CAR      */
+.sd-page .naowee-table--in-card thead th:nth-child(4){ width:14%; }   /* Estado   */
+.sd-page .naowee-table--in-card thead th:nth-child(5){ width:24%; }   /* Modific. */
+.sd-page .naowee-table--in-card thead th:nth-child(6){ width:8%;  }   /* Acciones */
+
+/* Searchbox del toolbar: dejarlo respirar (más ancho que el default
+   240px para que el placeholder largo entre completo) */
+.sd-page .naowee-table-card__toolbar .naowee-searchbox--small{
+  width:340px;
+  max-width:100%;
+}
+
+/* Responsive — bajo cierto ancho, simplificar y dar prioridad a
+   columnas legibles */
+@media (max-width: 1100px){
+  .sd-page .naowee-table-card__toolbar .naowee-searchbox--small{
+    width:260px;
+  }
+  .sd-page .naowee-table--in-card thead th:nth-child(2){ width:auto; } /* Código auto */
+}
+
+/* ─── Cells de la tabla ──────────────────────────────────────────── */
+.sd-cell-name{
+  font-size:14px;
+  font-weight:500;
+  color:var(--naowee-color-text-primary, #282834);
+}
+.sd-cell-code{
+  font-family:'SF Mono', Menlo, Consolas, monospace;
+  font-size:13px;
+  color:var(--naowee-color-text-secondary, #646587);
+}
+.sd-cell-car{
+  font-size:14px;
+  color:var(--naowee-color-text-primary, #282834);
+}
+.sd-cell-modified{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.sd-cell-modified__date{
+  font-size:13px;
+  color:var(--naowee-color-text-primary, #282834);
+}
+.sd-cell-modified__user{
+  font-size:12px;
+  color:var(--naowee-color-text-secondary, #646587);
+}
+
+/* Acciones col: derecha + sin grow, ícono accent en hover */
+.sd-th-actions, .sd-td-actions{
+  width:48px;
+  text-align:right;
+  padding-right:18px !important;
+}
+.sd-td-actions .naowee-btn--icon{
+  color:var(--naowee-color-text-accent, #d74009);
+}
+.sd-td-actions .naowee-btn--icon:hover{
+  background:var(--naowee-color-interactive-fill-mute-hover);
+}
+
+/* Dot en filter dropdown options (para preview del color del estado) */
+.sd-dot{
+  display:inline-block;
+  width:8px;height:8px;
+  border-radius:9999px;
+  margin-right:8px;
+  vertical-align:middle;
+}
+
+/* ─── Modal Registrar sede ───────────────────────────────────────── */
+.sd-modal{
+  width:680px !important;
+  max-width:calc(100vw - 48px);
+}
+.sd-modal__header{
+  padding-right:16px !important;   /* simétrico con el dismiss top */
+}
+.sd-modal__step{
+  display:inline-block;
+  font-size:11px;
+  font-weight:600;
+  color:var(--naowee-color-text-secondary, #646587);
+  letter-spacing:.4px;
+  margin-bottom:4px;
+}
+.sd-modal__body{
+  padding:20px 24px;
+}
+.sd-modal__footer{
+  padding:16px 24px !important;
+}
+.sd-modal__footer .naowee-btn{
+  flex:1;
+}
+
+/* Form section title (uppercase muted) — sin divider abajo, solo
+   typografía. Eliminamos el negative margin-bottom que generaba la
+   percepción de un "separador" visual entre el título y el siguiente
+   elemento (mapa, dropdown, etc). */
+.sd-form-section{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  color:#9ca0b8;
+  margin:0;
+  padding:0;
+  border:none;
+}
+.sd-form-section:first-child{ margin-top:0 }
+
+/* Grid 2-col para Departamento + Municipio */
+.sd-grid-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+/* Form general: gap entre campos */
+.sd-modal__body{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+/* ─── Map (Leaflet real) — portado 1:1 del reference ────────────────
+   .reg-map-wrap del escenario-08-dashboard. Altura 220px (la que pidió
+   el user). flex-shrink:0 para que no se comprima si el modal body
+   anda apretado. */
+.sd-map-wrap{
+  position:relative;
+  width:100%;
+  height:220px;
+  flex-shrink:0;
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid var(--naowee-color-border-default, #e7e9f3);
+}
+.sd-map{
+  width:100%;
+  height:100%;
+  background:#f5f6fa;   /* fallback antes de que Leaflet pinte */
+}
+/* Filtro blanco-suave aplicado solo a las tiles para que el mapa quede
+   casi blanco manteniendo legibilidad de calles. */
+.sd-map .leaflet-tile{
+  filter:saturate(0.6) brightness(1.06) contrast(0.95);
+}
+
+/* Marker custom (DS-styled, naranja accent). El divIcon que crea el JS
+   inyecta un SVG que ya viene con drop-shadow vía filter abajo. */
+.sd-map-marker{
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.25));
+  cursor:grab;
+}
+.sd-map-marker:active{ cursor:grabbing; }
+
+/* Z-index: el modal abre con z-index 9000. Leaflet mete sus controles
+   en z-index 800-1000 internos. Solo necesitamos que los dropdowns
+   abiertos del modal queden ARRIBA de los controles del mapa. */
+.sd-modal .leaflet-top,
+.sd-modal .leaflet-bottom{ z-index:400; }
+.sd-modal .naowee-dropdown--open .naowee-dropdown__menu{ z-index:9999; }
+
+/* Toast del map action (preview/feedback) */
+.sd-map-toast{
+  position:absolute;
+  z-index:1500;
+  bottom:14px; left:50%;
+  transform:translate(-50%, 12px);
+  background:rgba(40,40,52,.92);
+  color:#fff;
+  padding:8px 14px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:500;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s, transform .2s;
+}
+.sd-map-toast--show{
+  opacity:1;
+  transform:translate(-50%, 0);
+}
+
+/* Botón "Ubicarme en el mapa" en estado activo (pick mode on) */
+.sd-btn-active{
+  background:var(--naowee-color-interactive-fill-quiet-active, #ffd9b8) !important;
+  border-color:var(--naowee-color-text-accent, #d74009) !important;
+}
+
+/* Toast del map action (preview) */
+.sd-map-toast{
+  position:absolute;
+  bottom:12px; left:50%;
+  transform:translate(-50%, 12px);
+  background:rgba(40,40,52,.92);
+  color:#fff;
+  padding:8px 14px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:500;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s, transform .2s;
+}
+.sd-map-toast--show{
+  opacity:1;
+  transform:translate(-50%, 0);
+}
+
+/* Map action buttons */
+.sd-map-actions{
+  display:flex;
+  gap:12px;
+}
+.sd-map-actions .naowee-btn{
+  flex:1;
+}
+
+/* ─── Lat/Lon geofield + tooltip — portado 1:1 del reference ─────────
+   .reg-geofield del escenario-08-dashboard. Custom textfield (NO usa
+   naowee-textfield del DS) porque el tooltip inline en el label
+   requiere display:flex + gap, y la altura/look del input se diferencia
+   visualmente del nombre/dirección. */
+.sd-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.sd-row > *{ min-width:0 }
+
+.sd-geofield{
+  display:flex;
+  flex-direction:column;
+  width:100%;
+}
+.sd-geofield__label{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  font-size:14px;
+  font-weight:400;
+  line-height:18px;
+  color:var(--naowee-color-text-primary, #282834);
+  padding-bottom:6px;
+}
+.sd-req{
+  color:var(--naowee-color-text-accent, #d74009);
+  margin-left:2px;
+}
+
+/* Tooltip — custom inline (NO el del DS porque éste usa nowrap fijo
+   y se enmascara dentro del scroll del modal). Position absolute
+   arriba del icono, z-index 30. */
+.sd-geofield__tooltip{
+  position:relative;
+  width:16px; height:16px;
+  margin-left:2px;
+  color:var(--naowee-color-text-accent, #d74009);
+  cursor:help;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.sd-geofield__tooltip svg{ width:16px; height:16px; }
+.sd-geofield__tooltip-content{
+  position:absolute;
+  bottom:calc(100% + 8px);
+  /* Aligned al icono LEFT-edge (no centrado): el tooltip extiende a la
+     derecha del icono. Para el column izquierdo evita que el tooltip
+     se salga del overflow del modal__body por la izquierda; para el
+     column derecho usa la apertura natural hacia el centro del modal.
+     Max-width 220px fuerza wrap a 2 líneas si el texto es largo. */
+  left:0;
+  transform:none;
+  background:#282834;
+  color:#fff;
+  font-size:12px;
+  font-weight:400;
+  line-height:16px;
+  padding:8px 10px;
+  border-radius:6px;
+  white-space:normal;
+  width:max-content;
+  max-width:220px;
+  text-align:left;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .15s;
+  z-index:10001;
+}
+/* Arrow ubicada bajo el centro del icono (icono es 16×16, center=8px)
+   en vez del centro del pill — así apunta al icono aunque el pill se
+   extienda muy a la derecha. */
+.sd-geofield__tooltip-content::after{
+  content:'';
+  position:absolute;
+  top:100%;
+  left:8px;
+  transform:none;
+  border:5px solid transparent;
+  border-top-color:#282834;
+}
+.sd-geofield__tooltip:hover .sd-geofield__tooltip-content{ opacity:1; }
+
+.sd-geofield__input{
+  height:48px;
+  padding:0 12px;
+  background:#fff;
+  border:1px solid #8788ab;
+  border-radius:12px;
+  font:400 14px/18px 'Inter', sans-serif;
+  color:var(--naowee-color-text-primary, #282834);
+  width:100%;
+  outline:none;
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+  transition:border-color .15s, box-shadow .15s;
+}
+.sd-geofield__input:focus{
+  border-color:var(--naowee-color-text-accent, #d74009);
+  border-width:2px;
+  padding:0 11px;
+}
+.sd-geofield__input::placeholder{
+  color:var(--naowee-color-text-secondary, #646587);
+}
+
+/* Estado error del geofield (validación con shake + scroll) */
+.sd-geofield--error .sd-geofield__input{
+  border-color:var(--naowee-color-feedback-fill-negative-loud, #ed314a);
+  border-width:2px;
+  padding:0 11px;
+}
+
+/* ─── Helper informativo (link Google Maps) — portado 1:1 ────────────
+   .reg-helper del reference. Layout flex inline, SIN card/background,
+   badge azul mínimo de 12px circular, texto en text-secondary, strong
+   en text-primary regular weight (400, no bold). Look tipo "nota al
+   margen", no banner. */
+.sd-helper{
+  display:flex;
+  gap:6px;
+  align-items:flex-start;
+  padding-top:0;
+}
+.sd-helper__badge{
+  flex-shrink:0;
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:#006aff;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:4px;
+}
+.sd-helper__badge svg{ width:8px; height:8px; }
+.sd-helper__text{
+  flex:1;
+  font-size:12px;
+  line-height:16px;
+  color:var(--naowee-color-text-secondary, #646587);
+}
+.sd-helper__text strong{
+  display:block;
+  margin-bottom:4px;
+  font-weight:400;
+  color:var(--naowee-color-text-primary, #282834);
+}
+.sd-helper__text a{
+  color:#006aff;
+  text-decoration:underline;
+}
+
+/* Responsive */
+@media(max-width:680px){
+  .sd-grid-2{ grid-template-columns:1fr }
+  .sd-map-actions{ flex-direction:column }
+}

@@ -1,0 +1,287 @@
+/* ═══════════════════════════════════════════════════════════════
+   EVENT LIST + CREATE MODAL — styles locales
+   La mayoría viene del DS (.naowee-table-card, .naowee-page-header,
+   .naowee-filter-dropdown, .naowee-pagination, .naowee-checkbox).
+   Acá solo lo que el DS no cubre: header con CTA derecha, modal wizard.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Page header con botón CTA a la derecha ─────────────────────── */
+/* .naowee-page-header del DS tiene flex-direction:column. Acá pisamos
+   con !important porque la especificidad de la clase del DS gana sobre
+   nuestra extensión .ev-page-header (mismo peso, pero la del DS se
+   carga después en cascade). */
+.ev-page-header{
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+  margin-bottom:0;
+}
+.ev-page-header__text{
+  display:flex;flex-direction:column;gap:4px;
+  flex:1;min-width:0;
+}
+.ev-btn-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;
+}
+.ev-btn-icon svg{width:16px;height:16px}
+
+/* ─── Iguala altura del searchbox a la del filter-dropdown (36px)
+   El DS por default deja el searchbox--small en 32px, pero acá
+   conviven con dropdowns de 36px. Ajustamos para que se alineen. */
+.naowee-table-card__toolbar .naowee-searchbox--small .naowee-searchbox__input-wrap{
+  height:36px;
+}
+
+/* ─── Card sin grow vertical y sin scroll interno
+   El .naowee-table-card es flex-column. Forzamos altura natural y
+   sin overflow para eliminar scroll horizontal innecesario y el
+   espacio reservado por scrollbar gutter. */
+.um-page .naowee-table-card{
+  flex:0 0 auto;
+  min-height:0;
+  height:auto;
+}
+.um-page .naowee-table-card__table-wrap{
+  flex:0 0 auto;
+  min-height:0;
+  height:auto;
+  overflow:visible;             /* sin scroll horizontal interno */
+}
+
+/* ─── Reducir padding-bottom del shell .page específicamente
+   en esta vista para que no haya espacio fantasma debajo del card.
+   El shell pone padding-bottom:72px para footer flotante; en eventos-lista
+   el footer no es prioridad visual, podemos achicar. */
+.page:has(.um-page){
+  padding-bottom:32px !important;
+}
+
+/* ─── Tabla: checkboxes primera columna ──────────────────────────── */
+.ev-table .ev-th-check,
+.ev-table .ev-td-check{
+  width:42px;
+  padding-left:18px;
+  padding-right:0;
+}
+.ev-row-checked{
+  background:#fff8f3;
+}
+.ev-row-checked:hover{
+  background:#fff3e6 !important;
+}
+
+/* ─── Modal Crear Evento — overrides mínimos sobre componentes DS ─── */
+/* El modal ahora usa .naowee-modal-overlay + .naowee-modal del DS oficial.
+   Acá solo conservamos:
+   - Layout grid 2-col para fechas (ev-grid-2)
+   - Section uppercase (ev-form-section)
+   - Step placeholder (ev-step-placeholder)
+   - Container del form (ev-form gap)
+   - Stepper override (compacto en modal)
+   El resto (overlay bg, modal sizing, header, body, footer, dismiss btn)
+   viene 100% del DS. */
+
+.ev-modal{
+  width:720px !important;            /* Más ancho para que el stepper de 4 pasos entre cómodo */
+  max-width:calc(100vw - 48px);
+}
+
+/* Stepper compacto en el modal — solo padding interno.
+   El comportamiento de pulse + distribución a ancho completo viene del
+   DS: .naowee-stepper--pulse + .naowee-stepper--distributed (v1.8.0). */
+.ev-modal__stepper{
+  padding:16px 24px 0 24px;
+  margin:0;
+  box-sizing:border-box;
+}
+
+/* (Pulse + shake + dismiss padding fix → migrados al DS en v1.8.0:
+   .naowee-stepper--pulse, .naowee-shake, padding header simétrico. */
+
+/* Body padding ajustado para el contenido del form */
+.ev-modal__body{
+  padding:20px 24px;
+}
+
+/* ─── Multi-select dropdown: option-check + tags ────────────────────
+   El DS provee la mecánica visual base (.naowee-dropdown__option-check
+   + .naowee-dropdown__option--selected). Acá solo ajustamos el SVG del
+   checkmark dentro del check para que ocupe bien el espacio. */
+.naowee-dropdown__option-check svg{
+  width:12px; height:12px;
+}
+.naowee-dropdown__option{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  cursor:pointer;
+}
+/* Tags dentro del trigger: line-height tighter para que no estiren la altura */
+.naowee-dropdown__trigger .naowee-dropdown__tags{
+  padding:4px 0;
+}
+
+/* ─── Hover cuadrado en la X de cada tag ──────────────────────────────
+   El DS no define hover para __close — lo agregamos local. La hit-area
+   sigue siendo el __active-area (wrapper grande, click-friendly), pero
+   el feedback visual (fondo redondeado-cuadrado) se aplica solo al
+   __close para que sea un cuadrado perfecto.
+
+   Tag --small es 24px de alto. Close de 18×18 deja 3px de gap arriba/
+   abajo. Para igualar el gap derecho, override el padding-right del
+   active-area al mismo 3px (DS default es 8px, demasiado holgado).
+   El padding-left lo mantenemos en 4px (separación visual del label).
+
+   Tokens DS: --interactive-fill-mute-hover/active (orange-100/200) +
+   --text-accent — coherente con el resto del DS. */
+.naowee-dropdown__trigger .naowee-tag__active-area{
+  padding-right:3px !important;   /* override DS 8px → 3px (== gap top/bottom) */
+}
+.naowee-dropdown__trigger .naowee-tag__close{
+  width:18px;
+  height:18px;
+  border-radius:var(--naowee-border-radius-tiny, 4px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background .12s ease, color .12s ease;
+}
+.naowee-dropdown__trigger .naowee-tag__close svg{
+  width:12px;
+  height:12px;
+  stroke:currentColor;
+}
+.naowee-dropdown__trigger .naowee-tag__active-area:hover .naowee-tag__close{
+  background:var(--naowee-color-interactive-fill-mute-hover);
+  color:var(--naowee-color-text-accent);
+}
+.naowee-dropdown__trigger .naowee-tag__active-area:active .naowee-tag__close{
+  background:var(--naowee-color-interactive-fill-mute-active);
+  color:var(--naowee-color-text-accent);
+}
+
+/* ─── Lock hint para inscStart bloqueado al startDate ────────────────
+   Helper text de información sin badge — color text-secondary. */
+.ev-lock-hint{
+  font-size:11.5px;
+  color:var(--naowee-color-text-secondary, #646587);
+  font-style:italic;
+}
+/* El icono de candado en el suffix muestra ligeramente más opaco */
+.ev-locked .ev-date-suffix{
+  opacity:.6;
+}
+
+/* Date picker custom (DS-styled) — input read-only + popup calendar
+   El input no tiene caret y todo el wrap es clickeable. El popup se
+   inyecta al body con position:fixed (escapa el overflow del modal). */
+.naowee-textfield.has-datepicker .naowee-textfield__input-wrap{cursor:pointer}
+.naowee-textfield.has-datepicker input.ev-date-input{
+  cursor:pointer;
+  caret-color:transparent;
+  user-select:none;
+}
+.ev-date-suffix{
+  cursor:pointer;
+  color:#9c9ebf;
+  display:flex;align-items:center;
+}
+.ev-date-suffix svg{display:block}
+
+/* (Popup calendar → migrado al DS en v1.8.0:
+   .naowee-datepicker--compact + .naowee-datepicker--popover --open) */
+
+/* ─── Range helper (mensaje temporal cuando un "to" se auto-limpia) ──
+   Se muestra solo durante 2.8s después de limpiar el "to" por conflicto
+   con el "from". Mismo color rojo del DS pero sin badge para que sea
+   visualmente distinto del helper--negative de validación. */
+.ev-range-helper{
+  font-size:12px;
+  font-weight:500;
+  color:var(--naowee-color-feedback-text-negative-loud, #c4031d);
+  margin-top:4px;
+  line-height:1.4;
+}
+.ev-range-helper--warn{
+  animation: evHelperFadeIn .2s ease-out;
+}
+@keyframes evHelperFadeIn{
+  from{ opacity:0; transform:translateY(-2px); }
+  to  { opacity:1; transform:translateY(0); }
+}
+
+/* Flash rojo del field cuando se auto-limpia el "to" */
+.ev-flash-error .naowee-textfield__input-wrap{
+  animation: evFlashError 2.8s ease-out;
+}
+@keyframes evFlashError{
+  0%   { box-shadow:0 0 0 3px rgba(237,49,74,.25); border-color:#ed314a; }
+  60%  { box-shadow:0 0 0 0 rgba(237,49,74,0);    border-color:#ed314a; }
+  100% { box-shadow:none; }
+}
+
+/* Helper de "Este campo es obligatorio" — text muted del DS */
+.ev-form .naowee-textfield > .naowee-helper,
+.ev-form .naowee-dropdown > .naowee-helper{
+  margin-top:4px;
+}
+
+/* Footer con botones full-width */
+.ev-modal__footer .naowee-btn{
+  flex:1;
+  max-width:none;
+}
+
+/* ─── Form layout (inside modal body) ────────────────────────────── */
+.ev-form{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.ev-grid-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.ev-form-section{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  color:#9ca0b8;
+  margin:8px 0 -4px 0;
+}
+
+/* Step placeholders (steps 2-4) */
+.ev-step-placeholder{
+  text-align:center;
+  padding:40px 24px;
+  color:var(--naowee-color-text-secondary, #646587);
+}
+.ev-step-placeholder h3{
+  font-size:16px;
+  color:var(--naowee-color-text-primary, #282834);
+  font-weight:700;
+  margin:0 0 8px;
+}
+.ev-step-placeholder p{
+  font-size:13px;
+  margin:0 0 6px;
+}
+.ev-step-placeholder__note{
+  margin-top:18px;
+  font-size:12px;
+  color:#9ca0b8;
+  font-style:italic;
+}
+
+/* Responsive */
+@media(max-width:720px){
+  .ev-grid-2{grid-template-columns:1fr}
+  .ev-page-header{flex-direction:column !important;align-items:stretch !important}
+  .ev-page-header .naowee-btn{align-self:flex-start}
+}

@@ -27,9 +27,9 @@ const LOGIN_URL = (() => {
 
 /* Estado del módulo para que navigateToActive pueda re-renderizar
    sin recargar la página (View Transitions hacen morph suave entre estados). */
-const _state = { rootEl: null, role: null };
+const _state = { rootEl: null, role: null, onActiveChange: null };
 
-export function mountSidebar({ rootEl, roleCode, activeId }) {
+export function mountSidebar({ rootEl, roleCode, activeId, onActiveChange }) {
   const role = ROLES[roleCode] || ROLES.ATHLETE;
   const sections = getMenuForRole(role.code);
   const isCollapsed = localStorage.getItem(COLLAPSED_KEY) === '1';
@@ -37,11 +37,16 @@ export function mountSidebar({ rootEl, roleCode, activeId }) {
   _state.rootEl = rootEl;
   _state.role = role;
   _state.activeId = activeId;
+  _state.onActiveChange = onActiveChange || null;
 
   rootEl.innerHTML = renderSidebar({ sections, activeId, isCollapsed });
   bindSidebarEvents(rootEl);
   setupTooltips(rootEl);
   setupScrollHint(rootEl);
+
+  /* Notificar al consumidor el activeId inicial para que renderee la página */
+  if (_state.onActiveChange) _state.onActiveChange(activeId, role);
+
   return { role, sections };
 }
 
@@ -235,6 +240,9 @@ function updateActive(activeId, options) {
   /* Sync title del placeholder por si la página lo usa */
   const titleEl = document.getElementById('pageTitle');
   if (titleEl) titleEl.textContent = `Vista — ${role.label}`;
+
+  /* Notificar al consumidor el cambio de activeId para que renderee la página */
+  if (_state.onActiveChange) _state.onActiveChange(activeId, role);
 }
 
 /* Soportar navegación browser back/forward sin perder estado */
