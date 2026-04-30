@@ -1,0 +1,253 @@
+/* ═══════════════════════════════════════════════════════════════
+   EVENT LIST + CREATE MODAL — styles locales
+   La mayoría viene del DS (.naowee-table-card, .naowee-page-header,
+   .naowee-filter-dropdown, .naowee-pagination, .naowee-checkbox).
+   Acá solo lo que el DS no cubre: header con CTA derecha, modal wizard.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Page header con botón CTA a la derecha ─────────────────────── */
+.ev-page-header{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.ev-page-header__text{
+  display:flex;flex-direction:column;gap:4px;
+}
+.ev-btn-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;
+}
+.ev-btn-icon svg{width:16px;height:16px}
+
+/* ─── Tabla: checkboxes primera columna ──────────────────────────── */
+.ev-table .ev-th-check,
+.ev-table .ev-td-check{
+  width:42px;
+  padding-left:18px;
+  padding-right:0;
+}
+.ev-row-checked{
+  background:#fff8f3;
+}
+.ev-row-checked:hover{
+  background:#fff3e6 !important;
+}
+
+/* ─── Modal Crear Evento ─────────────────────────────────────────── */
+.ev-modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(15,15,25,.55);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+  animation:evOverlayIn .18s ease-out both;
+}
+.ev-modal-overlay.ev-modal-closing{
+  animation:evOverlayOut .18s ease-in both;
+}
+@keyframes evOverlayIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+@keyframes evOverlayOut{
+  from{opacity:1}
+  to{opacity:0}
+}
+
+.ev-modal{
+  background:#fff;
+  width:560px;max-width:100%;
+  max-height:calc(100vh - 48px);
+  border-radius:16px;
+  box-shadow:0 20px 60px rgba(15,15,25,.18);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  animation:evModalIn .22s cubic-bezier(.16,1,.3,1) both;
+}
+.ev-modal-overlay.ev-modal-closing .ev-modal{
+  animation:evModalOut .18s ease-in both;
+}
+@keyframes evModalIn{
+  from{opacity:0;transform:translateY(8px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes evModalOut{
+  from{opacity:1;transform:translateY(0) scale(1)}
+  to{opacity:0;transform:translateY(4px) scale(.99)}
+}
+
+/* Header del modal */
+.ev-modal__header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:20px 24px 0 24px;
+  flex-shrink:0;
+}
+.ev-modal__step-info{
+  display:flex;flex-direction:column;gap:2px;
+}
+.ev-modal__step-counter{
+  font-size:12px;color:#646587;font-weight:500;
+}
+.ev-modal__step-title{
+  font-size:18px;font-weight:700;color:#282834;
+  margin:0;letter-spacing:-.2px;
+}
+.ev-modal__close{
+  width:32px;height:32px;
+  border:none;background:transparent;
+  border-radius:8px;cursor:pointer;
+  color:#646587;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .12s, color .12s;
+}
+.ev-modal__close:hover{
+  background:#f5f6fa;color:#282834;
+}
+.ev-modal__close svg{width:18px;height:18px}
+
+/* Body con scroll */
+.ev-modal__body{
+  flex:1;
+  overflow-y:auto;
+  padding:18px 24px;
+}
+
+/* Footer */
+.ev-modal__footer{
+  display:flex;justify-content:space-between;gap:12px;
+  padding:16px 24px 20px 24px;
+  border-top:1px solid #e7e9f3;
+  flex-shrink:0;
+}
+.ev-modal__footer .naowee-btn{
+  flex:1;
+  max-width:none;
+}
+
+/* ─── Form (inputs, labels, secciones) ───────────────────────────── */
+.ev-form{
+  display:flex;flex-direction:column;gap:16px;
+}
+.ev-form-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.ev-form-field{
+  display:flex;flex-direction:column;gap:6px;
+}
+.ev-form-label{
+  font-size:13px;font-weight:500;color:#282834;
+}
+.ev-form-required{color:#d11f1f}
+.ev-form-section{
+  font-size:11px;font-weight:700;
+  letter-spacing:.4px;text-transform:uppercase;
+  color:#9ca0b8;
+  margin:8px 0 -2px 0;
+}
+
+.ev-form-input{
+  height:42px;
+  border:1px solid #d0d4e6;
+  border-radius:8px;
+  padding:0 12px;
+  font:inherit;font-size:13px;
+  color:#282834;
+  background:#fff;
+  outline:none;
+  width:100%;
+  transition:border-color .15s, box-shadow .15s;
+}
+.ev-form-input::placeholder{color:#9ca0b8}
+.ev-form-input:focus{
+  border-color:#d74009;
+  box-shadow:0 0 0 3px rgba(215,64,9,.12);
+}
+.ev-form-textarea{
+  height:auto;min-height:80px;
+  padding:10px 12px;
+  resize:vertical;
+  font-family:inherit;
+}
+.ev-form-input-wrap{
+  position:relative;
+  display:flex;align-items:center;
+}
+.ev-form-input-icon{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;color:#646587;pointer-events:none;
+}
+.ev-form-input-icon svg{width:16px;height:16px}
+.ev-form-input--with-icon{padding-left:36px}
+.ev-form-input--select{cursor:pointer;padding-right:36px}
+.ev-form-input-suffix{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;color:#646587;pointer-events:none;
+}
+.ev-form-input-suffix svg{width:16px;height:16px}
+
+/* Counter (fases) */
+.ev-counter{
+  display:flex;align-items:center;
+  background:#fff;
+  border:1px solid #d0d4e6;
+  border-radius:8px;
+  padding:0;
+  height:42px;
+  width:100%;
+}
+.ev-counter__btn{
+  width:42px;height:40px;
+  border:none;background:transparent;
+  font-size:18px;font-weight:600;
+  color:#646587;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:6px;
+  transition:background .12s, color .12s;
+}
+.ev-counter__btn:hover{
+  background:#f5f6fa;
+  color:#282834;
+}
+.ev-counter__btn--add{
+  color:#d74009;
+}
+.ev-counter__btn--add:hover{
+  background:#fff3e6;
+  color:#d74009;
+}
+.ev-counter__value{
+  flex:1;
+  text-align:center;
+  font-size:14px;font-weight:600;color:#282834;
+}
+
+/* Step placeholders (steps 2-4) */
+.ev-step-placeholder{
+  text-align:center;
+  padding:40px 24px;
+  color:#646587;
+}
+.ev-step-placeholder h3{
+  font-size:16px;color:#282834;font-weight:700;
+  margin:0 0 8px;
+}
+.ev-step-placeholder p{
+  font-size:13px;margin:0 0 6px;
+}
+.ev-step-placeholder__note{
+  margin-top:18px;
+  font-size:12px;
+  color:#9ca0b8;font-style:italic;
+}
+
+/* Responsive */
+@media(max-width:720px){
+  .ev-modal{width:100%;border-radius:12px}
+  .ev-form-row{grid-template-columns:1fr}
+  .ev-page-header{flex-direction:column;align-items:stretch}
+  .ev-page-header .naowee-btn{align-self:flex-start}
+}

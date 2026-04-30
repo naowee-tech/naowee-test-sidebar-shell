@@ -17,6 +17,7 @@
 
 <link rel="stylesheet" href="shared/shell.css">
 <link rel="stylesheet" href="shared/pages/user-management.css">
+<link rel="stylesheet" href="shared/pages/event-list.css">
 </head>
 <body>
 
@@ -53,6 +54,7 @@
 <script type="module">
   import { mountSidebar, mountHeader, mountDemoRoleSwitcher, getRoleFromQuery } from './shared/sidebar.js';
   import { renderUserManagementPage } from './shared/pages/user-management.js';
+  import { renderEventListPage } from './shared/pages/event-list.js';
 
   const roleCode = getRoleFromQuery();
   const activeId = new URLSearchParams(window.location.search).get('active') || 'inicio';
@@ -64,6 +66,11 @@
 
     if (currentActive === 'user-management') {
       renderUserManagementPage(pageEl);
+      return;
+    }
+
+    if (currentActive === 'eventos' || currentActive === 'eventos-lista') {
+      renderEventListPage(pageEl);
       return;
     }
 
