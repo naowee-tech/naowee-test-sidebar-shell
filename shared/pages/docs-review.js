@@ -542,7 +542,10 @@ function openRejectDialog(ids) {
     closeDialog(overlay);
     paintTableOnly();
     paintBulkOnly();
-    showToast('negative', `${ids.length === 1 ? 'Registro rechazado' : `${ids.length} registros rechazados`}`,
+    /* Toast verde (positive) — la ACCIÓN del revisor fue exitosa. El
+       contenido del toast indica que es un rechazo, pero la operación
+       se completó OK → feedback positivo coherente con aprobación. */
+    showToast('positive', `${ids.length === 1 ? 'Registro rechazado' : `${ids.length} registros rechazados`}`,
               'Se notificó al gestor con la observación.');
   });
 }
@@ -591,10 +594,12 @@ function showToast(variant, title, body) {
 }
 
 function navigateToDetail(row) {
+  /* Ruta dedicada del revisor: docs-detail (no sede-detail). Mantiene
+     el role=DOCUMENTATION_REVIEWER y el sidebar centrado en
+     "Documentación" (no se mezcla con la experiencia del super admin). */
   const params = new URLSearchParams(window.location.search);
-  params.set('active', 'sede-detail');
+  params.set('active', 'docs-detail');
   params.set('code', row.code);
-  /* Mapear estado de revisor → estado del detail */
   const detailStatus =
     row.status === 'por-revisar' ? 'revision' :
     row.status === 'rechazado'   ? 'rechazado' : 'activo';
