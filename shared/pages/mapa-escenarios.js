@@ -492,14 +492,15 @@ function renderFilterToolbar() {
 
 function renderFilterDD(field, label, options, value) {
   const display = value || label;
+  /* Sin opción "— Limpiar —" en el menu — el usuario limpia con el chip
+     activo de abajo o con el botón global "Limpiar filtros" del toolbar. */
   return `
     <div class="naowee-filter-dropdown me-dd" data-dd="${field}">
       <button type="button" class="naowee-filter-dropdown__trigger ${value ? 'me-dd__trigger--active' : ''}" data-dd-trigger="${field}">
-        <span>${display}</span>
+        <span class="me-dd__trigger-label">${display}</span>
         <span class="naowee-filter-dropdown__chev">${chevronDown()}</span>
       </button>
       <div class="naowee-filter-dropdown__menu" data-dd-menu="${field}">
-        ${value ? `<button type="button" class="naowee-filter-dropdown__option me-dd__opt-clear" data-dd-clear="${field}">— Limpiar —</button>` : ''}
         ${options.map(opt => `
           <button type="button" class="naowee-filter-dropdown__option"
                   data-dd-val="${escapeHtml(opt)}" data-dd-field="${field}"
@@ -518,7 +519,7 @@ function renderEstadoFilterDD() {
   return `
     <div class="naowee-filter-dropdown me-dd" data-dd="estado">
       <button type="button" class="naowee-filter-dropdown__trigger ${_state.estado !== 'todos' ? 'me-dd__trigger--active' : ''}" data-dd-trigger="estado">
-        <span>${display}</span>
+        <span class="me-dd__trigger-label">${display}</span>
         <span class="naowee-filter-dropdown__chev">${chevronDown()}</span>
       </button>
       <div class="naowee-filter-dropdown__menu" data-dd-menu="estado">

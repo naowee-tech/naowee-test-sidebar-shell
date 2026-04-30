@@ -89,17 +89,27 @@
   height:36px;
 }
 
-/* Filter dropdowns: width fijo apretado para todos los controles. El
-   menú desplegable usa width:max-content para ajustarse al texto más
-   largo (ej: "Todos los estados") sin verse cortado. */
+/* Filter dropdowns: TODOS al MISMO width fijo (130px) con
+   text-overflow:ellipsis. Si el valor seleccionado es muy largo (ej
+   "Cancha múltiple", "Complejo deportivo") se trunca con "…", el
+   trigger no crece y todos los dropdowns quedan alineados con gap
+   uniforme. */
 .me-dd{
-  flex:0 0 110px;
-  min-width:110px;
+  flex:0 0 130px;
+  min-width:130px;
+  width:130px;
+  max-width:130px;
 }
-/* Estado dropdown un poco más ancho porque dice "Estado" + opciones */
-.me-dd[data-dd="estado"]{
-  flex:0 0 120px;
-  min-width:120px;
+/* Trigger label: truncate con ellipsis si el value es más largo
+   que el width del trigger. Display block + min-width:0 para que
+   el flex container respete el text-overflow. */
+.me-dd__trigger-label{
+  display:block;
+  min-width:0;
+  flex:1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 /* Menu width = contenido más largo (no width del trigger) */
 .naowee-filter-dropdown__menu{
