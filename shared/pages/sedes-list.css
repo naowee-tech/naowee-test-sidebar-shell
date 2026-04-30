@@ -1264,15 +1264,25 @@
   margin-right:8px;
 }
 
-/* Table styles */
+/* Table styles — column widths explícitos para que la tabla NO
+   distribuya en auto-layout (que dejaba el checkbox column muy
+   ancho con espacio fantasma a la izquierda). */
+.dr-table{
+  width:100%;
+  table-layout:fixed;
+}
 .dr-table th.dr-th-check,
 .dr-table td.dr-td-check{
-  width:42px;
+  width:48px;
   padding-left:18px;
   padding-right:0;
 }
+.dr-table thead th:nth-child(3){ width:140px; }     /* ID único */
+.dr-table thead th:nth-child(4){ width:60px; }      /* CAR */
+.dr-table thead th:nth-child(5){ width:130px; }     /* Estado */
+.dr-table thead th:nth-child(6){ width:200px; }     /* Última actualización */
 .dr-th-actions{
-  width:48px;
+  width:48px !important;
   text-align:right;
   padding-right:18px !important;
 }
@@ -1449,40 +1459,67 @@
   text-align:left;
   margin-bottom:18px;
 }
+/* Footer del dialog: cancel + confirm proportional (ambos flex:1) para
+   que ocupen el ancho disponible balanceadamente. */
 .dr-dialog__footer{
   display:flex;
-  justify-content:space-between;
   align-items:center;
-  gap:14px;
+  gap:12px;
   margin-top:8px;
 }
-.dr-dialog__cancel{
-  color:var(--naowee-color-text-accent, #d74009) !important;
+.dr-dialog__footer .naowee-btn{
+  flex:1;
+  height:44px;
+  font-size:14px;
 }
-.dr-dialog__confirm--positive{
+/* Cancel: estilo mute (cream bg) en lugar de link, así pesa visualmente
+   igual al confirm (no se ve como un link suelto al lado de un loud). */
+.dr-dialog__cancel{
+  background:#FFEDC7 !important;
+  color:var(--naowee-color-text-accent, #d74009) !important;
+  border:none !important;
+}
+.dr-dialog__cancel:hover{
+  background:#FFD9B8 !important;
+}
+/* Confirm verde (aprobar) — solo cuando NO está disabled */
+.dr-dialog__confirm--positive:not(:disabled){
   background:#1f8923 !important;
   border-color:#1f8923 !important;
   color:#fff !important;
-  min-width:200px;
 }
-.dr-dialog__confirm--positive:hover{
+.dr-dialog__confirm--positive:not(:disabled):hover{
   background:#176d1c !important;
   border-color:#176d1c !important;
 }
-.dr-dialog__confirm--negative{
+.dr-dialog__confirm--positive:not(:disabled) svg{ stroke:#fff; color:#fff; }
+/* Confirm rojo (rechazar) — solo cuando NO está disabled */
+.dr-dialog__confirm--negative:not(:disabled){
   background:#e53935 !important;
   border-color:#e53935 !important;
   color:#fff !important;
-  min-width:200px;
 }
-.dr-dialog__confirm--negative:hover{
+.dr-dialog__confirm--negative:not(:disabled):hover{
   background:#c12d2a !important;
   border-color:#c12d2a !important;
 }
+.dr-dialog__confirm--negative:not(:disabled) svg{ stroke:#fff; color:#fff; }
+/* Disabled: usa los tokens DS oficiales (fill-loud-disabled gris claro,
+   text-disabled gris medio). NO override custom — deja al DS manejar. */
 .dr-dialog__confirm--positive:disabled,
-.dr-dialog__confirm--negative:disabled{
-  opacity:.55;
-  cursor:not-allowed;
+.dr-dialog__confirm--negative:disabled,
+.dr-dialog__confirm--positive[disabled],
+.dr-dialog__confirm--negative[disabled]{
+  background:var(--naowee-color-interactive-fill-loud-disabled, #ECEDF5) !important;
+  color:var(--naowee-color-text-disabled, #9c9ebf) !important;
+  border-color:transparent !important;
+  cursor:not-allowed !important;
+  pointer-events:none !important;
+}
+.dr-dialog__confirm--positive:disabled svg,
+.dr-dialog__confirm--negative:disabled svg{
+  stroke:var(--naowee-color-icon-disabled, #9c9ebf) !important;
+  color:var(--naowee-color-icon-disabled, #9c9ebf) !important;
 }
 
 /* ─── Toast (top-right floating) ──────────────────────────── */
@@ -1504,12 +1541,31 @@
   background:#fff;
   border:1px solid var(--naowee-color-border-default, #e7e9f3);
   box-shadow:0 12px 32px rgba(0, 0, 0, .14);
+  padding:14px 16px;
 }
 .dr-toast .naowee-message--positive{
-  border-left:4px solid #1f8923;
+  border-left:4px solid var(--naowee-color-feedback-fill-positive-loud, #1f8923);
 }
 .dr-toast .naowee-message--negative{
-  border-left:4px solid #e53935;
+  border-left:4px solid var(--naowee-color-feedback-fill-negative-loud, #e53935);
+}
+/* Badge icon: el DS lo hace verde/rojo automáticamente con
+   --message--positive/--negative. Solo aseguramos el size. */
+.dr-toast .naowee-message__icon{
+  width:20px;
+  height:20px;
+  flex-shrink:0;
+}
+.dr-toast .naowee-message__title{
+  font-size:14px;
+  line-height:18px;
+  margin:0;
+}
+.dr-toast .naowee-message__text{
+  font-size:13px;
+  line-height:18px;
+  color:var(--naowee-color-text-secondary, #646587);
+  margin:2px 0 0;
 }
 .dr-toast__body{
   flex:1;
