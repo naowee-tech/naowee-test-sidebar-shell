@@ -117,6 +117,61 @@ const TIPO_COLORS = {
   'Otro':               '#6b7280'
 };
 
+/* ─── Fotos reales por tipo (Unsplash) ──────────────────────────
+   Cada tipo tiene 3 photo IDs de Unsplash que matchean el tipo de
+   escenario deportivo. La primera es la "hero" del banner, las 3
+   se usan como thumbs en el photo-grid del primer tab.
+   Format: photo-{id} → usado como
+   https://images.unsplash.com/photo-{id}?w=600&h=400&fit=crop&q=80 */
+const TIPO_PHOTOS = {
+  'Cancha múltiple': [
+    '1546519638-68e109498ffc',   // basketball court outdoor
+    '1518091043644-c1d4457512c6', // basketball indoor
+    '1574623452334-1e0ac2b3ccb4'  // sports court
+  ],
+  'Estadio': [
+    '1459865264687-595d652de67e', // soccer stadium aerial
+    '1518621012420-8ab10887ce2a', // football stadium
+    '1577471488278-16eec37ffcc2'  // stadium night
+  ],
+  'Coliseo': [
+    '1577075940232-1db6eb50745a', // arena
+    '1565299624946-b28f40a0ae38', // indoor coliseum
+    '1571092049816-1d5547728432'  // sports arena interior
+  ],
+  'Piscina': [
+    '1576431260969-3a55f1a72c93', // olympic pool
+    '1530549387789-4c1017266635', // swimming pool
+    '1532274402911-5a369e4c4bb5'  // pool aerial
+  ],
+  'Pista atlética': [
+    '1517649763962-0c623066013b', // running track
+    '1559066653-edfd1e6d0f56',    // athletic field
+    '1565992441121-4367c2967103'  // track stadium
+  ],
+  'Gimnasio': [
+    '1534438327276-14e5300c3a48', // gym weights
+    '1540497077202-7c8a3999166f', // gym indoor
+    '1571902943202-507ec2618e8f'  // fitness center
+  ],
+  'Complejo deportivo': [
+    '1574629810360-7efbbe195018', // sports complex
+    '1571019613454-1cb2f99b2d8b', // multi-sport facility
+    '1518091043644-c1d4457512c6'  // sports center
+  ],
+  'Otro': [
+    '1517649763962-0c623066013b',
+    '1574629810360-7efbbe195018',
+    '1571902943202-507ec2618e8f'
+  ]
+};
+
+function tipoPhotoUrl(tipo, idx, w = 600, h = 400) {
+  const photos = TIPO_PHOTOS[tipo] || TIPO_PHOTOS['Otro'];
+  const id = photos[idx % photos.length];
+  return `https://images.unsplash.com/photo-${id}?w=${w}&h=${h}&fit=crop&q=80`;
+}
+
 /* ─── Ciudades principales (top deptos con sus capitales + alternas) ── */
 const CITIES = [
   { name:'Bogotá',         depto:'Bogotá D.C.',       lat: 4.7110, lon:-74.0721, weight:1.00 },
@@ -1206,10 +1261,14 @@ function renderScenarioDetailPanel(esc) {
     <div class="me-detail">
       <button type="button" class="me-detail__close" data-detail-close aria-label="Cerrar ficha">${closeIcon()}</button>
 
-      <!-- Carrousel placeholder (foto única por tipo, mock con gradient).
-           Sin dots de navegación — cleaner sin view indicator. -->
-      <div class="me-detail__carrousel">
-        <div class="me-detail__photo me-detail__photo--1" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
+      <!-- Banner con foto real de Unsplash matching el tipo de escenario.
+           onerror fallback al gradient (style.cssText con --tipo-color)
+           si la imagen falla a cargar (offline / CDN error). -->
+      <div class="me-detail__carrousel" style="--tipo-color:${TIPO_COLORS[esc.tipo]}">
+        <img class="me-detail__photo-img"
+             src="${tipoPhotoUrl(esc.tipo, 0, 600, 360)}"
+             alt="${escapeHtml(esc.tipo)}"
+             onerror="this.style.display='none';this.parentElement.classList.add('me-detail__carrousel--fallback')" />
       </div>
 
       <div class="me-detail__head">
@@ -1223,20 +1282,33 @@ function renderScenarioDetailPanel(esc) {
         </div>
       </div>
 
-      <!-- Tabs Información general / Documentación / Historial — DS naowee-tabs -->
-      <div class="naowee-tabs naowee-tabs--proportional naowee-tabs--animated me-detail__tabs">
+      <!-- Tabs Información general / Documentación / Historial — DS naowee-tabs.
+           Versión simple del DS (igual al playground): naowee-tabs +
+           naowee-tab + naowee-tab--selected. El underline pipe activo lo
+           maneja el ::after del DS — no necesitamos --animated ni
+           __indicator. -->
+      <div class="naowee-tabs naowee-tabs--proportional me-detail__tabs">
         <button type="button" class="naowee-tab naowee-tab--selected" data-tab="info">Información general</button>
         <button type="button" class="naowee-tab" data-tab="docs">Documentación</button>
         <button type="button" class="naowee-tab" data-tab="hist">Historial</button>
-        <span class="naowee-tabs__indicator" aria-hidden="true"></span>
       </div>
 
       <div class="me-detail__tab-content" data-tab-content="info">
-        <!-- Photo grid SIN título "FOTOGRAFÍAS" — los thumbs hablan por sí mismos -->
+        <!-- Photo grid con 3 fotos reales del tipo de escenario. onerror
+             fallback al gradient con --tipo-color si Unsplash no responde. -->
         <div class="me-detail__photo-grid">
-          <div class="me-detail__photo-thumb me-detail__photo--1" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
-          <div class="me-detail__photo-thumb me-detail__photo--2" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
-          <div class="me-detail__photo-thumb me-detail__photo--3" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
+          <div class="me-detail__photo-thumb" style="--tipo-color:${TIPO_COLORS[esc.tipo]}">
+            <img src="${tipoPhotoUrl(esc.tipo, 0, 200, 200)}" alt=""
+                 onerror="this.style.display='none';this.parentElement.classList.add('me-detail__photo-thumb--fallback')" />
+          </div>
+          <div class="me-detail__photo-thumb" style="--tipo-color:${TIPO_COLORS[esc.tipo]}">
+            <img src="${tipoPhotoUrl(esc.tipo, 1, 200, 200)}" alt=""
+                 onerror="this.style.display='none';this.parentElement.classList.add('me-detail__photo-thumb--fallback')" />
+          </div>
+          <div class="me-detail__photo-thumb" style="--tipo-color:${TIPO_COLORS[esc.tipo]}">
+            <img src="${tipoPhotoUrl(esc.tipo, 2, 200, 200)}" alt=""
+                 onerror="this.style.display='none';this.parentElement.classList.add('me-detail__photo-thumb--fallback')" />
+          </div>
         </div>
 
         <div class="me-detail__section">DATOS DE PRE-VALIDACIÓN</div>
@@ -1496,30 +1568,14 @@ function paintAside() {
   }
 }
 
-/* Posicionar el indicator animado del DS naowee-tabs--animated bajo
-   el tab seleccionado. Calcula offsetLeft + offsetWidth del active y
-   los aplica como inline styles → el CSS transition del indicator
-   anima el slide. */
-function positionTabsIndicator(pageEl) {
-  const tabs = pageEl.querySelector('.naowee-tabs--animated');
-  if (!tabs) return;
-  const indicator = tabs.querySelector('.naowee-tabs__indicator');
-  const active = tabs.querySelector('.naowee-tab--selected');
-  if (!indicator || !active) return;
-  const tabsRect = tabs.getBoundingClientRect();
-  const actRect = active.getBoundingClientRect();
-  indicator.style.left = `${actRect.left - tabsRect.left}px`;
-  indicator.style.width = `${actRect.width}px`;
-}
-
 function bindDetailPanelEvents(pageEl) {
   pageEl.querySelector('[data-detail-close]')?.addEventListener('click', () => {
     _state.selectedScenarioId = null;
     paintAside();
     paintScenarioMarkers();    /* Quitar el ring de selected del marker */
   });
-  /* Tabs DS — toggle naowee-tab--selected + posicionar el indicator
-     animado bajo el tab activo. */
+  /* Tabs DS simple — solo toggle de naowee-tab--selected. El underline
+     pipe activo lo maneja el ::after del DS automáticamente. */
   pageEl.querySelectorAll('[data-tab]').forEach(tab => {
     tab.addEventListener('click', () => {
       const target = tab.getAttribute('data-tab');
@@ -1529,11 +1585,8 @@ function bindDetailPanelEvents(pageEl) {
       pageEl.querySelectorAll('[data-tab-content]').forEach(c => {
         c.hidden = c.getAttribute('data-tab-content') !== target;
       });
-      positionTabsIndicator(pageEl);
     });
   });
-  /* Posicionar indicator al primer paint */
-  requestAnimationFrame(() => positionTabsIndicator(pageEl));
   /* (Carrousel sin dots — quitamos el view indicator. Una sola foto
      placeholder en el banner principal. Los thumbs del photo-grid en
      la primera tab actúan como vista de fotos del scenario.) */
