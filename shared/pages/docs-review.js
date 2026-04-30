@@ -551,20 +551,23 @@ function closeDialog(overlay) {
   }, 200);
 }
 
-/* ─── Toast (DS naowee-message) ──────────────────────────── */
+/* ─── Toast (DS naowee-message) ──────────────────────────────
+   Iconos del badge: idénticos al pattern del playground#message
+   - positive: check pequeño 16×16 con stroke blanco
+   - negative: minus horizontal 16×16 con stroke blanco
+   El círculo verde/rojo viene del .__icon background (DS handles). */
 function showToast(variant, title, body) {
   document.querySelectorAll('.dr-toast').forEach(t => t.remove());
   const wrap = document.createElement('div');
   wrap.className = 'dr-toast';
-  const isPositive = variant === 'positive';
+  const badgeIcons = {
+    positive: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 8l1.6 1.6L10.5 6.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
+    negative: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 8h6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>'
+  };
   wrap.innerHTML = `
     <div class="naowee-message naowee-message--${variant}">
       <div class="naowee-message__header">
-        <div class="naowee-message__icon">
-          ${isPositive
-            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
-            : '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="4" y1="8" x2="12" y2="8"/></svg>'}
-        </div>
+        <span class="naowee-message__icon">${badgeIcons[variant] || badgeIcons.positive}</span>
         <div class="dr-toast__body">
           <div class="naowee-message__title">${escapeHtml(title)}</div>
           <p class="naowee-message__text">${escapeHtml(body)}</p>
