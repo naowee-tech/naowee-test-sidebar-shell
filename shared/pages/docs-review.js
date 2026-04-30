@@ -226,9 +226,7 @@ function renderRow(row) {
   return `
     <tr class="dr-row ${isChecked ? 'dr-row--selected' : ''}" data-row-id="${row.id}">
       <td class="dr-td-check">
-        ${isReviewable
-          ? renderCheckbox(isChecked, false, `row-${row.id}`)
-          : '<div class="dr-check-spacer"></div>'}
+        ${renderCheckbox(isChecked, false, `row-${row.id}`, !isReviewable)}
       </td>
       <td><div class="dr-cell-name">${escapeHtml(row.name)}</div></td>
       <td><div class="dr-cell-code">${row.code}</div></td>
@@ -268,14 +266,18 @@ function renderRow(row) {
   `;
 }
 
-function renderCheckbox(checked, indeterminate, id) {
+function renderCheckbox(checked, indeterminate, id, disabled = false) {
   const cls = ['naowee-checkbox'];
   if (checked) cls.push('naowee-checkbox--checked');
   if (indeterminate) cls.push('naowee-checkbox--indeterminate');
+  if (disabled) cls.push('naowee-checkbox--disabled');
+  /* Disabled checkboxes no participan del bulk-select pero ocupan la
+     misma altura visual que los activos — la columna queda alineada y
+     el reviewer entiende "esta fila ya está resuelta, no se puede actuar". */
   return `
-    <div class="${cls.join(' ')}" tabindex="0" role="checkbox"
+    <div class="${cls.join(' ')}" ${disabled ? 'aria-disabled="true"' : 'tabindex="0"'} role="checkbox"
          aria-checked="${indeterminate ? 'mixed' : checked}"
-         data-checkbox="${id}">
+         ${disabled ? '' : `data-checkbox="${id}"`}>
       <div class="naowee-checkbox__box">
         ${checked && !indeterminate
           ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
@@ -559,10 +561,12 @@ function closeDialog(overlay) {
 }
 
 /* ─── Toast (DS naowee-message) ──────────────────────────────
-   Iconos del badge: idénticos al pattern del playground#message
-   - positive: check pequeño 16×16 con stroke blanco
-   - negative: minus horizontal 16×16 con stroke blanco
-   El círculo verde/rojo viene del .__icon background (DS handles). */
+   Estructura idéntica al playground#message del DS (variante con title):
+     .naowee-message--{variant}
+       └─ .naowee-message__header  → icon + title + dismiss
+       └─ .naowee-message__text    → body (sibling, NO anidado)
+   No se overridea bg/border del DS — el componente trae el quiet green
+   nativamente. Solo posicionamos floating bottom-right + drop shadow. */
 function showToast(variant, title, body) {
   document.querySelectorAll('.dr-toast').forEach(t => t.remove());
   const wrap = document.createElement('div');
@@ -575,12 +579,10 @@ function showToast(variant, title, body) {
     <div class="naowee-message naowee-message--${variant}">
       <div class="naowee-message__header">
         <span class="naowee-message__icon">${badgeIcons[variant] || badgeIcons.positive}</span>
-        <div class="dr-toast__body">
-          <div class="naowee-message__title">${escapeHtml(title)}</div>
-          <p class="naowee-message__text">${escapeHtml(body)}</p>
-        </div>
-        <button type="button" class="dr-toast__dismiss" aria-label="Cerrar">${closeIcon()}</button>
+        <span class="naowee-message__title">${escapeHtml(title)}</span>
+        <button type="button" class="naowee-message__dismiss" aria-label="Cerrar">${closeIcon(20)}</button>
       </div>
+      <p class="naowee-message__text">${escapeHtml(body)}</p>
     </div>
   `;
   document.body.appendChild(wrap);
@@ -589,7 +591,7 @@ function showToast(variant, title, body) {
     wrap.classList.remove('dr-toast--show');
     setTimeout(() => wrap.remove(), 250);
   };
-  wrap.querySelector('.dr-toast__dismiss').addEventListener('click', dismiss);
+  wrap.querySelector('.naowee-message__dismiss').addEventListener('click', dismiss);
   setTimeout(dismiss, 4500);
 }
 
