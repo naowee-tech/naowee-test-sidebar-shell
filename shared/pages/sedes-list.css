@@ -1544,15 +1544,17 @@
   color:var(--naowee-color-icon-disabled, #9c9ebf) !important;
 }
 
-/* ─── Toast (top-right floating) ──────────────────────────── */
+/* ─── Toast (bottom-right floating) ───────────────────────────
+   Position bottom-right (no top) — convención más común para toasts
+   de acción exitosa, no compite con el header del producto. */
 .dr-toast{
   position:fixed;
-  top:20px;
-  right:20px;
+  bottom:24px;
+  right:24px;
   z-index:10000;
-  width:min(420px, calc(100vw - 40px));
+  width:min(380px, calc(100vw - 48px));
   opacity:0;
-  transform:translateX(20px);
+  transform:translateY(20px);
   transition:opacity .25s ease, transform .25s ease;
 }
 .dr-toast--show{

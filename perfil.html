@@ -107,6 +107,17 @@
       return;
     }
 
+    if (currentActive === 'docs-detail') {
+      /* Reviewer's "Ver detalle" — usa la misma vista de sede-detail
+         pero el back link vuelve a 'docs' (dashboard de revisión)
+         en vez de 'sedes-lista'. Mantiene el role/sidebar del revisor. */
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const status = params.get('status') || 'activo';
+      renderSedeDetailPage(pageEl, { code, status, returnTo: 'docs' });
+      return;
+    }
+
     if (currentActive === 'mapa-escenarios') {
       renderMapaEscenariosPage(pageEl);
       return;

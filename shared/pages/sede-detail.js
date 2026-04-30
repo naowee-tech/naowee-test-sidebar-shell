@@ -162,12 +162,16 @@ const _state = {
   rootEl: null,
   sedeCode: null,
   sedeStatus: null,
+  /* returnTo: ruta a la que vuelve el botón "Regresar a la lista".
+     Por default es 'sedes-lista' (admin); el revisor pasa 'docs' para
+     volver al dashboard de revisión. */
+  returnTo: 'sedes-lista',
   galleryIdx: 0
 };
 
 /**
  * @param {HTMLElement} pageEl
- * @param {Object} opts { code, status }
+ * @param {Object} opts { code, status, returnTo }
  */
 export function renderSedeDetailPage(pageEl, opts = {}) {
   pageEl.classList.remove('um-page');
@@ -176,6 +180,7 @@ export function renderSedeDetailPage(pageEl, opts = {}) {
   _state.rootEl = pageEl;
   _state.sedeCode = opts.code;
   _state.sedeStatus = opts.status || 'activo';
+  _state.returnTo = opts.returnTo || 'sedes-lista';
   _state.galleryIdx = 0;
   pageEl.innerHTML = renderShell();
   bindEvents(pageEl);
@@ -721,9 +726,15 @@ function renderHistorialPanel(sede, status) {
 
 /* ─── Events ─────────────────────────────────────────────── */
 function bindEvents(pageEl) {
-  /* Back link → vuelve al listado */
+  /* Back link → preserva role actual + va al returnTo configurado.
+     Reviewer vuelve a 'docs' (dashboard de revisión), admin vuelve
+     a 'sedes-lista'. */
   pageEl.querySelector('[data-back]')?.addEventListener('click', () => {
-    window.location.search = '?role=ROOT&active=sedes-lista';
+    const params = new URLSearchParams(window.location.search);
+    params.set('active', _state.returnTo);
+    params.delete('code');
+    params.delete('status');
+    window.location.search = '?' + params.toString();
   });
 
   /* Tabs DS simple */
