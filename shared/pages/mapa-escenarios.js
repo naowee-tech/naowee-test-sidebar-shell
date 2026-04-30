@@ -317,9 +317,11 @@ const SVG_W = 700, SVG_H = 700;
 const _state = {
   rootEl: null,
   search: '',
-  region: null,
-  tipo: null,
-  estado: 'todos',
+  /* Multi-select: arrays vacíos = "todos pasan". Cada filter dropdown
+     se vuelve checkbox-list y el usuario puede tildar varios valores. */
+  region: [],
+  tipo: [],
+  estado: [],
   car: 'all',
   /* Nav state machine:
      - country: mapa entero coroplético, sin city pins
@@ -450,7 +452,13 @@ function renderAsideContent() {
 }
 
 function renderFilterToolbar() {
-  const hasActive = !!(_state.search || _state.region || _state.tipo || _state.estado !== 'todos' || _state.car !== 'all');
+  const hasActive = !!(
+    _state.search ||
+    _state.region.length > 0 ||
+    _state.tipo.length > 0 ||
+    _state.estado.length > 0 ||
+    _state.car !== 'all'
+  );
   return `
     <div class="me-toolbar">
       <div class="me-toolbar__row">
@@ -490,64 +498,92 @@ function renderFilterToolbar() {
   `;
 }
 
-function renderFilterDD(field, label, options, value) {
-  const display = value || label;
-  /* Sin opción "— Limpiar —" en el menu — el usuario limpia con el chip
-     activo de abajo o con el botón global "Limpiar filtros" del toolbar. */
+function renderFilterDD(field, label, options, selectedValues) {
+  const sel = Array.isArray(selectedValues) ? selectedValues : [];
+  /* Multi-select display:
+     - 0 seleccionados → label del filtro (ej "Tipo")
+     - 1 seleccionado → ese valor único (truncado con ellipsis si largo)
+     - 2+ seleccionados → "N seleccionados" */
+  let display = label;
+  if (sel.length === 1) display = sel[0];
+  else if (sel.length > 1) display = `${sel.length} seleccionados`;
+  const isActive = sel.length > 0;
   return `
     <div class="naowee-filter-dropdown me-dd" data-dd="${field}">
-      <button type="button" class="naowee-filter-dropdown__trigger ${value ? 'me-dd__trigger--active' : ''}" data-dd-trigger="${field}">
+      <button type="button" class="naowee-filter-dropdown__trigger ${isActive ? 'me-dd__trigger--active' : ''}" data-dd-trigger="${field}">
         <span class="me-dd__trigger-label">${display}</span>
         <span class="naowee-filter-dropdown__chev">${chevronDown()}</span>
       </button>
       <div class="naowee-filter-dropdown__menu" data-dd-menu="${field}">
-        ${options.map(opt => `
-          <button type="button" class="naowee-filter-dropdown__option"
-                  data-dd-val="${escapeHtml(opt)}" data-dd-field="${field}"
-                  aria-selected="${opt === value}">
-            ${opt}
-          </button>
-        `).join('')}
+        ${options.map(opt => {
+          const isSelected = sel.includes(opt);
+          return `
+            <button type="button"
+                    class="naowee-filter-dropdown__option me-dd__opt-multi ${isSelected ? 'me-dd__opt-multi--selected' : ''}"
+                    data-dd-val="${escapeHtml(opt)}" data-dd-field="${field}"
+                    aria-selected="${isSelected}">
+              <span class="me-dd__opt-check">${isSelected ? checkIcon() : ''}</span>
+              <span>${opt}</span>
+            </button>
+          `;
+        }).join('')}
       </div>
     </div>
   `;
 }
 
 function renderEstadoFilterDD() {
-  const current = ESTADOS.find(e => e.code === _state.estado) || ESTADOS[0];
-  const display = current.code === 'todos' ? 'Estado' : current.label;
+  const sel = _state.estado;  /* array */
+  /* Estados visibles (excluimos "todos los estados" del menu — un array
+     vacío representa "todos"). */
+  const opts = ESTADOS.filter(e => e.code !== 'todos');
+  let display = 'Estado';
+  if (sel.length === 1) {
+    const e = opts.find(x => x.code === sel[0]);
+    display = e ? e.label : sel[0];
+  } else if (sel.length > 1) {
+    display = `${sel.length} seleccionados`;
+  }
+  const isActive = sel.length > 0;
   return `
     <div class="naowee-filter-dropdown me-dd" data-dd="estado">
-      <button type="button" class="naowee-filter-dropdown__trigger ${_state.estado !== 'todos' ? 'me-dd__trigger--active' : ''}" data-dd-trigger="estado">
+      <button type="button" class="naowee-filter-dropdown__trigger ${isActive ? 'me-dd__trigger--active' : ''}" data-dd-trigger="estado">
         <span class="me-dd__trigger-label">${display}</span>
         <span class="naowee-filter-dropdown__chev">${chevronDown()}</span>
       </button>
       <div class="naowee-filter-dropdown__menu" data-dd-menu="estado">
-        ${ESTADOS.map(e => `
-          <button type="button" class="naowee-filter-dropdown__option me-estado-opt"
-                  data-dd-val="${e.code}" data-dd-field="estado"
-                  aria-selected="${e.code === _state.estado}">
-            ${e.dot
-              ? `<span class="me-dd__dot" style="background:${e.dot}"></span>`
-              : `<span class="me-dd__dot me-dd__dot--ph"></span>`}
-            ${e.label}
-          </button>
-        `).join('')}
+        ${opts.map(e => {
+          const isSelected = sel.includes(e.code);
+          return `
+            <button type="button"
+                    class="naowee-filter-dropdown__option me-dd__opt-multi ${isSelected ? 'me-dd__opt-multi--selected' : ''}"
+                    data-dd-val="${e.code}" data-dd-field="estado"
+                    aria-selected="${isSelected}">
+              <span class="me-dd__opt-check">${isSelected ? checkIcon() : ''}</span>
+              ${e.dot ? `<span class="me-dd__dot" style="background:${e.dot}"></span>` : ''}
+              <span>${e.label}</span>
+            </button>
+          `;
+        }).join('')}
       </div>
     </div>
   `;
 }
 
 function renderActiveChips() {
+  /* Multi-select: un chip por cada valor seleccionado, así el usuario
+     puede quitarlos individualmente. data-chip-remove encodea el
+     campo + valor con formato "field:value" para chips multi, "field"
+     simple para search/car. */
   const chips = [];
-  if (_state.search)              chips.push({ label: `"${_state.search}"`, key: 'search' });
-  if (_state.region)              chips.push({ label: `Región: ${_state.region}`, key: 'region' });
-  if (_state.tipo)                chips.push({ label: `Tipo: ${_state.tipo}`, key: 'tipo' });
-  if (_state.estado !== 'todos')  {
-    const e = ESTADOS.find(x => x.code === _state.estado);
-    chips.push({ label: `Estado: ${e?.label || _state.estado}`, key: 'estado', dot: e?.dot });
-  }
-  if (_state.car === 'only')      chips.push({ label: 'Solo CAR', key: 'car' });
+  if (_state.search) chips.push({ label: `"${_state.search}"`, removeKey: 'search' });
+  _state.region.forEach(v => chips.push({ label: `Región: ${v}`, removeKey: `region:${v}` }));
+  _state.tipo.forEach(v => chips.push({ label: `Tipo: ${v}`, removeKey: `tipo:${v}` }));
+  _state.estado.forEach(code => {
+    const e = ESTADOS.find(x => x.code === code);
+    chips.push({ label: `Estado: ${e?.label || code}`, removeKey: `estado:${code}`, dot: e?.dot });
+  });
+  if (_state.car === 'only') chips.push({ label: 'Solo CAR', removeKey: 'car' });
   if (chips.length === 0) return '';
   return `
     <div class="me-toolbar__chips">
@@ -555,7 +591,7 @@ function renderActiveChips() {
         <span class="naowee-tag naowee-tag--accent naowee-tag--small me-chip">
           ${c.dot ? `<span class="me-chip__dot" style="background:${c.dot}"></span>` : ''}
           ${escapeHtml(c.label)}
-          <span class="naowee-tag__active-area" data-chip-remove="${c.key}">
+          <span class="naowee-tag__active-area" data-chip-remove="${escapeHtml(c.removeKey)}">
             <span class="naowee-tag__close">${closeIconSmall()}</span>
           </span>
         </span>
@@ -621,14 +657,18 @@ function filteredDeptos() {
   return Object.entries(DEPTO_DATA)
     .filter(([name, d]) => {
       if (!passesSearch(name)) return false;
-      if (_state.region && d.region !== _state.region) return false;
+      if (_state.region.length > 0 && !_state.region.includes(d.region)) return false;
       if (_state.car === 'only' && d.car === 0) return false;
       return true;
     })
     .map(([name, d]) => ({ name, ...d }));
 }
+/* Multi-select: array vacío = pasa todo. Si hay valores, debe matchear
+   alguno (OR semantics). */
 function passesRegion(deptoName) {
-  return !_state.region || (DEPTO_DATA[deptoName]?.region === _state.region);
+  if (_state.region.length === 0) return true;
+  const r = DEPTO_DATA[deptoName]?.region;
+  return r && _state.region.includes(r);
 }
 function passesCar(deptoName) {
   if (_state.car !== 'only') return true;
@@ -1258,13 +1298,14 @@ function renderScenarioDetailPanel(esc) {
   `;
 }
 
-/* ─── Filtros para scenarios (tipo + estado + car) ─────────── */
+/* ─── Filtros para scenarios (tipo + car + estado) ─────────── */
 function passesScenarioFilters(esc) {
-  if (_state.tipo && esc.tipo !== _state.tipo) return false;
+  if (_state.tipo.length > 0 && !_state.tipo.includes(esc.tipo)) return false;
   if (_state.car === 'only' && !esc.car) return false;
   /* Estado del scenario es de mock (excelente/bueno/regular), no de
-     workflow (activo/revision/borrador/rechazado). Para el filtro
-     'estado' del toolbar, lo dejamos siempre pasar — es a nivel depto. */
+     workflow (activo/revision/borrador/rechazado). El filtro 'estado'
+     del toolbar opera a nivel depto solamente — los scenarios siempre
+     pasan ese check. */
   return true;
 }
 
@@ -1390,15 +1431,22 @@ function paintToolbarChipsAndReset(pageEl) {
   if (hasActive) {
     const chipsHtml = renderActiveChips();
     toolbar.insertAdjacentHTML('beforeend', chipsHtml);
-    /* Re-bind chip remove handlers */
+    /* Re-bind chip remove handlers (mismo handler que en bindToolbarEvents) */
     toolbar.querySelectorAll('[data-chip-remove]').forEach(el => {
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         const key = el.getAttribute('data-chip-remove');
-        if (key === 'search')      _state.search = '';
-        else if (key === 'estado') _state.estado = 'todos';
-        else if (key === 'car')    _state.car = 'all';
-        else                       _state[key] = null;
+        if (key === 'search') {
+          _state.search = '';
+        } else if (key === 'car') {
+          _state.car = 'all';
+        } else if (key.includes(':')) {
+          const [field, ...valParts] = key.split(':');
+          const val = valParts.join(':');
+          if (Array.isArray(_state[field])) {
+            _state[field] = _state[field].filter(v => v !== val);
+          }
+        }
         paintToolbar();
         applyChoroplethColors();
         paintRankCard();
@@ -1406,6 +1454,34 @@ function paintToolbarChipsAndReset(pageEl) {
       });
     });
   }
+}
+
+/* Update quirúrgico del display del trigger del dropdown de un field
+   (sin paintToolbar — eso cerraría el menu). Usa la misma lógica que
+   renderFilterDD para calcular el display, y actualiza solo el span
+   .me-dd__trigger-label. */
+function paintTriggerDisplay(pageEl, field) {
+  const dd = pageEl.querySelector(`[data-dd="${field}"]`);
+  if (!dd) return;
+  const trigger = dd.querySelector('.naowee-filter-dropdown__trigger');
+  const label = trigger?.querySelector('.me-dd__trigger-label');
+  if (!trigger || !label) return;
+  const sel = _state[field] || [];
+  let display;
+  if (field === 'estado') {
+    if (sel.length === 0)      display = 'Estado';
+    else if (sel.length === 1) {
+      const e = ESTADOS.find(x => x.code === sel[0]);
+      display = e ? e.label : sel[0];
+    } else                     display = `${sel.length} seleccionados`;
+  } else {
+    const fieldLabel = field === 'region' ? 'Región' : field === 'tipo' ? 'Tipo' : field;
+    if (sel.length === 0)      display = fieldLabel;
+    else if (sel.length === 1) display = sel[0];
+    else                       display = `${sel.length} seleccionados`;
+  }
+  label.textContent = display;
+  trigger.classList.toggle('me-dd__trigger--active', sel.length > 0);
 }
 function paintRankCard() {
   /* Compatibility shim: ahora se llama paintAside (puede mostrar rank
@@ -1573,24 +1649,26 @@ function bindToolbarEvents(pageEl) {
       dd.classList.toggle('is-open');
     });
   });
+  /* Multi-select: click en option toggle add/remove SIN cerrar el menu */
   pageEl.querySelectorAll('[data-dd-val]').forEach(opt => {
     opt.addEventListener('click', (e) => {
       e.stopPropagation();
       const field = opt.getAttribute('data-dd-field');
       const val = opt.getAttribute('data-dd-val');
-      _state[field] = val;
-      paintToolbar();
-      applyChoroplethColors();
-      paintRankCard();
-      paintMapOverlays();
-    });
-  });
-  pageEl.querySelectorAll('[data-dd-clear]').forEach(opt => {
-    opt.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const field = opt.getAttribute('data-dd-clear');
-      _state[field] = field === 'estado' ? 'todos' : null;
-      paintToolbar();
+      const arr = _state[field];
+      const idx = arr.indexOf(val);
+      if (idx >= 0) arr.splice(idx, 1);
+      else          arr.push(val);
+      /* Update visual del check + selected state quirúrgicamente,
+         sin paintToolbar() que cerraría el menu. */
+      const isSelected = idx < 0;
+      opt.classList.toggle('me-dd__opt-multi--selected', isSelected);
+      opt.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+      const check = opt.querySelector('.me-dd__opt-check');
+      if (check) check.innerHTML = isSelected ? checkIcon() : '';
+      /* Update display del trigger + chips + map overlays */
+      paintTriggerDisplay(pageEl, field);
+      paintToolbarChipsAndReset(pageEl);
       applyChoroplethColors();
       paintRankCard();
       paintMapOverlays();
@@ -1627,24 +1705,34 @@ function bindToolbarEvents(pageEl) {
 
   pageEl.querySelector('#meReset')?.addEventListener('click', () => {
     _state.search = '';
-    _state.region = null;
-    _state.tipo = null;
-    _state.estado = 'todos';
+    _state.region = [];
+    _state.tipo = [];
+    _state.estado = [];
     _state.car = 'all';
     _state.selectedDepto = null;
     paintToolbar();
     applyChoroplethColors();
     paintRankCard();
+    paintMapOverlays();
   });
 
+  /* Chip remove: clave puede ser "search", "car", o "field:value"
+     (multi-select) → quita ese valor específico del array. */
   pageEl.querySelectorAll('[data-chip-remove]').forEach(el => {
     el.addEventListener('click', (e) => {
       e.stopPropagation();
       const key = el.getAttribute('data-chip-remove');
-      if (key === 'search')      _state.search = '';
-      else if (key === 'estado') _state.estado = 'todos';
-      else if (key === 'car')    _state.car = 'all';
-      else                       _state[key] = null;
+      if (key === 'search') {
+        _state.search = '';
+      } else if (key === 'car') {
+        _state.car = 'all';
+      } else if (key.includes(':')) {
+        const [field, ...valParts] = key.split(':');
+        const val = valParts.join(':');
+        if (Array.isArray(_state[field])) {
+          _state[field] = _state[field].filter(v => v !== val);
+        }
+      }
       paintToolbar();
       applyChoroplethColors();
       paintRankCard();
@@ -1718,6 +1806,7 @@ function searchIcon()    { return '<svg viewBox="0 0 24 24" fill="none" stroke="
 function closeIcon()     { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'; }
 function closeIconSmall(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'; }
 function chevronDown()   { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'; }
+function checkIcon()     { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'; }
 function chevronRight()  { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>'; }
 function plusIcon()      { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'; }
 function minusIcon()     { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>'; }

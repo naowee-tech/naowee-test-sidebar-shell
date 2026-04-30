@@ -128,6 +128,9 @@
   max-width:100% !important;
   box-sizing:border-box;
   justify-content:space-between;
+  /* Padding reducido y simétrico (10px L/R) — antes el DS usaba
+     14px left + 12px right que dejaba aire visual desbalanceado. */
+  padding:4px 10px !important;
   /* overflow:hidden acá para que el LABEL trunque sin afectar el menu
      (que es sibling del trigger, no descendiente). */
   overflow:hidden;
@@ -171,12 +174,51 @@
   border-color:var(--naowee-color-text-accent) !important;
   box-shadow:0 0 0 3px rgba(215, 64, 9, .15) !important;
 }
-.me-dd__opt-clear{
-  color:var(--naowee-color-text-secondary, #646587) !important;
-  font-style:italic;
-  font-size:12px !important;
-  border-bottom:1px solid var(--naowee-color-border-default, #e7e9f3);
+/* (.me-dd__opt-clear ya no se usa — el menu ya no tiene "— Limpiar —") */
+
+/* ─── Multi-select options (checkbox + label) ──────────────────
+   Cada opción del dropdown ahora tiene un checkbox visual a la
+   izquierda. El usuario puede tildar varios valores; el menu NO se
+   cierra al click. */
+.me-dd__opt-multi{
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
 }
+.me-dd__opt-check{
+  width:16px;
+  height:16px;
+  flex-shrink:0;
+  border:1.5px solid var(--naowee-color-border-dark, #d0d4e6);
+  border-radius:4px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background .12s, border-color .12s;
+}
+.me-dd__opt-check svg{
+  width:11px; height:11px;
+  color:#fff;
+}
+.me-dd__opt-multi--selected .me-dd__opt-check{
+  background:var(--naowee-color-text-accent, #d74009);
+  border-color:var(--naowee-color-text-accent, #d74009);
+}
+/* Selected option text en accent (consistencia con el chip activo) */
+.me-dd__opt-multi--selected{
+  color:var(--naowee-color-text-accent, #d74009) !important;
+  font-weight:600 !important;
+}
+/* Override para que NO use el highlight cream del DS-default --selected:
+   con multi-select queremos solo el check + texto naranja, sin bg. */
+.me-dd__opt-multi[aria-selected="true"]{
+  background:transparent !important;
+}
+.me-dd__opt-multi[aria-selected="true"]:hover{
+  background:var(--naowee-color-interactive-fill-mute-hover, #f5f6fa) !important;
+}
+
 .me-estado-opt{ display:flex; align-items:center; gap:10px; }
 .me-dd__dot{
   width:8px; height:8px;
