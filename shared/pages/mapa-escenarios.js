@@ -1206,16 +1206,10 @@ function renderScenarioDetailPanel(esc) {
     <div class="me-detail">
       <button type="button" class="me-detail__close" data-detail-close aria-label="Cerrar ficha">${closeIcon()}</button>
 
-      <!-- Carrousel placeholder (3 fotos por tipo, mock con gradients) -->
+      <!-- Carrousel placeholder (foto única por tipo, mock con gradient).
+           Sin dots de navegación — cleaner sin view indicator. -->
       <div class="me-detail__carrousel">
         <div class="me-detail__photo me-detail__photo--1" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
-        <div class="me-detail__photo me-detail__photo--2" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
-        <div class="me-detail__photo me-detail__photo--3" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
-        <div class="me-detail__carrousel-nav">
-          <span class="me-detail__dot me-detail__dot--active"></span>
-          <span class="me-detail__dot"></span>
-          <span class="me-detail__dot"></span>
-        </div>
       </div>
 
       <div class="me-detail__head">
@@ -1238,7 +1232,7 @@ function renderScenarioDetailPanel(esc) {
       </div>
 
       <div class="me-detail__tab-content" data-tab-content="info">
-        <div class="me-detail__section">FOTOGRAFÍAS</div>
+        <!-- Photo grid SIN título "FOTOGRAFÍAS" — los thumbs hablan por sí mismos -->
         <div class="me-detail__photo-grid">
           <div class="me-detail__photo-thumb me-detail__photo--1" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
           <div class="me-detail__photo-thumb me-detail__photo--2" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
@@ -1540,21 +1534,9 @@ function bindDetailPanelEvents(pageEl) {
   });
   /* Posicionar indicator al primer paint */
   requestAnimationFrame(() => positionTabsIndicator(pageEl));
-  /* Carrousel dots: click para cambiar foto activa (solo visual) */
-  pageEl.querySelectorAll('.me-detail__dot').forEach((dot, idx) => {
-    dot.addEventListener('click', () => {
-      pageEl.querySelectorAll('.me-detail__dot').forEach((d, i) => {
-        d.classList.toggle('me-detail__dot--active', i === idx);
-      });
-      const carrousel = pageEl.querySelector('.me-detail__carrousel');
-      if (carrousel) {
-        const photos = carrousel.querySelectorAll('.me-detail__photo');
-        photos.forEach((p, i) => {
-          p.style.opacity = i === idx ? '1' : '0';
-        });
-      }
-    });
-  });
+  /* (Carrousel sin dots — quitamos el view indicator. Una sola foto
+     placeholder en el banner principal. Los thumbs del photo-grid en
+     la primera tab actúan como vista de fotos del scenario.) */
 }
 /* Re-render de city pins (depto level) o scenario markers (city level)
    según el nav state actual. Llamado después de cualquier cambio de

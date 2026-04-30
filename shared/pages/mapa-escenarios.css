@@ -659,25 +659,8 @@
 .me-detail__photo--1{ opacity:1 }
 .me-detail__photo--2{ opacity:0; background:linear-gradient(45deg, var(--tipo-color, #6b7280) 0%, #fff 100%); }
 .me-detail__photo--3{ opacity:0; background:linear-gradient(225deg, var(--tipo-color, #6b7280) 0%, rgba(255, 255, 255, .5) 100%); }
-.me-detail__carrousel-nav{
-  position:absolute;
-  bottom:10px;
-  left:50%;
-  transform:translateX(-50%);
-  display:flex;
-  gap:6px;
-}
-.me-detail__dot{
-  width:7px; height:7px;
-  border-radius:9999px;
-  background:rgba(255, 255, 255, .55);
-  cursor:pointer;
-  transition:background .12s, transform .12s;
-}
-.me-detail__dot--active{
-  background:#fff;
-  transform:scale(1.3);
-}
+/* (.me-detail__carrousel-nav y .me-detail__dot removidos — el banner
+   ahora muestra una foto única sin view indicator dots) */
 
 .me-detail__head{
   padding:14px 16px 0;
@@ -786,13 +769,17 @@
   font-size:13px;
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:10px 16px;
+  /* Más respiración entre items: 16px vertical, 20px horizontal
+     (antes 10/16, se sentía apretado entre filas). */
+  gap:16px 20px;
 }
-/* dt (label): gris medio (#9ca0b8) — match con section dividers */
 .me-detail__dl dt{
   color:#646587;
   font-weight:400;
   font-size:13px;
+  /* Padding-top sutil para alinear con la baseline del dd cuando éste
+     tiene altura mayor por el dot del estado o el badge CAR. */
+  padding-top:1px;
 }
 .me-detail__dl dd{
   margin:0;
@@ -801,6 +788,7 @@
   display:flex;
   align-items:center;
   gap:6px;
+  font-size:13px;
 }
 
 .me-detail__empty{
