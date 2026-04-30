@@ -60,7 +60,7 @@ const SPORTS_CATALOG = [
 
 /* Sedes mock — replicaría el catálogo real del módulo de Sedes (RUE).
    Se conecta al backend cuando el módulo /api/sedes esté disponible. */
-const SEDES_CATALOG = [
+export const SEDES_CATALOG = [
   'Centro Acuático Salitre',
   'Centro deportivo Miramar',
   'Centro deportivo Norte',
@@ -77,7 +77,7 @@ const SEDES_CATALOG = [
 /* Catálogo global de delegaciones — niveles de organización del modelo
    Naowee (ver dev-sports.naoweesuite.com). El usuario elige UN nivel
    por fase y luego selecciona los items concretos del nivel escogido. */
-const DELEGACIONES_CATALOG = [
+export const DELEGACIONES_CATALOG = [
   'Países',
   'Departamentos',
   'Municipios',

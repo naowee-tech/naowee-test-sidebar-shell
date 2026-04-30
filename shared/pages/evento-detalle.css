@@ -11,187 +11,136 @@
   color: var(--text-primary, #282834);
 }
 
-/* ── Title row ─────────────────────────────────────────────── */
-.evd-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 18px;
-  animation: evdFadeUp .35s ease both;
-}
-.evd-title-left {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-}
-.evd-back {
-  width: 40px;
-  height: 40px;
-  border-radius: 9999px;
-  border: none;
-  background: transparent;
-  color: var(--accent, #d74009);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: background .15s;
-}
-.evd-back:hover {
-  background: rgba(215, 64, 9, .08);
-}
-.evd-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text-primary, #282834);
-  line-height: 1.3;
-  letter-spacing: -.2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.evd-title-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-/* ── Status badge ──────────────────────────────────────────── */
-.evd-status {
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 10px;
-  border-radius: 9999px;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: .1px;
-  border: 1px solid transparent;
-  flex-shrink: 0;
-  font-family: var(--font, 'Inter', sans-serif);
-}
-.evd-status--creado    { background:#defade; color:#124515; border-color:#bdf5be; }
-.evd-status--en-curso  { background:#ffedc7; color:#7a3500; border-color:#ffbf75; }
-.evd-status--publicado { background:#dee9ff; color:#1c2c8a; border-color:#c6d8ff; }
-.evd-status--terminado { background:#e7e9f3; color:#434565; border-color:#d0d4e6; }
-
-/* ── Stats bar (gris, 4 columnas con dividers) ─────────────── */
-.evd-stats {
-  background: #f4f5f9;
-  border-radius: 16px;
-  padding: 20px 24px;
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-  margin-bottom: 24px;
-  animation: evdFadeUp .4s .05s ease both;
-}
-.evd-stat {
-  flex: 1;
+/* ── Header card (hero + KPIs strip) ──────────────────────── */
+.evd-header-card {
+  background: #fff;
+  border: 1px solid var(--border, #e7e9f3);
+  border-radius: 20px;
+  padding: 24px 28px;
+  margin-bottom: 32px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  text-align: center;
-  padding: 0 16px;
-}
-.evd-stat__divider {
-  width: 1px;
-  background: var(--border-dark, #d0d4e6);
-  margin: 4px 0;
-  align-self: stretch;
-}
-.evd-stat__label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-secondary, #646587);
-  line-height: 1.6;
-}
-.evd-stat__value {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary, #282834);
-  line-height: 1.5;
+  gap: 24px;
+  animation: evdFadeUp .35s ease both;
 }
 
-/* ── Metric strip ─────────────────────────────────────────── */
-.evd-metrics {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-  animation: evdFadeUp .4s .08s ease both;
-}
-.evd-metric {
-  display: inline-flex;
+/* ── Hero: back + avatar + title/subtitle + actions ─────────
+   Grid: [back][avatar][main fluid][actions]. El "main" colapsa con
+   ellipsis cuando el nombre es muy largo. */
+.evd-hero {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  gap: 18px;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+}
+.evd-back { flex-shrink: 0; align-self: center; }
+
+/* Avatar circular con iniciales — tinta accent quiet (cream) sobre el
+   tono accent loud de texto. Da identidad visual al evento sin imagen. */
+.evd-hero__avatar {
+  width: 56px;
+  height: 56px;
   border-radius: 9999px;
-  border: 1px solid var(--border, #e7e9f3);
-  background: #fff;
-  cursor: pointer;
-  transition: background .15s, border-color .15s;
-  font-family: var(--font, 'Inter', sans-serif);
-  color: var(--text-primary, #282834);
-}
-.evd-metric:hover {
-  background: #f5f6fa;
-}
-.evd-metric.is-active {
-  background: #fff3e6;
-  border-color: #ffbf75;
+  background: var(--naowee-color-feedback-fill-caution-quiet, #FFEDC7);
   color: var(--accent, #d74009);
-}
-.evd-metric svg {
-  color: var(--text-secondary, #646587);
-}
-.evd-metric.is-active svg {
-  color: var(--accent, #d74009);
-}
-.evd-metric__label {
-  font-size: 14px;
-  font-weight: 600;
-}
-.evd-metric__count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 20px;
-  min-width: 24px;
-  padding: 0 8px;
-  border-radius: 9999px;
-  background: var(--border, #e7e9f3);
-  color: var(--text-secondary, #646587);
-  font-size: 11px;
+  font-size: 20px;
   font-weight: 700;
-  letter-spacing: .2px;
-}
-.evd-metric.is-active .evd-metric__count {
-  background: var(--accent, #d74009);
-  color: #fff;
+  letter-spacing: -.3px;
+  flex-shrink: 0;
+  user-select: none;
 }
 
-/* ── Section row ──────────────────────────────────────────── */
-.evd-section {
+.evd-hero__main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.evd-hero__title-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
-  animation: evdFadeUp .4s .1s ease both;
+  gap: 12px;
+  min-width: 0;
 }
-.evd-section__title {
-  font-size: 20px;
+.evd-title {
+  font-size: 24px;
   font-weight: 700;
   color: var(--text-primary, #282834);
   line-height: 1.2;
-  letter-spacing: -.2px;
+  letter-spacing: -.4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+.evd-hero__subtitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary, #646587);
+  line-height: 1.5;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.evd-hero__type {
+  color: var(--text-primary, #282834);
+  font-weight: 600;
+}
+.evd-hero__sep {
+  color: var(--border-dark, #d0d4e6);
+}
+
+.evd-hero__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* ── KPIs strip — 4 stats con número grande y dividers verticales.
+   Reemplaza la stats bar gris (fechas/categorías) y los metric chips.
+   Visual: bg muy sutil, padding generoso, dividers de 32px height. */
+.evd-kpis {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  align-items: center;
+  background: #f5f6fa;
+  border-radius: 16px;
+  padding: 22px 28px;
+}
+.evd-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  padding: 0 8px;
+  min-width: 0;
+}
+.evd-kpi__value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary, #282834);
+  line-height: 1.05;
+  letter-spacing: -.6px;
+  font-variant-numeric: tabular-nums;
+}
+.evd-kpi__label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--text-secondary, #646587);
+}
+.evd-kpi__sep {
+  width: 1px;
+  height: 36px;
+  background: var(--border-dark, #d0d4e6);
+  align-self: center;
 }
 
 /* ── Phase card ───────────────────────────────────────────── */
@@ -202,60 +151,111 @@
   overflow: hidden;
   animation: evdFadeUp .45s .15s ease both;
 }
-.evd-phase-tabs-wrap {
-  padding: 16px 16px 0;
+/* Header del card: contiene el título "Fases del juego" + CTA "Agregar fase".
+   Antes vivía afuera (.evd-section) — ahora forma parte del card para
+   reforzar la jerarquía visual. */
+.evd-phase-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+}
+.evd-section__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary, #282834);
+  line-height: 1.2;
+  letter-spacing: -.2px;
+}
+/* ── Phase stepper (DS naowee-stepper con layout custom) ───────
+   El DS renderiza el stepper horizontal con [number, label, connector]
+   inline. Acá lo restructuramos a layout vertical: number arriba con
+   connector horizontal entre numbers, label/fecha/badge stackeados
+   debajo de cada number. Reusa los modificadores --active/--done/--pulse
+   del DS para coherencia de color y animación. */
+.evd-phase-stepper-wrap {
+  padding: 24px 28px 16px;
   border-bottom: 1px solid var(--border, #e7e9f3);
 }
-.evd-phase-tabs {
-  display: flex;
-  align-items: flex-end;
-  gap: 0;
-  height: 48px;
-  position: relative;
+.evd-phase-stepper.naowee-stepper {
+  align-items: flex-start;
+  width: 100%;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
-.evd-phase-tab {
-  display: inline-flex;
+.evd-phase-stepper .evd-phase-step {
+  flex: 1;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 0 16px;
-  height: 48px;
-  background: transparent;
-  border: none;
+  text-align: center;
+  position: relative;
+  padding: 0 8px;
+  gap: 8px;
+  min-width: 0;
   cursor: pointer;
-  font-family: inherit;
+}
+/* Number circle: el DS lo pinta; solo lo subimos un poco y le damos
+   z-index para quedar sobre el connector. */
+.evd-phase-stepper .naowee-stepper__number {
+  position: relative;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+}
+/* Connector: lo posicionamos absoluto sobre la fila del number en lugar
+   de seguir al label. Va desde el centro de este step al centro del
+   próximo (top:14px = mitad del número 28px). */
+.evd-phase-stepper .naowee-stepper__connector {
+  position: absolute;
+  top: 14px;
+  left: calc(50% + 14px);
+  right: calc(-50% + 14px);
+  width: auto;
+  flex: none;
+  height: 2px;
+  margin: 0;
+  z-index: 0;
+}
+/* Bloque de info (label + fecha + badge) stackeado bajo el number */
+.evd-phase-step__info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+}
+.evd-phase-stepper .naowee-stepper__label {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-secondary, #646587);
-  position: relative;
-  transition: color .15s;
-  white-space: nowrap;
+  white-space: normal;
+  line-height: 1.3;
 }
-.evd-phase-tab:hover {
+/* Por defecto el DS pone el label gris; lo subimos a primary para todos
+   los estados — el step muestra hierarchy a través del number, no del label. */
+.evd-phase-stepper .naowee-stepper__label {
   color: var(--text-primary, #282834);
 }
-.evd-phase-tab.is-selected {
+.evd-phase-step__date {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary, #646587);
+  line-height: 1.3;
+}
+.evd-phase-step__badge {
+  margin-top: 2px;
+}
+/* Hover sutil sobre el step (clickable) — el DS solo hace hover en --done */
+.evd-phase-step:hover .naowee-stepper__label {
   color: var(--accent, #d74009);
 }
-.evd-phase-tab.is-selected::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -1px;
-  height: 3px;
-  background: var(--accent, #d74009);
-  border-radius: 4px 4px 0 0;
+/* Selected manual: highlight visual del label */
+.evd-phase-step.is-selected .naowee-stepper__label {
+  color: var(--accent, #d74009);
 }
-.evd-phase-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.evd-phase-dot--active  { background:#1f8923; }
-.evd-phase-dot--pending { background:#ffe600; }
-.evd-phase-dot--done    { background:#646587; }
 
 .evd-phase-body {
   padding: 24px 28px;
@@ -274,86 +274,18 @@
   letter-spacing: -.2px;
 }
 
-/* ── Split button (Acciones) ──────────────────────────────── */
-.evd-split {
-  position: relative;
-  display: inline-flex;
-  align-items: stretch;
-  border-radius: 8px;
-}
-.evd-split__main, .evd-split__caret {
-  height: 40px;
-  padding: 0 16px;
-  border: none;
-  background: #fff3e6;
-  color: var(--accent, #d74009);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: background .15s;
-}
-.evd-split__main {
-  border-radius: 8px 0 0 8px;
-  padding: 0 18px;
-}
-.evd-split__caret {
-  border-radius: 0 8px 8px 0;
-  padding: 0 10px;
-  border-left: 1px solid rgba(215, 64, 9, .2);
-}
-.evd-split__main:hover, .evd-split__caret:hover {
-  background: #ffe2cc;
-}
-.evd-split__caret svg {
+/* ── Acciones (DS row-actions menu) ───────────────────────────
+   Reusamos el patrón oficial .naowee-table-card__row-actions* del DS.
+   El único override es ancho mínimo del menú + rotación del chevron
+   en el trigger cuando está abierto. */
+.evd-actions__trigger svg {
   transition: transform .2s;
 }
-.evd-split.is-open .evd-split__caret svg {
+.evd-actions.is-open .evd-actions__trigger svg {
   transform: rotate(180deg);
 }
-.evd-split__menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  background: #fff;
-  border: 1px solid var(--border, #e7e9f3);
-  border-radius: 12px;
-  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, .12));
+.evd-actions .naowee-table-card__row-actions-menu {
   min-width: 240px;
-  padding: 6px;
-  display: none;
-  z-index: 50;
-  animation: evdFadeIn .15s ease;
-}
-.evd-split.is-open .evd-split__menu {
-  display: block;
-}
-.evd-split__item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary, #282834);
-  background: transparent;
-  border: none;
-  transition: background .12s;
-  text-align: left;
-}
-.evd-split__item:hover {
-  background: #f5f6fa;
-}
-.evd-split__item svg {
-  color: var(--text-secondary, #646587);
-  flex-shrink: 0;
 }
 
 /* ── Form fields (read-only) ──────────────────────────────── */
@@ -393,47 +325,6 @@
   color: var(--text-secondary, #646587);
 }
 
-/* ── Dev state picker ─────────────────────────────────────── */
-.evd-state-picker {
-  position: fixed;
-  bottom: 16px;
-  right: 16px;
-  background: #fff;
-  border: 1px solid var(--border, #e7e9f3);
-  border-radius: 12px;
-  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, .12));
-  padding: 8px;
-  display: flex;
-  gap: 4px;
-  z-index: 100;
-  font-size: 11px;
-}
-.evd-state-picker__label {
-  font-size: 10px;
-  color: var(--text-secondary, #646587);
-  font-weight: 600;
-  align-self: center;
-  padding: 0 4px;
-  text-transform: uppercase;
-  letter-spacing: .4px;
-}
-.evd-state-picker button {
-  border: 1px solid var(--border, #e7e9f3);
-  background: #fff;
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  color: var(--text-secondary, #646587);
-}
-.evd-state-picker button.is-active {
-  background: var(--text-primary, #282834);
-  color: #fff;
-  border-color: var(--text-primary, #282834);
-}
-
 /* ── Animations ───────────────────────────────────────────── */
 @keyframes evdFadeUp {
   from { opacity: 0; transform: translateY(10px); }
@@ -447,9 +338,30 @@
 /* ── Responsive ───────────────────────────────────────────── */
 @media (max-width: 900px) {
   .evd-page { padding: 20px 20px 64px; }
-  .evd-stats { flex-wrap: wrap; }
-  .evd-stat__divider { display: none; }
-  .evd-stat { flex: 1 1 45%; padding: 8px 0; }
+  .evd-header-card { padding: 20px; }
+  /* Hero: stack vertical en mobile — back + avatar arriba, actions full-width abajo */
+  .evd-hero {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "back  main"
+      "avatar main"
+      "actions actions";
+    gap: 12px;
+  }
+  .evd-back { grid-area: back; }
+  .evd-hero__avatar { grid-area: avatar; }
+  .evd-hero__main { grid-area: main; }
+  .evd-hero__actions { grid-area: actions; flex-wrap: wrap; }
+  .evd-hero__actions .naowee-btn { flex: 1; }
+  /* KPIs: 2 columnas con dividers solo entre pares horizontales */
+  .evd-kpis {
+    grid-template-columns: 1fr auto 1fr;
+    grid-auto-rows: auto;
+    gap: 16px 0;
+    padding: 18px 20px;
+  }
+  .evd-kpi__sep:nth-of-type(2) { display: none; }
+  .evd-kpi:nth-of-type(3),
+  .evd-kpi:nth-of-type(4) { grid-row: 2; }
   .evd-fields { grid-template-columns: 1fr; }
-  .evd-metrics { gap: 6px; }
 }

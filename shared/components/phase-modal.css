@@ -1,0 +1,197 @@
+/* ═══════════════════════════════════════════════════════════════
+   PHASE MODAL — Agregar / Editar fase
+   Reusa el wizard de Crear evento (event-create-modal):
+     - .naowee-modal-overlay + .naowee-modal
+     - .naowee-textfield + variants (incl. has-datepicker)
+     - .naowee-checkbox
+     - .naowee-dropdown + naowee-dropdown--multiple + naowee-tag accent
+     - .naowee-datepicker--compact en popover (inyectado al body)
+   Solo agregamos overrides de layout específicos del modal:
+     - Anchura fija (520px)
+     - Grid 2-col para fechas
+     - Search input adentro del menú de sedes
+     - Footer con botones proporcionales (flex:1)
+     - Info icon del checkbox de cargue de documentos
+   ═══════════════════════════════════════════════════════════════ */
+
+.phase-modal-overlay { z-index: 1050; }
+
+.phase-modal {
+  width: 520px;
+  max-width: calc(100vw - 32px);
+}
+.phase-modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* Fechas en 2 columnas */
+.phase-modal__row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Footer — botones proporcionales (mismo override que ev-modal__footer) */
+.phase-modal__footer .naowee-btn {
+  flex: 1;
+  max-width: none;
+}
+
+/* Checkbox propio del modal — alinea con info icon a la derecha */
+.phase-modal__check {
+  cursor: pointer;
+  user-select: none;
+}
+.phase-modal__check .naowee-checkbox__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--naowee-color-text-primary, #282834);
+}
+.phase-modal__info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: var(--naowee-color-feedback-fill-informative-loud, #1f78d1);
+  color: #fff;
+  cursor: help;
+  margin-left: 6px;
+}
+.phase-modal__info svg { width: 14px; height: 14px; }
+
+/* ─── Dropdowns: trigger + popover (no usamos popper, popover propio) ─── */
+.phase-modal__dd { position: relative; }
+
+.phase-modal__dd-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--naowee-color-fill-primary, #fff);
+  border: 1px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(40, 40, 52, .12);
+  padding: 6px;
+  z-index: 60;
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity .15s, transform .15s;
+}
+.phase-modal__dd.is-open .phase-modal__dd-menu {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Search interno del menu de sedes (igual al wizard) */
+.phase-modal__dd-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px 8px;
+  border-bottom: 1px solid var(--naowee-color-border-default, #e7e9f3);
+  margin-bottom: 4px;
+}
+.phase-modal__dd-search-icon {
+  color: var(--naowee-color-icon-secondary, #646587);
+  display: inline-flex;
+}
+.phase-modal__dd-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--naowee-color-text-primary, #282834);
+  background: transparent;
+}
+.phase-modal__dd-search-input::placeholder {
+  color: var(--naowee-color-text-tertiary, #9ca0b8);
+}
+
+.phase-modal__dd-list {
+  flex: 1;
+  overflow-y: auto;
+}
+.phase-modal__dd-empty {
+  padding: 14px 12px;
+  text-align: center;
+  color: var(--naowee-color-text-secondary, #646587);
+  font-size: 13px;
+}
+
+/* Options dentro del menú */
+.phase-modal__dd-menu .naowee-dropdown__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--naowee-color-text-primary, #282834);
+  transition: background .12s;
+}
+.phase-modal__dd-menu .naowee-dropdown__option:hover {
+  background: var(--naowee-color-interactive-fill-mute-hover, #FFEDC7);
+}
+.phase-modal__dd-menu .naowee-dropdown__option--selected {
+  color: var(--naowee-color-icon-accent, #d74009);
+  font-weight: 600;
+}
+.phase-modal__dd-menu .naowee-dropdown__option-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--naowee-color-icon-accent, #d74009);
+}
+
+/* Estado open: chevron rotado */
+.phase-modal__dd .naowee-dropdown__chevron {
+  transition: transform .2s;
+  color: var(--naowee-color-icon-secondary, #646587);
+  display: inline-flex;
+}
+.phase-modal__dd.is-open .naowee-dropdown__chevron {
+  transform: rotate(180deg);
+}
+
+/* Helper de error */
+.phase-modal .naowee-helper--negative {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: var(--naowee-color-feedback-text-negative-loud, #d11f1f);
+}
+
+/* ─── Datepicker popover (inyectado al body) ─────────────────────────
+   El componente es naowee-datepicker--compact (DS oficial). Acá solo
+   nos aseguramos del state --open (display) y elevación. */
+.phase-modal__dp-popover {
+  display: none;
+}
+.phase-modal__dp-popover.naowee-datepicker--open {
+  display: block;
+}
+
+/* Datepicker textfield: el suffix calendar y readonly look-and-feel */
+.phase-modal .has-datepicker .naowee-textfield__input {
+  cursor: pointer;
+}
+.phase-modal .has-datepicker .naowee-textfield__suffix {
+  color: var(--naowee-color-icon-secondary, #646587);
+  pointer-events: none;
+}

@@ -16,11 +16,11 @@ import { openCreateEventModal } from './event-create-modal.js';
 
 /* ─── Catálogos ───────────────────────────────────────────────────── */
 const ESTADOS = [
-  { code: 'all',        label: 'Todos los estados' },
-  { code: 'creado',     label: 'Creado' },
-  { code: 'en-curso',   label: 'En curso' },
-  { code: 'finalizado', label: 'Finalizado' },
-  { code: 'cancelado',  label: 'Cancelado' }
+  { code: 'all',       label: 'Todos los estados' },
+  { code: 'creado',    label: 'Creado' },
+  { code: 'en-curso',  label: 'En curso' },
+  { code: 'publicado', label: 'Publicado' },
+  { code: 'terminado', label: 'Terminado' }
 ];
 const FECHAS = [
   { code: 'all',     label: 'Todas las fechas' },
@@ -44,19 +44,19 @@ export const EVENTS = [
   { id:'evt-005', name:'Juegos Departamentales Atlántico',      start:'18, may, 2026',  end:'7, jun, 2026',   cierre:'10, may, 2026',  participants:2120,  status:'creado',     categorias:['Sub-15','Sub-18','Mayores'],         fases:3, eventos:12, competencias:212, sede:'Barranquilla' },
   { id:'evt-006', name:'Torneo Internacional Béisbol Sub-23',   start:'2, jun, 2026',   end:'14, jun, 2026',  cierre:'20, may, 2026',  participants:312,   status:'en-curso',   categorias:['Sub-23'],                            fases:2, eventos:6,  competencias:54,  sede:'Cartagena' },
   { id:'evt-007', name:'Copa Tejo Federación 2026',             start:'15, mar, 2026',  end:'30, mar, 2026',  cierre:'5, mar, 2026',   participants:184,   status:'creado',     categorias:['Mayores','Veteranos'],               fases:2, eventos:4,  competencias:24,  sede:'Tunja' },
-  { id:'evt-008', name:'Liga Departamental Voleibol Cundinamarca', start:'1, mar, 2026', end:'15, jul, 2026', cierre:'15, feb, 2026', participants:768,   status:'en-curso',   categorias:['Juvenil','Mayores'],                 fases:3, eventos:10, competencias:120, sede:'Bogotá' },
+  { id:'evt-008', name:'Liga Departamental Voleibol Cundinamarca', start:'1, mar, 2026', end:'15, jul, 2026', cierre:'15, feb, 2026', participants:768,   status:'terminado',  categorias:['Juvenil','Mayores'],                 fases:3, eventos:10, competencias:120, sede:'Bogotá' },
   { id:'evt-009', name:'Campeonato Nacional Patinaje Carreras', start:'8, abr, 2026',   end:'12, abr, 2026',  cierre:'25, mar, 2026',  participants:412,   status:'creado',     categorias:['Sub-13','Sub-15','Sub-18','Mayores'],fases:2, eventos:5,  competencias:42,  sede:'Pereira' },
-  { id:'evt-010', name:'Copa Antioquia de Ciclismo de Ruta',    start:'4, may, 2026',   end:'10, may, 2026',  cierre:'20, abr, 2026',  participants:284,   status:'en-curso',   categorias:['Sub-23','Mayores'],                  fases:2, eventos:4,  competencias:28,  sede:'Medellín' },
+  { id:'evt-010', name:'Copa Antioquia de Ciclismo de Ruta',    start:'4, may, 2026',   end:'10, may, 2026',  cierre:'20, abr, 2026',  participants:284,   status:'publicado',  categorias:['Sub-23','Mayores'],                  fases:2, eventos:4,  competencias:28,  sede:'Medellín' },
   { id:'evt-011', name:'Torneo Élite Boxeo Pacífico',           start:'20, mar, 2026',  end:'25, mar, 2026',  cierre:'10, mar, 2026',  participants:96,    status:'creado',     categorias:['Juvenil','Mayores'],                 fases:2, eventos:3,  competencias:18,  sede:'Buenaventura' },
   { id:'evt-012', name:'Copa Federación Bádminton 2026',        start:'12, mar, 2026',  end:'18, mar, 2026',  cierre:'25, feb, 2026',  participants:148,   status:'en-curso',   categorias:['Sub-15','Sub-18','Mayores'],         fases:2, eventos:4,  competencias:36,  sede:'Bucaramanga' },
-  { id:'evt-013', name:'Festival Atletismo Antioquia',          start:'10, abr, 2026',  end:'15, abr, 2026',  cierre:'30, mar, 2026',  participants:680,   status:'finalizado', categorias:['Infantil','Sub-15','Sub-18'],        fases:1, eventos:1,  competencias:32,  sede:'Medellín' },
-  { id:'evt-014', name:'Selectivo Nacional Karate Sub-15',      start:'25, mar, 2026',  end:'28, mar, 2026',  cierre:'15, mar, 2026',  participants:172,   status:'finalizado', categorias:['Sub-15'],                            fases:1, eventos:1,  competencias:14,  sede:'Pereira' },
-  { id:'evt-015', name:'Campeonato Distrital Bogotá Multideporte', start:'20, mar, 2026', end:'5, abr, 2026', cierre:'10, mar, 2026', participants:1340, status:'finalizado', categorias:['Pre juvenil','Juvenil'],             fases:2, eventos:8,  competencias:96,  sede:'Bogotá' },
-  { id:'evt-016', name:'Liga Empresarial Naowee 2026',          start:'15, mar, 2026',  end:'15, dic, 2026',  cierre:'1, mar, 2026',   participants:312,   status:'en-curso',   categorias:['Empresarial'],                       fases:2, eventos:6,  competencias:48,  sede:'Bogotá' },
-  { id:'evt-017', name:'Torneo Veteranos +50 Naowee',           start:'10, mar, 2026',  end:'10, mar, 2026',  cierre:'1, mar, 2026',   participants:64,    status:'finalizado', categorias:['Veteranos'],                         fases:1, eventos:1,  competencias:8,   sede:'Cali' },
-  { id:'evt-018', name:'Copa Universitaria Pacífico',           start:'5, mar, 2026',   end:'30, jun, 2026',  cierre:'20, feb, 2026',  participants:920,   status:'en-curso',   categorias:['Universitaria'],                     fases:3, eventos:12, competencias:140, sede:'Cali' },
-  { id:'evt-019', name:'Liga Cricket Colombia 2026',            start:'1, abr, 2026',   end:'30, may, 2026',  cierre:'15, mar, 2026',  participants:84,    status:'en-curso',   categorias:['Mayores'],                           fases:2, eventos:3,  competencias:18,  sede:'Bogotá' },
-  { id:'evt-020', name:'Torneo Sóftbol Femenino Caribe',        start:'15, mar, 2026',  end:'10, abr, 2026',  cierre:'1, mar, 2026',   participants:148,   status:'cancelado',  categorias:['Mayores'],                           fases:1, eventos:1,  competencias:12,  sede:'Santa Marta' }
+  { id:'evt-013', name:'Festival Atletismo Antioquia',          start:'10, abr, 2026',  end:'15, abr, 2026',  cierre:'30, mar, 2026',  participants:680,   status:'terminado', categorias:['Infantil','Sub-15','Sub-18'],        fases:1, eventos:1,  competencias:32,  sede:'Medellín' },
+  { id:'evt-014', name:'Selectivo Nacional Karate Sub-15',      start:'25, mar, 2026',  end:'28, mar, 2026',  cierre:'15, mar, 2026',  participants:172,   status:'terminado', categorias:['Sub-15'],                            fases:1, eventos:1,  competencias:14,  sede:'Pereira' },
+  { id:'evt-015', name:'Campeonato Distrital Bogotá Multideporte', start:'20, mar, 2026', end:'5, abr, 2026', cierre:'10, mar, 2026', participants:1340, status:'terminado', categorias:['Pre juvenil','Juvenil'],             fases:2, eventos:8,  competencias:96,  sede:'Bogotá' },
+  { id:'evt-016', name:'Liga Empresarial Naowee 2026',          start:'15, mar, 2026',  end:'15, dic, 2026',  cierre:'1, mar, 2026',   participants:312,   status:'publicado',  categorias:['Empresarial'],                       fases:2, eventos:6,  competencias:48,  sede:'Bogotá' },
+  { id:'evt-017', name:'Torneo Veteranos +50 Naowee',           start:'10, mar, 2026',  end:'10, mar, 2026',  cierre:'1, mar, 2026',   participants:64,    status:'terminado', categorias:['Veteranos'],                         fases:1, eventos:1,  competencias:8,   sede:'Cali' },
+  { id:'evt-018', name:'Copa Universitaria Pacífico',           start:'5, mar, 2026',   end:'30, jun, 2026',  cierre:'20, feb, 2026',  participants:920,   status:'publicado',  categorias:['Universitaria'],                     fases:3, eventos:12, competencias:140, sede:'Cali' },
+  { id:'evt-019', name:'Liga Cricket Colombia 2026',            start:'1, abr, 2026',   end:'30, may, 2026',  cierre:'15, mar, 2026',  participants:84,    status:'publicado',  categorias:['Mayores'],                           fases:2, eventos:3,  competencias:18,  sede:'Bogotá' },
+  { id:'evt-020', name:'Torneo Sóftbol Femenino Caribe',        start:'15, mar, 2026',  end:'10, abr, 2026',  cierre:'1, mar, 2026',   participants:148,   status:'publicado',  categorias:['Mayores'],                           fases:1, eventos:1,  competencias:12,  sede:'Santa Marta' }
 ];
 
 /* ─── Estado ───────────────────────────────────────────────────────── */
@@ -70,10 +70,17 @@ const _state = {
   selected: new Set()
 };
 
+/* Set de IDs marcados como "deleted" mientras corre el undo de 20s. Si
+   el usuario no deshace, al expirar el toast el id sale de aquí y se
+   borra definitivamente del array EVENTS. Mientras esté aquí, la fila
+   no aparece en la lista filtrada. */
+const _pendingDeletes = new Set();
+
 /* ─── Helpers ──────────────────────────────────────────────────────── */
 function getFiltered() {
   const q = _state.search.trim().toLowerCase();
   return EVENTS.filter((e) => {
+    if (_pendingDeletes.has(e.id)) return false;
     if (q && !e.name.toLowerCase().includes(q)) return false;
     if (_state.estadoFilter !== 'all' && e.status !== _state.estadoFilter) return false;
     return true;
@@ -258,7 +265,7 @@ function renderTable(filtered) {
               </td>
               <td class="naowee-table__cell-muted">${e.start}</td>
               <td class="naowee-table__cell-muted">${e.end}</td>
-              <td>${e.participants.toLocaleString('es-CO')}</td>
+              <td><span class="ev-participants">${getIcon('user')}<span>${e.participants.toLocaleString('es-CO')}</span></span></td>
               <td>${renderBadge(e.status)}</td>
               <td style="text-align:right">
                 <div class="naowee-table-card__row-actions" data-row="${absoluteIdx}">
@@ -269,6 +276,10 @@ function renderTable(filtered) {
                     <button class="naowee-table-card__row-actions-item" data-act="view" data-event-id="${e.id}">
                       <span class="naowee-table-card__row-actions-item-icon">${getIcon('user')}</span> Ver detalles
                     </button>
+                    ${e.status === 'creado' ? `
+                    <button class="naowee-table-card__row-actions-item" data-act="publish">
+                      <span class="naowee-table-card__row-actions-item-icon">${publishIcon()}</span> Publicar
+                    </button>` : ''}
                     <button class="naowee-table-card__row-actions-item" data-act="edit">
                       <span class="naowee-table-card__row-actions-item-icon">${editIcon()}</span> Editar
                     </button>
@@ -303,10 +314,14 @@ function renderCheckbox(id, checked, indeterminate, rowIdx) {
   `;
 }
 
-/* Eventos en estado `creado` o `en-curso` se pueden abrir en el detalle.
-   Los demás (finalizado, cancelado) solo muestran el badge en la lista. */
+/* Los 4 estados del SUID — cualquiera abre el detalle (la vista soporta
+   los 4 badges). Mantengo el helper por si más adelante hay un estado
+   "borrador" o similar que sí deba bloquearse. */
 function isOpenable(status) {
-  return status === 'creado' || status === 'en-curso';
+  return status === 'creado'
+      || status === 'en-curso'
+      || status === 'publicado'
+      || status === 'terminado';
 }
 
 /* Navega al detalle conservando role en la querystring (perfil.html?role=…). */
@@ -317,12 +332,223 @@ function navigateToEvent(id) {
   window.location.href = url.toString();
 }
 
+/* ─── Eliminar evento — confirm + soft-delete + undo toast ─────────── */
+const UNDO_WINDOW_MS = 20000;
+
+/* Modal de confirmación destructiva. Usa el componente DS naowee-modal
+   con un footer de 2 botones: Cancelar (mute) + Eliminar (loud + ev-btn--danger
+   que pinta el bg en rojo usando los tokens negative del DS). */
+function openDeleteEventDialog(ev) {
+  const overlay = document.createElement('div');
+  overlay.className = 'naowee-modal-overlay open ev-delete-overlay';
+  overlay.innerHTML = `
+    <div class="naowee-modal" role="dialog" aria-modal="true" aria-labelledby="evDelTitle">
+      <div class="naowee-modal__header">
+        <div class="naowee-modal__title-group">
+          <h2 id="evDelTitle" class="naowee-modal__title">Eliminar evento</h2>
+          <p class="naowee-modal__subtitle">Esta acci&oacute;n no se puede deshacer una vez transcurridos 20 segundos.</p>
+        </div>
+        <button type="button" class="naowee-modal__dismiss" aria-label="Cerrar" data-dlg-cancel>${closeIcon()}</button>
+      </div>
+      <div class="naowee-modal__body">
+        <p>Est&aacute;s a punto de eliminar el evento <strong>${escapeHtml(ev.name)}</strong>.</p>
+        <p>Toda su informaci&oacute;n &mdash; fases, competencias, participantes inscritos &mdash; quedar&aacute; oculta inmediatamente. Tendr&aacute;s 20 segundos para deshacer la acci&oacute;n desde la notificaci&oacute;n.</p>
+      </div>
+      <div class="naowee-modal__footer">
+        <button type="button" class="naowee-btn naowee-btn--mute" data-dlg-cancel>Cancelar</button>
+        <button type="button" class="naowee-btn naowee-btn--loud ev-btn--danger" data-dlg-confirm>
+          ${trashIcon()}<span>Eliminar evento</span>
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+
+  const close = () => {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(() => overlay.remove(), 200);
+  };
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.querySelectorAll('[data-dlg-cancel]').forEach((b) => b.addEventListener('click', close));
+  overlay.querySelector('[data-dlg-confirm]').addEventListener('click', () => {
+    close();
+    softDeleteEvent(ev);
+  });
+}
+
+/* Marca el evento como pendiente de eliminación, repinta la lista y
+   muestra el toast con undo. Si pasan 20s sin deshacer, lo borramos
+   definitivamente del array EVENTS. */
+function softDeleteEvent(ev) {
+  _pendingDeletes.add(ev.id);
+  paintFull();
+  showUndoToast(ev);
+}
+
+let _undoToastTimer = null;
+function showUndoToast(ev) {
+  /* Solo permitimos un toast a la vez para no apilar undos. */
+  document.querySelectorAll('.ev-undo-toast').forEach((t) => t.remove());
+  if (_undoToastTimer) { clearTimeout(_undoToastTimer); _undoToastTimer = null; }
+
+  const wrap = document.createElement('div');
+  wrap.className = 'ev-undo-toast';
+  wrap.innerHTML = `
+    <div class="naowee-message naowee-message--positive">
+      <div class="naowee-message__header">
+        <span class="naowee-message__icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 8l1.6 1.6L10.5 6.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="naowee-message__title">Evento eliminado exitosamente</span>
+        <button type="button" class="naowee-message__dismiss" aria-label="Cerrar">${closeIcon(20)}</button>
+      </div>
+      <p class="naowee-message__text">${escapeHtml(ev.name)} fue removido del listado. Tienes 20 segundos para deshacer esta acci&oacute;n.</p>
+      <div class="ev-undo-toast__action">
+        <button type="button" class="naowee-btn naowee-btn--quiet naowee-btn--small ev-undo-toast__undo">Deshacer</button>
+      </div>
+      <span class="ev-undo-toast__progress" aria-hidden="true"></span>
+    </div>
+  `;
+  document.body.appendChild(wrap);
+  requestAnimationFrame(() => wrap.classList.add('ev-undo-toast--show'));
+
+  const dismiss = () => {
+    wrap.classList.remove('ev-undo-toast--show');
+    setTimeout(() => wrap.remove(), 220);
+    if (_undoToastTimer) { clearTimeout(_undoToastTimer); _undoToastTimer = null; }
+  };
+  wrap.querySelector('.naowee-message__dismiss').addEventListener('click', dismiss);
+  wrap.querySelector('.ev-undo-toast__undo').addEventListener('click', () => {
+    _pendingDeletes.delete(ev.id);
+    paintFull();
+    dismiss();
+  });
+
+  _undoToastTimer = setTimeout(() => {
+    /* Tiempo agotado: borramos el evento del array. */
+    if (_pendingDeletes.has(ev.id)) {
+      _pendingDeletes.delete(ev.id);
+      const idx = EVENTS.findIndex((e) => e.id === ev.id);
+      if (idx >= 0) EVENTS.splice(idx, 1);
+    }
+    dismiss();
+  }, UNDO_WINDOW_MS);
+}
+
+/* ─── Publicar evento — confirm dialog + status creado → publicado ── */
+/* El dialog explica las consecuencias irreversibles: visibilidad para
+   delegaciones/coordinadores, congelamiento de fechas/reglas/cupos, y
+   que cualquier cambio post-publicación pasa por soporte. Replica el
+   spec del screenshot de Figma. */
+function openPublishEventDialog(ev) {
+  const overlay = document.createElement('div');
+  overlay.className = 'naowee-modal-overlay open ev-publish-overlay';
+  overlay.innerHTML = `
+    <div class="naowee-modal ev-publish-modal" role="dialog" aria-modal="true" aria-labelledby="evPubTitle">
+      <div class="naowee-modal__header ev-publish-modal__header">
+        <div class="naowee-modal__title-group">
+          <h2 id="evPubTitle" class="naowee-modal__title ev-publish-modal__title">Publicar evento</h2>
+        </div>
+        <button type="button" class="naowee-modal__dismiss" aria-label="Cerrar" data-dlg-cancel>${closeIcon()}</button>
+      </div>
+      <div class="naowee-modal__body ev-publish-modal__body">
+        <p class="ev-publish-modal__lead">
+          Est&aacute;s a punto de publicar el evento <strong>${escapeHtml(ev.name)}</strong>
+        </p>
+        <p class="ev-publish-modal__lead">&iquest;Quieres publicar este evento ahora?</p>
+
+        <div class="naowee-message naowee-message--caution ev-publish-modal__warning">
+          <div class="naowee-message__header">
+            <span class="naowee-message__icon">${warningIcon()}</span>
+            <p class="naowee-message__text">Despu&eacute;s de publicar, cualquier cambio deber&aacute; ser gestionado por el equipo de soporte.</p>
+          </div>
+        </div>
+
+        <ul class="ev-publish-modal__checks">
+          <li class="ev-publish-modal__check">
+            <span class="ev-publish-modal__check-icon">${circleCheckIcon()}</span>
+            <span>El evento quedar&aacute; visible para las delegaciones y coordinadores habilitados.</span>
+          </li>
+          <li class="ev-publish-modal__check">
+            <span class="ev-publish-modal__check-icon">${circleCheckIcon()}</span>
+            <span>Se aplicar&aacute;n las fechas, reglas, cupos y configuraciones que definiste. <strong>No vas a poder editar este evento desde la plataforma.</strong></span>
+          </li>
+        </ul>
+
+        <div class="ev-publish-modal__help">
+          <h4 class="ev-publish-modal__help-title">${chatIcon()} &iquest;NECESITAS AYUDA?</h4>
+          <p>Si necesitas modificar algo despu&eacute;s de publicar, contacta a soporte indicando el nombre del evento y el cambio que requieres.</p>
+          <a class="ev-publish-modal__email" href="mailto:soporte@naowee.com">soporte@naowee.com</a>
+        </div>
+      </div>
+      <div class="naowee-modal__footer naowee-modal__footer--spread">
+        <button type="button" class="naowee-btn naowee-btn--link" data-dlg-cancel>Cancelar</button>
+        <button type="button" class="naowee-btn naowee-btn--loud" data-dlg-confirm>S&iacute;, publicar evento</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+
+  const close = () => {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(() => overlay.remove(), 200);
+  };
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.querySelectorAll('[data-dlg-cancel]').forEach((b) => b.addEventListener('click', close));
+  overlay.querySelector('[data-dlg-confirm]').addEventListener('click', () => {
+    close();
+    publishEvent(ev);
+  });
+}
+
+function publishEvent(ev) {
+  /* Cambio de estado in-memory + repaint. En backend real esto sería
+     un PATCH /events/:id { status: 'publicado' }. */
+  ev.status = 'publicado';
+  paintFull();
+  showPublishToast(ev);
+}
+
+function showPublishToast(ev) {
+  document.querySelectorAll('.ev-undo-toast').forEach((t) => t.remove());
+  const wrap = document.createElement('div');
+  wrap.className = 'ev-undo-toast ev-undo-toast--no-progress';
+  wrap.innerHTML = `
+    <div class="naowee-message naowee-message--positive">
+      <div class="naowee-message__header">
+        <span class="naowee-message__icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 8l1.6 1.6L10.5 6.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="naowee-message__title">Evento publicado</span>
+        <button type="button" class="naowee-message__dismiss" aria-label="Cerrar">${closeIcon(20)}</button>
+      </div>
+      <p class="naowee-message__text">${escapeHtml(ev.name)} ya est&aacute; visible para las delegaciones y coordinadores habilitados.</p>
+    </div>
+  `;
+  document.body.appendChild(wrap);
+  requestAnimationFrame(() => wrap.classList.add('ev-undo-toast--show'));
+  const dismiss = () => {
+    wrap.classList.remove('ev-undo-toast--show');
+    setTimeout(() => wrap.remove(), 220);
+  };
+  wrap.querySelector('.naowee-message__dismiss').addEventListener('click', dismiss);
+  setTimeout(dismiss, 4500);
+}
+
 function renderBadge(status) {
   const map = {
-    'creado':     { cls: 'naowee-badge naowee-badge--positive naowee-badge--quiet', label: 'Creado' },
-    'en-curso':   { cls: 'naowee-badge naowee-badge--caution naowee-badge--quiet',  label: 'En curso' },
-    'finalizado': { cls: 'naowee-badge naowee-badge--neutral naowee-badge--quiet',  label: 'Finalizado' },
-    'cancelado':  { cls: 'naowee-badge naowee-badge--negative naowee-badge--quiet', label: 'Cancelado' }
+    'creado':    { cls: 'naowee-badge naowee-badge--positive naowee-badge--quiet',    label: 'Creado'    },
+    'en-curso':  { cls: 'naowee-badge naowee-badge--caution naowee-badge--quiet',     label: 'En curso'  },
+    'publicado': { cls: 'naowee-badge naowee-badge--informative naowee-badge--quiet', label: 'Publicado' },
+    'terminado': { cls: 'naowee-badge naowee-badge--neutral naowee-badge--quiet',     label: 'Terminado' }
   };
   const m = map[status] || map['creado'];
   return `<span class="${m.cls}">${m.label}</span>`;
@@ -459,11 +685,22 @@ function bindTableEvents() {
     item.addEventListener('click', (e) => {
       e.stopPropagation();
       const act = item.getAttribute('data-act');
-      const row = item.closest('.naowee-table-card__row-actions').getAttribute('data-row');
+      const wrap = item.closest('.naowee-table-card__row-actions');
+      const row = wrap.getAttribute('data-row');
       const eventId = item.getAttribute('data-event-id');
-      item.closest('.naowee-table-card__row-actions').classList.remove('is-open');
+      wrap.classList.remove('is-open');
       if (act === 'view' && eventId) {
         navigateToEvent(eventId);
+        return;
+      }
+      if (act === 'delete') {
+        const ev = EVENTS[Number(row)];
+        if (ev) openDeleteEventDialog(ev);
+        return;
+      }
+      if (act === 'publish') {
+        const ev = EVENTS[Number(row)];
+        if (ev) openPublishEventDialog(ev);
         return;
       }
       console.info(`[event-list] action=${act} row=${row}`);
@@ -490,6 +727,10 @@ function editIcon()        { return '<svg viewBox="0 0 24 24" fill="none" stroke
 function copyIcon()        { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'; }
 function trashIcon()       { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>'; }
 function userPlusIcon()    { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>'; }
+function publishIcon()     { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>'; }
+function warningIcon()     { return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><line x1="8" y1="4" x2="8" y2="9" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="11.6" r="1" fill="#fff"/></svg>'; }
+function circleCheckIcon() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/></svg>'; }
+function chatIcon()        { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M3 12a8 8 0 0 1 8-8h0a8 8 0 0 1 8 8v0a8 8 0 0 1-8 8H7l-4 3z"/></svg>'; }
 
 function escapeHtml(str) {
   return String(str)
