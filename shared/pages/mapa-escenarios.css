@@ -64,7 +64,7 @@
   display:flex;
   align-items:center;
   flex-wrap:wrap;
-  gap:8px;
+  gap:6px;
 }
 .me-toolbar__chips{
   display:flex;
@@ -73,26 +73,47 @@
   gap:8px;
 }
 
-/* Searchbox: ancho fijo, NO grow → controles a la derecha quedan
-   pegados al searchbox (no spread). Mismo height que dropdowns (36px). */
+/* Searchbox: ancho fijo. Mismo height (36px) que dropdowns y segment. */
 .me-search{
-  flex:0 0 300px;
-  max-width:300px;
+  flex:0 0 280px;
+  max-width:280px;
 }
 .me-search .naowee-searchbox__input-wrap{
   height:36px;
 }
 
-/* Filter dropdowns: width fijo para que todos midan igual y queden
-   alineados sin gaps fantasma entre Region/Tipo/Estado. */
+/* Filter dropdowns: width fijo apretado para todos los controles. El
+   menú desplegable usa width:max-content para ajustarse al texto más
+   largo (ej: "Todos los estados") sin verse cortado. */
 .me-dd{
-  flex:0 0 130px;
-  min-width:130px;
+  flex:0 0 110px;
+  min-width:110px;
 }
+/* Estado dropdown un poco más ancho porque dice "Estado" + opciones */
+.me-dd[data-dd="estado"]{
+  flex:0 0 120px;
+  min-width:120px;
+}
+/* Menu width = contenido más largo (no width del trigger) */
+.naowee-filter-dropdown__menu{
+  width:max-content !important;
+  min-width:100% !important;
+  max-width:280px;
+}
+/* SIN estilo naranja en el trigger cuando hay filtro aplicado.
+   El feedback de "filtro activo" lo da exclusivamente el chip que
+   aparece en la fila de chips abajo, NO el trigger del dropdown.
+   Override del que tenía antes (--active). */
 .me-dd__trigger--active{
-  background:#FFEDC7 !important;
-  color:var(--naowee-color-text-accent, #d74009) !important;
-  border-color:var(--naowee-color-text-accent, #d74009) !important;
+  /* No cambia background/color/border — se ve igual que el idle */
+  background:transparent !important;
+  color:var(--naowee-color-text-primary, #282834) !important;
+  border-color:var(--naowee-color-interactive-border-idle) !important;
+}
+/* Pero cuando el dropdown está OPEN, sí se ve el accent (DS default) */
+.naowee-filter-dropdown.is-open .naowee-filter-dropdown__trigger.me-dd__trigger--active{
+  border-color:var(--naowee-color-text-accent) !important;
+  box-shadow:0 0 0 3px rgba(215, 64, 9, .15) !important;
 }
 .me-dd__opt-clear{
   color:var(--naowee-color-text-secondary, #646587) !important;
@@ -310,12 +331,14 @@
 }
 .me-cluster-pin__car svg{ width:14px; height:14px; }
 
-/* ─── Scenario pin (Leaflet, divIcon) ────────────────────────── */
+/* ─── Scenario pin (Leaflet, divIcon) ──────────────────────────
+   Sin border blanco — el shape clásico de map pin (gota) con drop-shadow
+   da suficiente separación visual del fondo del mapa. */
 .me-scn-pin{
   position:relative;
   width:40px;
   height:50px;
-  filter:drop-shadow(0 4px 8px rgba(0, 0, 0, .25));
+  filter:drop-shadow(0 3px 5px rgba(0, 0, 0, .3));
   cursor:pointer;
 }
 .me-scn-pin__bubble{
@@ -324,14 +347,13 @@
   width:40px; height:40px;
   border-radius:9999px;
   background:var(--tipo-color, #6b7280);
-  border:3px solid #fff;
   display:flex;
   align-items:center;
   justify-content:center;
   color:#fff;
 }
 .me-scn-pin__icon svg{
-  width:22px; height:22px;
+  width:20px; height:20px;
   stroke:currentColor;
 }
 .me-scn-pin__tail{
@@ -343,20 +365,25 @@
   border-right:8px solid transparent;
   border-top:14px solid var(--tipo-color, #6b7280);
 }
+/* CAR badge: estrella más sutil y bien centrada arriba-derecha del
+   bubble. Usa el mismo cream-amarillo del DS de tag positive (no el
+   amarillo intenso de antes). Center con flex perfectamente. */
 .me-scn-pin__car{
   position:absolute;
-  top:-4px; right:-4px;
-  width:18px; height:18px;
+  top:-3px; right:-3px;
+  width:16px; height:16px;
   border-radius:9999px;
-  background:#fbbf24;
-  border:2px solid #fff;
+  background:#fef3c7;
+  border:1.5px solid #fcd34d;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:11px;
-  line-height:1;
+  box-sizing:border-box;
 }
-.me-scn-pin__car svg{ width:11px; height:11px; }
+.me-scn-pin__car svg{
+  width:9px; height:9px;
+  display:block;
+}
 .me-scn-pin--selected .me-scn-pin__bubble{
   box-shadow:0 0 0 4px rgba(215, 64, 9, .35);
 }
@@ -653,8 +680,15 @@
     rgba(0, 0, 0, .25) 100%);
   cursor:pointer;
   transition:transform .12s;
+  opacity:1 !important;          /* override la opacity 0 del --2/--3 del carrousel */
 }
 .me-detail__photo-thumb:hover{ transform:scale(1.04); }
+.me-detail__photo-thumb.me-detail__photo--2{
+  background:linear-gradient(45deg, var(--tipo-color, #6b7280) 0%, rgba(255, 255, 255, .6) 100%) !important;
+}
+.me-detail__photo-thumb.me-detail__photo--3{
+  background:linear-gradient(225deg, var(--tipo-color, #6b7280) 0%, rgba(0, 0, 0, .35) 100%) !important;
+}
 
 .me-detail__dl{
   margin:0;
