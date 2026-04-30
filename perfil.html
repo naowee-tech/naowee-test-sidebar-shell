@@ -64,6 +64,7 @@
   import { renderUserManagementPage } from './shared/pages/user-management.js';
   import { renderEventListPage } from './shared/pages/event-list.js';
   import { renderSedesListPage } from './shared/pages/sedes-list.js';
+  import { renderSedeDetailPage } from './shared/pages/sede-detail.js';
   import { renderMapaEscenariosPage } from './shared/pages/mapa-escenarios.js';
 
   const roleCode = getRoleFromQuery();
@@ -86,6 +87,14 @@
 
     if (currentActive === 'sedes' || currentActive === 'sedes-lista') {
       renderSedesListPage(pageEl);
+      return;
+    }
+
+    if (currentActive === 'sede-detail') {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const status = params.get('status') || 'activo';
+      renderSedeDetailPage(pageEl, { code, status });
       return;
     }
 
