@@ -36,6 +36,20 @@
   height:36px;
 }
 
+/* ─── Card sin grow vertical
+   El .naowee-table-card es flex-column. Cuando la página tiene pocos
+   elementos (página 2 con 7 filas en lugar de 15), el card podía
+   mostrar espacio extra debajo de la última fila por flex grow heredado
+   o min-height implícito. Forzamos altura natural. */
+.um-page .naowee-table-card{
+  flex:0 0 auto;
+  min-height:0;
+}
+.um-page .naowee-table-card__table-wrap{
+  flex:0 0 auto;
+  min-height:0;
+}
+
 /* ─── Tabla: checkboxes primera columna ──────────────────────────── */
 .ev-table .ev-th-check,
 .ev-table .ev-td-check{
