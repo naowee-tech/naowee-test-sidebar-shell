@@ -83,6 +83,25 @@
   background:#fff3e6 !important;
 }
 
+/* Nombre clickable para eventos abribles (creado / en-curso) */
+.ev-name-link{
+  color:var(--accent, #d74009);
+  font-weight:600;
+  cursor:pointer;
+  text-decoration:none;
+  border-radius:4px;
+  transition:color .12s, background .12s;
+}
+.ev-name-link:hover{
+  color:var(--naowee-color-orange-800, #b83100);
+  text-decoration:underline;
+  text-underline-offset:2px;
+}
+.ev-name-link:focus-visible{
+  outline:2px solid var(--accent, #d74009);
+  outline-offset:2px;
+}
+
 /* ─── Modal Crear Evento — overrides mínimos sobre componentes DS ─── */
 /* El modal ahora usa .naowee-modal-overlay + .naowee-modal del DS oficial.
    Acá solo conservamos:

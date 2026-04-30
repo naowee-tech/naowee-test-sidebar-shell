@@ -30,28 +30,33 @@ const FECHAS = [
   { code: 'año',     label: 'Este año' }
 ];
 
-/* ─── Datos mock ─────────────────────────────────────────────────── */
-const EVENTS = [
-  { name:'Padasdasd',                                start:'28, abr, 2026',  end:'25, jun, 2026',  participants:0,  status:'creado' },
-  { name:'Fase inicial',                             start:'27, abr, 2026',  end:'31, dic, 2026',  participants:0,  status:'en-curso' },
-  { name:'27 de Abril',                              start:'27, abr, 2026',  end:'31, oct, 2027',  participants:0,  status:'en-curso' },
-  { name:'Juegos Intercolegiados 2026 — Pruebas',    start:'24, abr, 2026',  end:'31, dic, 2026',  participants:0,  status:'en-curso' },
-  { name:'Evento de Juanisa',                        start:'22, abr, 2026',  end:'30, sept, 2026', participants:0,  status:'en-curso' },
-  { name:'Evento de pruebas',                        start:'22, abr, 2026',  end:'30, nov, 2026',  participants:0,  status:'en-curso' },
-  { name:'Event 22',                                 start:'22, abr, 2026',  end:'27, abr, 2026',  participants:0,  status:'creado' },
-  { name:'Event 21',                                 start:'21, abr, 2026',  end:'6, may, 2026',   participants:0,  status:'en-curso' },
-  { name:'PruebaDocProm 2',                          start:'20, abr, 2026',  end:'25, jun, 2026',  participants:0,  status:'en-curso' },
-  { name:'PruebaPromProcDoc',                        start:'20, abr, 2026',  end:'29, may, 2026',  participants:0,  status:'creado' },
-  { name:'Copa BetPlay 2026',                        start:'15, abr, 2026',  end:'15, jul, 2026',  participants:128, status:'en-curso' },
-  { name:'Liga Profesional Femenina',                start:'12, abr, 2026',  end:'30, oct, 2026',  participants:64,  status:'en-curso' },
-  { name:'Festival Atletismo Antioquia',             start:'10, abr, 2026',  end:'15, abr, 2026',  participants:240, status:'finalizado' },
-  { name:'Torneo Apertura Liga Antioqueña',          start:'5, abr, 2026',   end:'30, sept, 2026', participants:96,  status:'en-curso' },
-  { name:'Copa Federación de Atletismo',             start:'1, abr, 2026',   end:'15, abr, 2026',  participants:180, status:'finalizado' },
-  { name:'Selectivo Nacional Sub-15',                start:'25, mar, 2026',  end:'10, abr, 2026',  participants:72,  status:'finalizado' },
-  { name:'Campeonato Distrital Bogotá',              start:'20, mar, 2026',  end:'5, abr, 2026',   participants:144, status:'finalizado' },
-  { name:'Liga Empresarial 2026',                    start:'15, mar, 2026',  end:'15, dic, 2026',  participants:48,  status:'en-curso' },
-  { name:'Torneo Veteranos Naowee',                  start:'10, mar, 2026',  end:'10, mar, 2026',  participants:32,  status:'finalizado' },
-  { name:'Copa Universitaria',                       start:'5, mar, 2026',   end:'30, jun, 2026',  participants:200, status:'en-curso' }
+/* ─── Datos mock ─────────────────────────────────────────────────────
+   Reemplazado 2026-04-30: nombres realistas tipo Mindeporte / Comité
+   Olímpico Colombiano, datos coherentes (categorías, cierre inscripciones,
+   sede y categorías) que alimentan la vista de detalle (evento-detalle.js).
+   `id` se usa como query param en perfil.html?active=evento-detalle&id=…
+   ──────────────────────────────────────────────────────────────────── */
+export const EVENTS = [
+  { id:'evt-001', name:'Juegos Intercolegiados 2026',          start:'12, ene, 2026',  end:'20, feb, 2026',  cierre:'20, feb, 2026',  participants:8420,  status:'en-curso',   categorias:['Infantil','Pre juvenil','Juvenil'],  fases:4, eventos:10, competencias:657, sede:'Nacional' },
+  { id:'evt-002', name:'Festival Nacional Atletismo Sub-18',    start:'10, mar, 2026',  end:'14, mar, 2026',  cierre:'1, mar, 2026',   participants:540,   status:'creado',     categorias:['Sub-18'],                            fases:2, eventos:5,  competencias:48,  sede:'Cali' },
+  { id:'evt-003', name:'Copa Bolivariana de Natación',          start:'5, may, 2026',   end:'12, may, 2026',  cierre:'15, abr, 2026',  participants:1280,  status:'en-curso',   categorias:['Mayores'],                           fases:3, eventos:8,  competencias:86,  sede:'Cartagena' },
+  { id:'evt-004', name:'Liga Profesional Femenina de Fútbol',   start:'1, abr, 2026',   end:'30, oct, 2026',  cierre:'25, mar, 2026',  participants:432,   status:'en-curso',   categorias:['Mayores'],                           fases:3, eventos:18, competencias:182, sede:'Multisede' },
+  { id:'evt-005', name:'Juegos Departamentales Atlántico',      start:'18, may, 2026',  end:'7, jun, 2026',   cierre:'10, may, 2026',  participants:2120,  status:'creado',     categorias:['Sub-15','Sub-18','Mayores'],         fases:3, eventos:12, competencias:212, sede:'Barranquilla' },
+  { id:'evt-006', name:'Torneo Internacional Béisbol Sub-23',   start:'2, jun, 2026',   end:'14, jun, 2026',  cierre:'20, may, 2026',  participants:312,   status:'en-curso',   categorias:['Sub-23'],                            fases:2, eventos:6,  competencias:54,  sede:'Cartagena' },
+  { id:'evt-007', name:'Copa Tejo Federación 2026',             start:'15, mar, 2026',  end:'30, mar, 2026',  cierre:'5, mar, 2026',   participants:184,   status:'creado',     categorias:['Mayores','Veteranos'],               fases:2, eventos:4,  competencias:24,  sede:'Tunja' },
+  { id:'evt-008', name:'Liga Departamental Voleibol Cundinamarca', start:'1, mar, 2026', end:'15, jul, 2026', cierre:'15, feb, 2026', participants:768,   status:'en-curso',   categorias:['Juvenil','Mayores'],                 fases:3, eventos:10, competencias:120, sede:'Bogotá' },
+  { id:'evt-009', name:'Campeonato Nacional Patinaje Carreras', start:'8, abr, 2026',   end:'12, abr, 2026',  cierre:'25, mar, 2026',  participants:412,   status:'creado',     categorias:['Sub-13','Sub-15','Sub-18','Mayores'],fases:2, eventos:5,  competencias:42,  sede:'Pereira' },
+  { id:'evt-010', name:'Copa Antioquia de Ciclismo de Ruta',    start:'4, may, 2026',   end:'10, may, 2026',  cierre:'20, abr, 2026',  participants:284,   status:'en-curso',   categorias:['Sub-23','Mayores'],                  fases:2, eventos:4,  competencias:28,  sede:'Medellín' },
+  { id:'evt-011', name:'Torneo Élite Boxeo Pacífico',           start:'20, mar, 2026',  end:'25, mar, 2026',  cierre:'10, mar, 2026',  participants:96,    status:'creado',     categorias:['Juvenil','Mayores'],                 fases:2, eventos:3,  competencias:18,  sede:'Buenaventura' },
+  { id:'evt-012', name:'Copa Federación Bádminton 2026',        start:'12, mar, 2026',  end:'18, mar, 2026',  cierre:'25, feb, 2026',  participants:148,   status:'en-curso',   categorias:['Sub-15','Sub-18','Mayores'],         fases:2, eventos:4,  competencias:36,  sede:'Bucaramanga' },
+  { id:'evt-013', name:'Festival Atletismo Antioquia',          start:'10, abr, 2026',  end:'15, abr, 2026',  cierre:'30, mar, 2026',  participants:680,   status:'finalizado', categorias:['Infantil','Sub-15','Sub-18'],        fases:1, eventos:1,  competencias:32,  sede:'Medellín' },
+  { id:'evt-014', name:'Selectivo Nacional Karate Sub-15',      start:'25, mar, 2026',  end:'28, mar, 2026',  cierre:'15, mar, 2026',  participants:172,   status:'finalizado', categorias:['Sub-15'],                            fases:1, eventos:1,  competencias:14,  sede:'Pereira' },
+  { id:'evt-015', name:'Campeonato Distrital Bogotá Multideporte', start:'20, mar, 2026', end:'5, abr, 2026', cierre:'10, mar, 2026', participants:1340, status:'finalizado', categorias:['Pre juvenil','Juvenil'],             fases:2, eventos:8,  competencias:96,  sede:'Bogotá' },
+  { id:'evt-016', name:'Liga Empresarial Naowee 2026',          start:'15, mar, 2026',  end:'15, dic, 2026',  cierre:'1, mar, 2026',   participants:312,   status:'en-curso',   categorias:['Empresarial'],                       fases:2, eventos:6,  competencias:48,  sede:'Bogotá' },
+  { id:'evt-017', name:'Torneo Veteranos +50 Naowee',           start:'10, mar, 2026',  end:'10, mar, 2026',  cierre:'1, mar, 2026',   participants:64,    status:'finalizado', categorias:['Veteranos'],                         fases:1, eventos:1,  competencias:8,   sede:'Cali' },
+  { id:'evt-018', name:'Copa Universitaria Pacífico',           start:'5, mar, 2026',   end:'30, jun, 2026',  cierre:'20, feb, 2026',  participants:920,   status:'en-curso',   categorias:['Universitaria'],                     fases:3, eventos:12, competencias:140, sede:'Cali' },
+  { id:'evt-019', name:'Liga Cricket Colombia 2026',            start:'1, abr, 2026',   end:'30, may, 2026',  cierre:'15, mar, 2026',  participants:84,    status:'en-curso',   categorias:['Mayores'],                           fases:2, eventos:3,  competencias:18,  sede:'Bogotá' },
+  { id:'evt-020', name:'Torneo Sóftbol Femenino Caribe',        start:'15, mar, 2026',  end:'10, abr, 2026',  cierre:'1, mar, 2026',   participants:148,   status:'cancelado',  categorias:['Mayores'],                           fases:1, eventos:1,  competencias:12,  sede:'Santa Marta' }
 ];
 
 /* ─── Estado ───────────────────────────────────────────────────────── */
@@ -246,10 +251,14 @@ function renderTable(filtered) {
               <td class="ev-td-check">
                 ${renderCheckbox(`evCheck-${absoluteIdx}`, isChecked, false, absoluteIdx)}
               </td>
-              <td class="naowee-table__cell-name">${escapeHtml(e.name)}</td>
+              <td class="naowee-table__cell-name">
+                ${isOpenable(e.status)
+                  ? `<a class="ev-name-link" data-nav-id="${e.id}">${escapeHtml(e.name)}</a>`
+                  : escapeHtml(e.name)}
+              </td>
               <td class="naowee-table__cell-muted">${e.start}</td>
               <td class="naowee-table__cell-muted">${e.end}</td>
-              <td>${e.participants}</td>
+              <td>${e.participants.toLocaleString('es-CO')}</td>
               <td>${renderBadge(e.status)}</td>
               <td style="text-align:right">
                 <div class="naowee-table-card__row-actions" data-row="${absoluteIdx}">
@@ -257,7 +266,7 @@ function renderTable(filtered) {
                     ${dotsIcon()}
                   </button>
                   <div class="naowee-table-card__row-actions-menu">
-                    <button class="naowee-table-card__row-actions-item" data-act="view">
+                    <button class="naowee-table-card__row-actions-item" data-act="view" data-event-id="${e.id}">
                       <span class="naowee-table-card__row-actions-item-icon">${getIcon('user')}</span> Ver detalles
                     </button>
                     <button class="naowee-table-card__row-actions-item" data-act="edit">
@@ -292,6 +301,20 @@ function renderCheckbox(id, checked, indeterminate, rowIdx) {
       </span>
     </label>
   `;
+}
+
+/* Eventos en estado `creado` o `en-curso` se pueden abrir en el detalle.
+   Los demás (finalizado, cancelado) solo muestran el badge en la lista. */
+function isOpenable(status) {
+  return status === 'creado' || status === 'en-curso';
+}
+
+/* Navega al detalle conservando role en la querystring (perfil.html?role=…). */
+function navigateToEvent(id) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('active', 'evento-detalle');
+  url.searchParams.set('id', id);
+  window.location.href = url.toString();
 }
 
 function renderBadge(status) {
@@ -437,8 +460,21 @@ function bindTableEvents() {
       e.stopPropagation();
       const act = item.getAttribute('data-act');
       const row = item.closest('.naowee-table-card__row-actions').getAttribute('data-row');
-      console.info(`[event-list] action=${act} row=${row}`);
+      const eventId = item.getAttribute('data-event-id');
       item.closest('.naowee-table-card__row-actions').classList.remove('is-open');
+      if (act === 'view' && eventId) {
+        navigateToEvent(eventId);
+        return;
+      }
+      console.info(`[event-list] action=${act} row=${row}`);
+    });
+  });
+
+  /* Click en el nombre del evento (cuando es openable) → navega al detalle */
+  _state.rootEl.querySelectorAll('.ev-name-link[data-nav-id]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateToEvent(link.getAttribute('data-nav-id'));
     });
   });
 }
