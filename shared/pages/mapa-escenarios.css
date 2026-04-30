@@ -64,10 +64,12 @@
   display:flex;
   align-items:center;
   flex-wrap:wrap;
-  gap:10px;
+  /* gap:6px — match exacto al reference de naowee-test-escenarios.
+     Más apretado que 10px (que se sentía spread). */
+  gap:6px;
 }
-/* Asegurar que todos los items del toolbar tengan flex-grow:0 para que
-   el flex no agregue espacio extra a uno solo. El único con
+/* Items del toolbar: flex-grow:0 para que ninguno crezca y rompa el
+   ritmo. margin:0 para no acumular margins extra. El único con
    margin-left:auto es el reset (al final). */
 .me-toolbar__row > *{ flex-grow:0; flex-shrink:0; margin:0; }
 .me-toolbar__row > .me-filter-reset{ margin-left:auto; }
@@ -428,12 +430,15 @@
   text-overflow:ellipsis;
 }
 .me-popover__sub{
-  font-size:11px;
+  font-size:12px;
   font-weight:600;
   margin-top:2px;
   display:flex;
   gap:6px;
   align-items:center;
+}
+.me-popover__tipo{
+  font-weight:600;
 }
 .me-popover__car{
   display:inline-flex;
@@ -470,12 +475,15 @@
   padding:10px 14px 12px;
   border-top:1px solid var(--naowee-color-border-default, #e7e9f3);
 }
+/* Labels muted más claros (#9ca0b8) — mismo tono que las section
+   dividers de los modales del DS. Más subtle que text-secondary. */
 .me-popover__label{
-  font-size:9px;
+  font-size:9.5px;
   font-weight:700;
-  color:#646587;
-  letter-spacing:.4px;
+  color:#9ca0b8;
+  letter-spacing:.5px;
   margin-bottom:2px;
+  text-transform:uppercase;
 }
 .me-popover__val{
   font-size:13px;
@@ -624,30 +632,18 @@
   letter-spacing:.3px;
 }
 
+/* Tabs: usa DS naowee-tabs--proportional --animated. Acá solo
+   ajustamos el margen y el font-size para que encaje en el side panel. */
 .me-detail__tabs{
-  display:flex;
-  gap:0;
-  margin:14px 0 0;
-  border-bottom:1px solid var(--naowee-color-border-default, #e7e9f3);
+  margin-top:14px;
+  background:transparent !important;
 }
-.me-detail__tab{
-  flex:1;
-  padding:10px 12px;
-  background:transparent;
-  border:none;
-  border-bottom:2px solid transparent;
-  font-family:inherit;
-  font-size:12px;
-  font-weight:600;
-  color:#646587;
-  cursor:pointer;
-  transition:color .12s, border-color .12s;
-  white-space:nowrap;
+.me-detail__tabs .naowee-tab{
+  font-size:12px !important;
+  background:transparent !important;
 }
-.me-detail__tab:hover{ color:#282834; }
-.me-detail__tab--active{
-  color:var(--naowee-color-text-accent, #d74009);
-  border-bottom-color:var(--naowee-color-text-accent, #d74009);
+.me-detail__tabs .naowee-tab:hover{
+  background:rgba(245, 246, 250, .6) !important;
 }
 
 .me-detail__tab-content{
@@ -655,12 +651,20 @@
   max-height:400px;
   overflow-y:auto;
 }
+/* Section labels: gris muted #9ca0b8 — mismo tono que los uppercase
+   "DATOS BÁSICOS / GEOREFERENCIACIÓN" del modal del DS. Más claro
+   que text-secondary (#646587), suficientemente sutil como divider. */
 .me-detail__section{
-  font-size:10px;
+  font-size:11px;
   font-weight:700;
-  color:#646587;
-  letter-spacing:.6px;
+  color:#9ca0b8;
+  letter-spacing:.4px;
+  text-transform:uppercase;
   margin:6px 0 8px;
+}
+.me-detail__section + .me-detail__section,
+.me-detail__photo-grid + .me-detail__section{
+  margin-top:18px;
 }
 .me-detail__photo-grid{
   display:grid;
@@ -690,12 +694,14 @@
   margin:0;
   font-size:13px;
   display:grid;
-  grid-template-columns:auto 1fr;
-  gap:8px 16px;
+  grid-template-columns:1fr 1fr;
+  gap:10px 16px;
 }
+/* dt (label): gris medio (#9ca0b8) — match con section dividers */
 .me-detail__dl dt{
   color:#646587;
-  font-weight:500;
+  font-weight:400;
+  font-size:13px;
 }
 .me-detail__dl dd{
   margin:0;

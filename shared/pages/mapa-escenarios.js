@@ -1097,6 +1097,11 @@ function showScenarioPopover(esc) {
   const point = _state.leafletMap.latLngToContainerPoint([esc.lat, esc.lon]);
   const px = point.x;
   const py = point.y;
+  /* Popover layout — pattern del reference:
+     - Icon colored + título + tipo (mismo color del icon, no opaco
+       como cyan random) + CAR badge a la derecha
+     - Grid 2×2 con labels muted (#9ca0b8) tipo modal section divider
+     - CTA "Ver perfil completo" cream con hover */
   pop.innerHTML = `
     <div class="me-popover__head">
       <div class="me-popover__icon" style="--tipo-color:${TIPO_COLORS[esc.tipo] || '#6b7280'}">
@@ -1105,7 +1110,7 @@ function showScenarioPopover(esc) {
       <div class="me-popover__titles">
         <div class="me-popover__title">${escapeHtml(esc.nombre)}</div>
         <div class="me-popover__sub">
-          <span style="color:${TIPO_COLORS[esc.tipo]}">${esc.tipo}</span>
+          <span class="me-popover__tipo" style="color:${TIPO_COLORS[esc.tipo] || '#6b7280'}">${esc.tipo}</span>
           ${esc.car ? `<span class="me-popover__car"><span class="me-popover__car-star">★</span> CAR</span>` : ''}
         </div>
       </div>
@@ -1183,11 +1188,12 @@ function renderScenarioDetailPanel(esc) {
         </div>
       </div>
 
-      <!-- Tabs Información general / Documentación / Historial -->
-      <div class="me-detail__tabs">
-        <button type="button" class="me-detail__tab me-detail__tab--active" data-tab="info">Información general</button>
-        <button type="button" class="me-detail__tab" data-tab="docs">Documentación</button>
-        <button type="button" class="me-detail__tab" data-tab="hist">Historial</button>
+      <!-- Tabs Información general / Documentación / Historial — DS naowee-tabs -->
+      <div class="naowee-tabs naowee-tabs--proportional naowee-tabs--animated me-detail__tabs">
+        <button type="button" class="naowee-tab naowee-tab--selected" data-tab="info">Información general</button>
+        <button type="button" class="naowee-tab" data-tab="docs">Documentación</button>
+        <button type="button" class="naowee-tab" data-tab="hist">Historial</button>
+        <span class="naowee-tabs__indicator" aria-hidden="true"></span>
       </div>
 
       <div class="me-detail__tab-content" data-tab-content="info">
@@ -1419,24 +1425,44 @@ function paintAside() {
   }
 }
 
+/* Posicionar el indicator animado del DS naowee-tabs--animated bajo
+   el tab seleccionado. Calcula offsetLeft + offsetWidth del active y
+   los aplica como inline styles → el CSS transition del indicator
+   anima el slide. */
+function positionTabsIndicator(pageEl) {
+  const tabs = pageEl.querySelector('.naowee-tabs--animated');
+  if (!tabs) return;
+  const indicator = tabs.querySelector('.naowee-tabs__indicator');
+  const active = tabs.querySelector('.naowee-tab--selected');
+  if (!indicator || !active) return;
+  const tabsRect = tabs.getBoundingClientRect();
+  const actRect = active.getBoundingClientRect();
+  indicator.style.left = `${actRect.left - tabsRect.left}px`;
+  indicator.style.width = `${actRect.width}px`;
+}
+
 function bindDetailPanelEvents(pageEl) {
   pageEl.querySelector('[data-detail-close]')?.addEventListener('click', () => {
     _state.selectedScenarioId = null;
     paintAside();
     paintScenarioMarkers();    /* Quitar el ring de selected del marker */
   });
-  /* Tabs */
+  /* Tabs DS — toggle naowee-tab--selected + posicionar el indicator
+     animado bajo el tab activo. */
   pageEl.querySelectorAll('[data-tab]').forEach(tab => {
     tab.addEventListener('click', () => {
       const target = tab.getAttribute('data-tab');
       pageEl.querySelectorAll('[data-tab]').forEach(t => {
-        t.classList.toggle('me-detail__tab--active', t === tab);
+        t.classList.toggle('naowee-tab--selected', t === tab);
       });
       pageEl.querySelectorAll('[data-tab-content]').forEach(c => {
         c.hidden = c.getAttribute('data-tab-content') !== target;
       });
+      positionTabsIndicator(pageEl);
     });
   });
+  /* Posicionar indicator al primer paint */
+  requestAnimationFrame(() => positionTabsIndicator(pageEl));
   /* Carrousel dots: click para cambiar foto activa (solo visual) */
   pageEl.querySelectorAll('.me-detail__dot').forEach((dot, idx) => {
     dot.addEventListener('click', () => {
