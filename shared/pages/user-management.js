@@ -106,7 +106,7 @@ const _state = {
   docTypeFilter: 'all',
   roleFilter: 'all',
   page: 1,
-  pageSize: 10
+  pageSize: 15
 };
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */

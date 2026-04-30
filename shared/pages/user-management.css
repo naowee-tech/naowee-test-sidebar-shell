@@ -151,11 +151,24 @@
 .um-dropdown__opt[aria-selected="true"] .um-dropdown__opt-check{opacity:1}
 
 /* ─── Paginación — DS oficial (.naowee-pagination, .--small) ────────
-   Sin overrides locales — el DS provee label, input, total, controls,
-   btn (con bg quiet, hover, disabled). Solo usamos el componente. */
+   Overrides locales mínimos:
+   - Gap entre __pages y __controls (DS lo deja en 0 con --small)
+   - Input cuadrado 32×32 (matchea los botones, en lugar de 48×32 rectangular). */
+.naowee-pagination.naowee-pagination--small{
+  gap:12px;
+}
+.naowee-pagination.naowee-pagination--small .naowee-pagination__input{
+  width:32px;
+  padding:4px 2px;
+}
 
 /* ─── Tabla (DS cod-table) ───────────────────────────────────────── */
-.um-table-wrap{overflow-x:auto}
+.um-table-wrap{
+  /* Solo scroll horizontal si la tabla excede el ancho. NUNCA scroll vertical
+     interno: las 15 filas se muestran completas y la página scrollea naturalmente. */
+  overflow-x:auto;
+  overflow-y:visible;
+}
 .um-table{
   width:100%;
   border-collapse:separate;
