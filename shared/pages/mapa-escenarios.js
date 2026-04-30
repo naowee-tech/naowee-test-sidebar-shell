@@ -105,6 +105,202 @@ const TIPO_ICONS = {
   'Otro':               '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>'
 };
 
+/* ─── Colores por tipo de scenario (pins + carrousel) ──────────── */
+const TIPO_COLORS = {
+  'Cancha múltiple':    '#2563eb',
+  'Estadio':            '#16a34a',
+  'Coliseo':            '#a855f7',
+  'Piscina':            '#06b6d4',
+  'Pista atlética':     '#e11d48',
+  'Gimnasio':           '#f59e0b',
+  'Complejo deportivo': '#0ea5e9',
+  'Otro':               '#6b7280'
+};
+
+/* ─── Ciudades principales (top deptos con sus capitales + alternas) ── */
+const CITIES = [
+  { name:'Bogotá',         depto:'Bogotá D.C.',       lat: 4.7110, lon:-74.0721, weight:1.00 },
+  { name:'Medellín',       depto:'Antioquia',         lat: 6.2442, lon:-75.5812, weight:0.55 },
+  { name:'Envigado',       depto:'Antioquia',         lat: 6.1753, lon:-75.5916, weight:0.15 },
+  { name:'Bello',          depto:'Antioquia',         lat: 6.3373, lon:-75.5540, weight:0.15 },
+  { name:'Rionegro',       depto:'Antioquia',         lat: 6.1553, lon:-75.3732, weight:0.15 },
+  { name:'Cali',           depto:'Valle del Cauca',   lat: 3.4516, lon:-76.5320, weight:0.60 },
+  { name:'Palmira',        depto:'Valle del Cauca',   lat: 3.5394, lon:-76.3036, weight:0.20 },
+  { name:'Buenaventura',   depto:'Valle del Cauca',   lat: 3.8801, lon:-77.0317, weight:0.20 },
+  { name:'Barranquilla',   depto:'Atlántico',         lat:10.9639, lon:-74.7964, weight:0.75 },
+  { name:'Soledad',        depto:'Atlántico',         lat:10.9174, lon:-74.7641, weight:0.25 },
+  { name:'Bucaramanga',    depto:'Santander',         lat: 7.1193, lon:-73.1227, weight:0.55 },
+  { name:'Floridablanca',  depto:'Santander',         lat: 7.0655, lon:-73.0883, weight:0.25 },
+  { name:'Barrancabermeja',depto:'Santander',         lat: 7.0653, lon:-73.8547, weight:0.20 },
+  { name:'Soacha',         depto:'Cundinamarca',      lat: 4.5793, lon:-74.2168, weight:0.40 },
+  { name:'Zipaquirá',      depto:'Cundinamarca',      lat: 5.0268, lon:-74.0090, weight:0.30 },
+  { name:'Chía',           depto:'Cundinamarca',      lat: 4.8619, lon:-74.0582, weight:0.30 },
+  { name:'Cartagena',      depto:'Bolívar',           lat:10.3910, lon:-75.4794, weight:0.85 },
+  { name:'Magangué',       depto:'Bolívar',           lat: 9.2417, lon:-74.7539, weight:0.15 },
+  { name:'Montería',       depto:'Córdoba',           lat: 8.7479, lon:-75.8814, weight:0.80 },
+  { name:'Lorica',         depto:'Córdoba',           lat: 9.2397, lon:-75.8147, weight:0.20 },
+  { name:'Pasto',          depto:'Nariño',            lat: 1.2136, lon:-77.2811, weight:0.70 },
+  { name:'Tumaco',         depto:'Nariño',            lat: 1.7988, lon:-78.7639, weight:0.30 },
+  { name:'Tunja',          depto:'Boyacá',            lat: 5.5446, lon:-73.3572, weight:0.55 },
+  { name:'Duitama',        depto:'Boyacá',            lat: 5.8251, lon:-73.0324, weight:0.25 },
+  { name:'Sogamoso',       depto:'Boyacá',            lat: 5.7146, lon:-72.9343, weight:0.20 },
+  { name:'Cúcuta',         depto:'Norte de Santander',lat: 7.8939, lon:-72.5078, weight:0.80 },
+  { name:'Ocaña',          depto:'Norte de Santander',lat: 8.2369, lon:-73.3561, weight:0.20 },
+  { name:'Ibagué',         depto:'Tolima',            lat: 4.4389, lon:-75.2322, weight:0.75 },
+  { name:'Espinal',        depto:'Tolima',            lat: 4.1533, lon:-74.8833, weight:0.25 },
+  { name:'Santa Marta',    depto:'Magdalena',         lat:11.2408, lon:-74.1990, weight:0.85 },
+  { name:'Valledupar',     depto:'Cesar',             lat:10.4631, lon:-73.2532, weight:0.90 },
+  { name:'Manizales',      depto:'Caldas',            lat: 5.0703, lon:-75.5138, weight:0.85 },
+  { name:'Neiva',          depto:'Huila',             lat: 2.9345, lon:-75.2809, weight:0.85 },
+  { name:'Pereira',        depto:'Risaralda',         lat: 4.8133, lon:-75.6961, weight:0.80 },
+  { name:'Dosquebradas',   depto:'Risaralda',         lat: 4.8339, lon:-75.6686, weight:0.20 },
+  { name:'Villavicencio',  depto:'Meta',              lat: 4.1420, lon:-73.6266, weight:0.85 },
+  { name:'Riohacha',       depto:'La Guajira',        lat:11.5444, lon:-72.9072, weight:0.70 },
+  { name:'Sincelejo',      depto:'Sucre',             lat: 9.2950, lon:-75.3978, weight:0.95 },
+  { name:'Popayán',        depto:'Cauca',             lat: 2.4448, lon:-76.6147, weight:0.90 },
+  { name:'Quibdó',         depto:'Chocó',             lat: 5.6947, lon:-76.6610, weight:1.00 },
+  { name:'Armenia',        depto:'Quindío',           lat: 4.5339, lon:-75.6811, weight:1.00 },
+  { name:'Yopal',          depto:'Casanare',          lat: 5.3378, lon:-72.3959, weight:1.00 },
+  { name:'Mocoa',          depto:'Putumayo',          lat: 1.1520, lon:-76.6479, weight:1.00 },
+  { name:'Florencia',      depto:'Caquetá',           lat: 1.6144, lon:-75.6062, weight:1.00 },
+  { name:'Arauca',         depto:'Arauca',            lat: 7.0900, lon:-70.7617, weight:1.00 },
+  { name:'San José del Guaviare', depto:'Guaviare',   lat: 2.5710, lon:-72.6412, weight:1.00 },
+  { name:'Puerto Carreño', depto:'Vichada',           lat: 6.1897, lon:-67.4859, weight:1.00 },
+  { name:'Leticia',        depto:'Amazonas',          lat:-4.2150, lon:-69.9406, weight:1.00 },
+  { name:'Inírida',        depto:'Guainía',           lat: 3.8653, lon:-67.9239, weight:1.00 },
+  { name:'Mitú',           depto:'Vaupés',            lat: 1.2538, lon:-70.2339, weight:1.00 },
+  { name:'San Andrés',     depto:'San Andrés y Providencia', lat:12.5847, lon:-81.7006, weight:1.00 }
+];
+
+/* ─── Mock scenarios generation (PRNG determinístico) ─────────── */
+const NOMBRE_PREFIX = {
+  'Cancha múltiple':    ['Polideportivo', 'Cancha', 'Centro Deportivo'],
+  'Estadio':            ['Estadio', 'Coliseo Cubierto'],
+  'Coliseo':            ['Coliseo', 'Polideportivo Mayor'],
+  'Piscina':            ['Complejo Acuático', 'Piscina Olímpica', 'Centro Acuático'],
+  'Pista atlética':     ['Pista Atlética', 'Estadio de Atletismo'],
+  'Gimnasio':           ['Gimnasio', 'Sala de Gimnasia'],
+  'Complejo deportivo': ['Villa Olímpica', 'Complejo Deportivo', 'Unidad Deportiva'],
+  'Otro':               ['Centro Recreativo', 'Parque Polideportivo']
+};
+const APELLIDOS = ['Mutis','Bolívar','Santander','Galán','Caldas','Núñez','Reyes','Pardo','Gaitán','Uribe','Rojas','Suárez','Lozano','Mora','Cárdenas','Mendoza','Zúñiga','Ramírez','Quintero','Vargas','Espinosa','Salgado'];
+const ESTADOS_CONSERVACION = ['Excelente', 'Bueno', 'Regular'];
+const CAPACIDAD_RANGE = {
+  'Cancha múltiple':    [200, 1500],
+  'Estadio':            [10000, 50000],
+  'Coliseo':            [3000, 18000],
+  'Piscina':            [500, 4000],
+  'Pista atlética':     [3000, 15000],
+  'Gimnasio':           [100, 800],
+  'Complejo deportivo': [2000, 15000],
+  'Otro':               [200, 3000]
+};
+
+function prng(seed) {
+  let s = seed >>> 0;
+  return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 0x100000000; };
+}
+function generateEscenarios() {
+  const rng = prng(42);
+  const out = [];
+  const totalDeclared = Object.values(DEPTO_DATA).reduce((a, b) => a + b.total, 0);
+  const deptoTargets = {};
+  Object.entries(DEPTO_DATA).forEach(([d, base]) => {
+    /* Cap total mock = 200 escenarios para que el render sea liviano */
+    deptoTargets[d] = Math.max(1, Math.round(base.total / totalDeclared * 200));
+  });
+  let id = 1;
+  Object.entries(deptoTargets).forEach(([depto, count]) => {
+    const cities = CITIES.filter(c => c.depto === depto);
+    if (cities.length === 0) return;
+    const totalW = cities.reduce((s, c) => s + c.weight, 0);
+    const carBudget = DEPTO_DATA[depto].car;
+    let carsAssigned = 0;
+    for (let i = 0; i < count; i++) {
+      let roll = rng() * totalW;
+      let city = cities[0];
+      for (const c of cities) { roll -= c.weight; if (roll <= 0) { city = c; break; } }
+      let tr = rng();
+      let tipo = 'Cancha múltiple';
+      let acc = 0;
+      for (const [t, w] of Object.entries(TIPO_WEIGHTS)) {
+        acc += w;
+        if (tr <= acc) { tipo = t; break; }
+      }
+      const carEligible = carsAssigned < carBudget &&
+        ['Coliseo', 'Piscina', 'Pista atlética', 'Complejo deportivo'].includes(tipo);
+      const car = carEligible && rng() < 0.45;
+      if (car) carsAssigned++;
+      const lat = city.lat + (rng() - 0.5) * 0.06;
+      const lon = city.lon + (rng() - 0.5) * 0.06;
+      const pref = NOMBRE_PREFIX[tipo] || ['Escenario'];
+      const nombre = `${pref[Math.floor(rng() * pref.length)]} ${APELLIDOS[Math.floor(rng() * APELLIDOS.length)]}`;
+      const cRange = CAPACIDAD_RANGE[tipo] || [200, 2000];
+      const cap = Math.round((cRange[0] + rng() * (cRange[1] - cRange[0])) / 50) * 50;
+      const anioBase = 1970 + Math.floor(Math.pow(rng(), 0.6) * 53);
+      const edad = 2026 - anioBase;
+      let estIdx = 0;
+      if (edad > 40) estIdx = 2;
+      else if (edad > 20) estIdx = rng() < 0.5 ? 1 : 2;
+      else estIdx = rng() < 0.7 ? 0 : 1;
+      out.push({
+        id: id++, nombre, tipo, car,
+        depto, cityName: city.name, lat, lon,
+        anioConstruccion: anioBase,
+        capacidad: cap,
+        estado: ESTADOS_CONSERVACION[estIdx]
+      });
+    }
+  });
+  return out;
+}
+let ESCENARIOS = []; /* lazy-init en el primer renderMapa */
+
+/* ─── Proyección lat/lon → SVG (700×700) ──────────────────────── */
+const CO_BBOX = { latMin:-4.5, latMax:13.0, lonMin:-82.0, lonMax:-66.5 };
+function projectLL(lat, lon) {
+  return {
+    x: (lon - CO_BBOX.lonMin) / (CO_BBOX.lonMax - CO_BBOX.lonMin) * SVG_W,
+    y: (CO_BBOX.latMax - lat) / (CO_BBOX.latMax - CO_BBOX.latMin) * SVG_H
+  };
+}
+const DEPTO_CENTROID = {};
+function computeDeptoCentroids() {
+  Object.values(DEPTO_NAMES).forEach(d => {
+    const b = bboxForDepto(d);
+    if (b) DEPTO_CENTROID[d] = { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+  });
+}
+/* Calibrar el pin de la ciudad por el centroide real del depto:
+   la capital se ancla al centroide y las hermanas conservan offset relativo. */
+function projectCityPin(city) {
+  const c = DEPTO_CENTROID[city.depto];
+  if (!c) return projectLL(city.lat, city.lon);
+  const siblings = CITIES.filter(x => x.depto === city.depto);
+  const capital = siblings.reduce((a, b) => b.weight > a.weight ? b : a, siblings[0]);
+  const capRaw = projectLL(capital.lat, capital.lon);
+  const dx = c.x - capRaw.x;
+  const dy = c.y - capRaw.y;
+  const raw = projectLL(city.lat, city.lon);
+  return { x: raw.x + dx, y: raw.y + dy };
+}
+
+/* SVG coords → pixel coords del stage (compensa viewBox actual) */
+function svgToPixel(svgX, svgY) {
+  const stage = document.getElementById('meStage');
+  const svg = document.querySelector('#meMapContainer svg');
+  if (!stage || !svg) return { x: 0, y: 0 };
+  const stageRect = stage.getBoundingClientRect();
+  const svgRect = svg.getBoundingClientRect();
+  const v = _state.viewBox;
+  const sx = svgRect.width / v.w;
+  const sy = svgRect.height / v.h;
+  return {
+    x: (svgRect.left - stageRect.left) + (svgX - v.x) * sx,
+    y: (svgRect.top  - stageRect.top)  + (svgY - v.y) * sy
+  };
+}
+
 const REGIONS = ['Andina', 'Caribe', 'Pacífica', 'Orinoquía', 'Amazonía', 'Insular'];
 const ESTADOS = [
   { code:'todos',     label:'Todos los estados', dot:null },
@@ -125,12 +321,19 @@ const _state = {
   tipo: null,
   estado: 'todos',
   car: 'all',
-  /* Nav state machine: country (mapa entero) | depto (zoom in) */
-  nav: { level: 'country', depto: null },
+  /* Nav state machine:
+     - country: mapa entero coroplético, sin city pins
+     - depto: zoom into depto SVG, city pins overlay visible
+     - city: switch to Leaflet con tiles reales + scenario pins */
+  nav: { level: 'country', depto: null, city: null },
   viewBox: { x: 0, y: 0, w: SVG_W, h: SVG_H },
   vbAnimId: null,
   selectedDepto: null,
-  svgLoaded: false
+  selectedScenarioId: null,    /* id del scenario seleccionado para side panel */
+  svgLoaded: false,
+  /* Leaflet city map */
+  leafletMap: null,
+  leafletMarkers: []
 };
 
 /* ─── Render principal ─────────────────────────────────────────── */
@@ -138,6 +341,8 @@ export function renderMapaEscenariosPage(pageEl) {
   pageEl.classList.remove('um-page');
   pageEl.classList.remove('sd-page');
   pageEl.classList.add('me-page');
+  /* Lazy-init de scenarios mock (PRNG determinístico, mismo set entre renders) */
+  if (ESCENARIOS.length === 0) ESCENARIOS = generateEscenarios();
   pageEl.innerHTML = renderShell();
   _state.rootEl = pageEl;
   bindEvents(pageEl);
@@ -162,18 +367,32 @@ function renderShell() {
               <div class="me-skeleton__shape"></div>
               <div class="me-skeleton__hint">Cargando mapa…</div>
             </div>
-            <div id="meMapContainer" class="me-map-container"></div>
+            <!-- Layer 1+2: SVG choropleth + city pins overlay -->
+            <div class="me-map-layer" id="meSvgLayer">
+              <div id="meMapContainer" class="me-map-container"></div>
+              <div class="me-pin-layer" id="mePinLayer"></div>
+            </div>
+            <!-- Layer 3: Leaflet con tiles reales (city level) -->
+            <div class="me-map-layer me-map-layer--hidden" id="meLeafletLayer" aria-hidden="true">
+              <div id="meLeafletMap" class="me-leaflet-map"></div>
+            </div>
+            <!-- Zoom controls (solo en niveles SVG) -->
             <div class="me-zoom" id="meZoom">
               <button type="button" class="me-zoom__btn" data-zoom="in" aria-label="Acercar">${plusIcon()}</button>
               <button type="button" class="me-zoom__btn" data-zoom="out" aria-label="Alejar">${minusIcon()}</button>
             </div>
+            <!-- Floating tooltip (depto hover) -->
             <div class="me-tooltip" id="meTooltip" role="tooltip" aria-hidden="true"></div>
+            <!-- Mini-popover (scenario click en city level) -->
+            <div class="me-popover" id="mePopover" hidden></div>
           </div>
         </div>
 
-        <aside class="me-rank">
-          ${renderRankCard()}
-          ${renderLegend()}
+        <!-- Side panel: aside dinámico. Por default muestra rank card.
+             Al seleccionar un scenario, swap a la ficha completa con
+             carrousel + tabs Información general / Documentación / Historial. -->
+        <aside class="me-aside" id="meAside">
+          ${renderAsideContent()}
         </aside>
       </div>
     </div>
@@ -181,15 +400,38 @@ function renderShell() {
 }
 
 function renderBreadcrumb() {
-  const isCountry = _state.nav.level === 'country';
+  const lvl = _state.nav.level;
+  const sep = `<span class="me-breadcrumb__sep">${chevronRight()}</span>`;
   return `
     <nav class="me-breadcrumb" aria-label="Navegación del mapa">
-      ${isCountry
+      ${lvl === 'country'
         ? `<span class="me-breadcrumb__current">Colombia</span>`
-        : `<button type="button" class="me-breadcrumb__link" data-bc="country">Colombia</button>
-           <span class="me-breadcrumb__sep">${chevronRight()}</span>
-           <span class="me-breadcrumb__current">${escapeHtml(_state.nav.depto)}</span>`}
+        : lvl === 'depto'
+          ? `<button type="button" class="me-breadcrumb__link" data-bc="country">Colombia</button>
+             ${sep}
+             <span class="me-breadcrumb__current">${escapeHtml(_state.nav.depto)}</span>`
+          : /* city */
+            `<button type="button" class="me-breadcrumb__link" data-bc="country">Colombia</button>
+             ${sep}
+             <button type="button" class="me-breadcrumb__link" data-bc="depto">${escapeHtml(_state.nav.depto)}</button>
+             ${sep}
+             <span class="me-breadcrumb__current">${escapeHtml(_state.nav.city)}</span>`}
     </nav>
+  `;
+}
+
+/* Aside dinámico: rank card por default, ficha completa de scenario
+   cuando hay uno seleccionado. */
+function renderAsideContent() {
+  if (_state.selectedScenarioId) {
+    const esc = ESCENARIOS.find(e => e.id === _state.selectedScenarioId);
+    if (esc) return renderScenarioDetailPanel(esc);
+  }
+  return `
+    <div class="me-rank">
+      ${renderRankCard()}
+      ${renderLegend()}
+    </div>
   `;
 }
 
@@ -397,6 +639,7 @@ function loadSvgMap() {
       _state.svgLoaded = true;
       normalizeSvg(container);
       injectScopedSvgStyles();
+      computeDeptoCentroids();      /* para projectCityPin posterior */
       applyChoroplethColors();
       bindSvgEvents(container);
       if (skel) {
@@ -580,8 +823,6 @@ function bboxForDepto(deptoName) {
 function zoomToDepto(deptoName) {
   const bbox = bboxForDepto(deptoName);
   if (!bbox) return;
-  /* Padding 10% — zoom apretado para que el depto se sienta protagonista
-     pero sin tocar los bordes del stage. */
   const pad = 0.10;
   const padX = bbox.width * pad;
   const padY = bbox.height * pad;
@@ -593,20 +834,384 @@ function zoomToDepto(deptoName) {
   );
   _state.nav.level = 'depto';
   _state.nav.depto = deptoName;
+  _state.nav.city = null;
+  _state.selectedScenarioId = null;
+  hideLeafletLayer();
+  showSvgLayer();
   applyChoroplethColors();
   animateViewBoxTo(target, 700);
   paintBreadcrumb();
-  paintRankCard();
+  paintAside();
+  /* Renderizar city pins después de que la animación termine */
+  setTimeout(renderCityPins, 720);
+  /* También en cada step para que sigan al viewBox */
+  scheduleRenderPinsDuringAnim();
+}
+
+/* Render pins en cada paso de la animación del viewBox así siguen el zoom */
+function scheduleRenderPinsDuringAnim() {
+  let lastT = 0;
+  const tick = () => {
+    if (!_state.vbAnimId) return;
+    const now = performance.now();
+    if (now - lastT > 50) {
+      renderCityPins();
+      lastT = now;
+    }
+    requestAnimationFrame(tick);
+  };
+  tick();
 }
 
 function resetZoom() {
   _state.nav.level = 'country';
   _state.nav.depto = null;
+  _state.nav.city = null;
+  _state.selectedScenarioId = null;
+  hideLeafletLayer();
+  showSvgLayer();
   applyChoroplethColors();
+  clearCityPins();
   animateViewBoxTo(adjustVbToStage(0, 0, SVG_W, SVG_H), 600);
   paintBreadcrumb();
-  paintRankCard();
+  paintAside();
 }
+
+/* ─── Layer toggle (SVG vs Leaflet) ────────────────────────── */
+function showSvgLayer() {
+  const root = _state.rootEl;
+  if (!root) return;
+  root.querySelector('#meSvgLayer')?.classList.remove('me-map-layer--hidden');
+  root.querySelector('#meLeafletLayer')?.classList.add('me-map-layer--hidden');
+  root.querySelector('#meZoom')?.removeAttribute('hidden');
+}
+function hideSvgLayer() {
+  const root = _state.rootEl;
+  if (!root) return;
+  root.querySelector('#meSvgLayer')?.classList.add('me-map-layer--hidden');
+}
+function showLeafletLayer() {
+  const root = _state.rootEl;
+  if (!root) return;
+  root.querySelector('#meLeafletLayer')?.classList.remove('me-map-layer--hidden');
+  root.querySelector('#meSvgLayer')?.classList.add('me-map-layer--hidden');
+  root.querySelector('#meZoom')?.setAttribute('hidden', 'true');
+}
+function hideLeafletLayer() {
+  const root = _state.rootEl;
+  if (!root) return;
+  root.querySelector('#meLeafletLayer')?.classList.add('me-map-layer--hidden');
+}
+
+/* ─── City pins overlay (depto level) ──────────────────────── */
+function clearCityPins() {
+  const layer = _state.rootEl?.querySelector('#mePinLayer');
+  if (layer) layer.innerHTML = '';
+}
+
+function renderCityPins() {
+  if (_state.nav.level !== 'depto') return;
+  const layer = _state.rootEl?.querySelector('#mePinLayer');
+  if (!layer) return;
+  const cities = CITIES.filter(c => c.depto === _state.nav.depto);
+  /* Pins de ciudades con scenarios filtrados */
+  const html = cities.map(city => {
+    const escs = ESCENARIOS.filter(e => e.cityName === city.name && passesScenarioFilters(e));
+    if (escs.length === 0) return '';
+    const hasCar = escs.some(e => e.car);
+    /* Tipo dominante en esta city */
+    const tipoCount = {};
+    escs.forEach(e => { tipoCount[e.tipo] = (tipoCount[e.tipo] || 0) + 1; });
+    const dominant = Object.entries(tipoCount).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Otro';
+    const tColor = TIPO_COLORS[dominant] || '#6b7280';
+    const svg = projectCityPin(city);
+    const pos = svgToPixel(svg.x, svg.y);
+    return `
+      <button type="button" class="me-cluster-pin" style="
+        left:${pos.x}px;
+        top:${pos.y}px;
+        --tipo-color:${tColor};
+      " data-city="${escapeHtml(city.name)}" title="${city.name}: ${escs.length} escenarios">
+        <span class="me-cluster-pin__count">${escs.length}</span>
+        <span class="me-cluster-pin__sep"></span>
+        <span class="me-cluster-pin__label">${city.name}</span>
+        ${hasCar ? `<span class="me-cluster-pin__car">${starIcon()}</span>` : ''}
+      </button>
+    `;
+  }).filter(Boolean).join('');
+  layer.innerHTML = html;
+  /* Bind click handlers */
+  layer.querySelectorAll('[data-city]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const cityName = btn.getAttribute('data-city');
+      const city = CITIES.find(c => c.name === cityName && c.depto === _state.nav.depto);
+      if (city) enterCity(city);
+    });
+  });
+}
+
+/* ─── City level (Leaflet) ─────────────────────────────────── */
+function enterCity(city) {
+  _state.nav.level = 'city';
+  _state.nav.city = city.name;
+  _state.selectedScenarioId = null;
+  clearCityPins();
+  hideSvgLayer();
+  showLeafletLayer();
+  initLeafletCity(city);
+  paintBreadcrumb();
+  paintAside();
+}
+
+function initLeafletCity(city) {
+  if (typeof window.L === 'undefined') {
+    setTimeout(() => initLeafletCity(city), 50);
+    return;
+  }
+  /* Limpiar instancia previa si existe */
+  if (_state.leafletMap) {
+    try { _state.leafletMap.remove(); } catch (_) { /* swallow */ }
+    _state.leafletMap = null;
+    _state.leafletMarkers = [];
+  }
+  const mapEl = document.getElementById('meLeafletMap');
+  if (!mapEl) return;
+  const map = window.L.map(mapEl, { zoomControl: true, attributionControl: true })
+    .setView([city.lat, city.lon], 14);
+  window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    subdomains: 'abcd',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+  }).addTo(map);
+  _state.leafletMap = map;
+  setTimeout(() => map.invalidateSize(), 220);
+  paintScenarioMarkers();
+}
+
+/* Scenario markers (Leaflet) — pin estilizado por tipo */
+function paintScenarioMarkers() {
+  if (!_state.leafletMap || !window.L) return;
+  _state.leafletMarkers.forEach(m => _state.leafletMap.removeLayer(m));
+  _state.leafletMarkers = [];
+
+  const escs = ESCENARIOS.filter(e =>
+    e.cityName === _state.nav.city &&
+    passesScenarioFilters(e)
+  );
+
+  escs.forEach(esc => {
+    const color = TIPO_COLORS[esc.tipo] || '#6b7280';
+    const isSelected = _state.selectedScenarioId === esc.id;
+    /* Pin con fondo colored, ícono blanco del tipo. CAR = star amarilla overlay. */
+    const html = `
+      <div class="me-scn-pin ${isSelected ? 'me-scn-pin--selected' : ''}" style="--tipo-color:${color}">
+        <div class="me-scn-pin__bubble">
+          <span class="me-scn-pin__icon">${TIPO_ICONS[esc.tipo] || ''}</span>
+          ${esc.car ? `<span class="me-scn-pin__car">${starIconFilled()}</span>` : ''}
+        </div>
+        <div class="me-scn-pin__tail"></div>
+      </div>
+    `;
+    const icon = window.L.divIcon({
+      className: '',
+      html,
+      iconSize: [40, 50],
+      iconAnchor: [20, 50]
+    });
+    const marker = window.L.marker([esc.lat, esc.lon], { icon, riseOnHover: true })
+      .addTo(_state.leafletMap);
+    marker.on('click', () => {
+      _state.selectedScenarioId = esc.id;
+      paintScenarioMarkers();         /* re-paint para actualizar selected state */
+      showScenarioPopover(esc);
+      /* No mostramos el side panel aún — esperamos al click "Ver perfil completo" */
+    });
+    _state.leafletMarkers.push(marker);
+  });
+}
+
+/* ─── Scenario popover (mini card on click) ────────────────── */
+function showScenarioPopover(esc) {
+  const root = _state.rootEl;
+  if (!root) return;
+  const pop = root.querySelector('#mePopover');
+  if (!pop) return;
+  const stage = root.querySelector('#meStage');
+  const stageRect = stage.getBoundingClientRect();
+  /* Convertir lat/lon a pixel del stage usando Leaflet */
+  if (!_state.leafletMap) return;
+  const point = _state.leafletMap.latLngToContainerPoint([esc.lat, esc.lon]);
+  const px = point.x;
+  const py = point.y;
+  pop.innerHTML = `
+    <div class="me-popover__head">
+      <div class="me-popover__icon" style="--tipo-color:${TIPO_COLORS[esc.tipo] || '#6b7280'}">
+        ${TIPO_ICONS[esc.tipo] || ''}
+      </div>
+      <div class="me-popover__titles">
+        <div class="me-popover__title">${escapeHtml(esc.nombre)}</div>
+        <div class="me-popover__sub">
+          <span style="color:${TIPO_COLORS[esc.tipo]}">${esc.tipo}</span>
+          ${esc.car ? `<span class="me-popover__car"><span class="me-popover__car-star">★</span> CAR</span>` : ''}
+        </div>
+      </div>
+      <button type="button" class="me-popover__close" data-pop-close aria-label="Cerrar">${closeIcon()}</button>
+    </div>
+    <div class="me-popover__grid">
+      <div>
+        <div class="me-popover__label">AÑO</div>
+        <div class="me-popover__val">${esc.anioConstruccion}</div>
+      </div>
+      <div>
+        <div class="me-popover__label">CAPACIDAD</div>
+        <div class="me-popover__val">${formatNum(esc.capacidad)}</div>
+      </div>
+      <div>
+        <div class="me-popover__label">ESTADO</div>
+        <div class="me-popover__val">
+          <span class="me-popover__estado-dot" style="background:${estadoColor(esc.estado)}"></span>
+          ${esc.estado}
+        </div>
+      </div>
+      <div>
+        <div class="me-popover__label">MUNICIPIO</div>
+        <div class="me-popover__val">${esc.cityName}</div>
+      </div>
+    </div>
+    <button type="button" class="me-popover__cta" data-pop-detail>Ver perfil completo</button>
+  `;
+  pop.style.left = `${Math.max(8, px - 165)}px`;
+  pop.style.top = `${Math.max(8, py - 290)}px`;
+  pop.hidden = false;
+  pop.querySelector('[data-pop-close]')?.addEventListener('click', () => hideScenarioPopover());
+  pop.querySelector('[data-pop-detail]')?.addEventListener('click', () => {
+    hideScenarioPopover();
+    paintAside();              /* renderiza el side panel detallado */
+  });
+}
+function hideScenarioPopover() {
+  const pop = _state.rootEl?.querySelector('#mePopover');
+  if (pop) pop.hidden = true;
+}
+function estadoColor(estado) {
+  if (estado === 'Excelente') return '#1f8923';
+  if (estado === 'Bueno')     return '#22c55e';
+  if (estado === 'Regular')   return '#f59e0b';
+  return '#9e0015';
+}
+
+/* ─── Side panel detallado ──────────────────────────────────── */
+function renderScenarioDetailPanel(esc) {
+  return `
+    <div class="me-detail">
+      <button type="button" class="me-detail__close" data-detail-close aria-label="Cerrar ficha">${closeIcon()}</button>
+
+      <!-- Carrousel placeholder (3 fotos por tipo, mock con gradients) -->
+      <div class="me-detail__carrousel">
+        <div class="me-detail__photo me-detail__photo--1" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
+        <div class="me-detail__photo me-detail__photo--2" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
+        <div class="me-detail__photo me-detail__photo--3" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
+        <div class="me-detail__carrousel-nav">
+          <span class="me-detail__dot me-detail__dot--active"></span>
+          <span class="me-detail__dot"></span>
+          <span class="me-detail__dot"></span>
+        </div>
+      </div>
+
+      <div class="me-detail__head">
+        <span class="me-detail__tipo-badge" style="--tipo-color:${TIPO_COLORS[esc.tipo]}">
+          ${TIPO_ICONS[esc.tipo] || ''} ${esc.tipo}
+        </span>
+        <h2 class="me-detail__name">${escapeHtml(esc.nombre)}</h2>
+        <div class="me-detail__location">
+          ${esc.cityName}, ${esc.depto}
+          ${esc.car ? `<span class="me-detail__car-badge">★ CAR</span>` : ''}
+        </div>
+      </div>
+
+      <!-- Tabs Información general / Documentación / Historial -->
+      <div class="me-detail__tabs">
+        <button type="button" class="me-detail__tab me-detail__tab--active" data-tab="info">Información general</button>
+        <button type="button" class="me-detail__tab" data-tab="docs">Documentación</button>
+        <button type="button" class="me-detail__tab" data-tab="hist">Historial</button>
+      </div>
+
+      <div class="me-detail__tab-content" data-tab-content="info">
+        <div class="me-detail__section">FOTOGRAFÍAS</div>
+        <div class="me-detail__photo-grid">
+          <div class="me-detail__photo-thumb me-detail__photo--1" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
+          <div class="me-detail__photo-thumb me-detail__photo--2" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
+          <div class="me-detail__photo-thumb me-detail__photo--3" style="--tipo-color:${TIPO_COLORS[esc.tipo]}"></div>
+        </div>
+
+        <div class="me-detail__section">DATOS DE PRE-VALIDACIÓN</div>
+        <dl class="me-detail__dl">
+          <dt>Nombre del escenario</dt><dd>${escapeHtml(esc.nombre)}</dd>
+          <dt>Departamento</dt><dd>${esc.depto}</dd>
+          <dt>Municipio</dt><dd>${esc.cityName}</dd>
+          <dt>Año de construcción</dt><dd>${esc.anioConstruccion}</dd>
+          <dt>Capacidad</dt><dd>${formatNum(esc.capacidad)} personas</dd>
+          <dt>Estado de conservación</dt>
+          <dd>
+            <span class="me-popover__estado-dot" style="background:${estadoColor(esc.estado)}"></span>
+            ${esc.estado}
+          </dd>
+          <dt>Centro de Alto Rendimiento</dt><dd>${esc.car ? 'Sí' : 'No'}</dd>
+        </dl>
+      </div>
+
+      <div class="me-detail__tab-content" data-tab-content="docs" hidden>
+        <div class="me-detail__empty">
+          <div class="me-detail__empty-icon">${docIcon()}</div>
+          <div class="me-detail__empty-title">Documentación pendiente</div>
+          <div class="me-detail__empty-desc">Acta de recepción, certificado catastral, planos arquitectónicos.</div>
+        </div>
+      </div>
+
+      <div class="me-detail__tab-content" data-tab-content="hist" hidden>
+        <ul class="me-detail__timeline">
+          <li class="me-detail__tl-item">
+            <span class="me-detail__tl-dot me-detail__tl-dot--positive"></span>
+            <div>
+              <div class="me-detail__tl-date">Abr. 24, 2026</div>
+              <div class="me-detail__tl-text">Inspección anual aprobada</div>
+            </div>
+          </li>
+          <li class="me-detail__tl-item">
+            <span class="me-detail__tl-dot me-detail__tl-dot--neutral"></span>
+            <div>
+              <div class="me-detail__tl-date">Feb. 12, 2025</div>
+              <div class="me-detail__tl-text">Renovación de iluminación LED</div>
+            </div>
+          </li>
+          <li class="me-detail__tl-item">
+            <span class="me-detail__tl-dot me-detail__tl-dot--neutral"></span>
+            <div>
+              <div class="me-detail__tl-date">${esc.anioConstruccion}</div>
+              <div class="me-detail__tl-text">Construcción inicial</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  `;
+}
+
+/* ─── Filtros para scenarios (tipo + estado + car) ─────────── */
+function passesScenarioFilters(esc) {
+  if (_state.tipo && esc.tipo !== _state.tipo) return false;
+  if (_state.car === 'only' && !esc.car) return false;
+  /* Estado del scenario es de mock (excelente/bueno/regular), no de
+     workflow (activo/revision/borrador/rechazado). Para el filtro
+     'estado' del toolbar, lo dejamos siempre pasar — es a nivel depto. */
+  return true;
+}
+
+/* ─── Iconos de soporte para detail panel ──────────────────── */
+function starIcon()       { return '<svg viewBox="0 0 24 24" fill="#fbbf24" stroke="#f59e0b" stroke-width="1.5"><polygon points="12 2 15 9 22 10 17 15 18 22 12 19 6 22 7 15 2 10 9 9"/></svg>'; }
+function starIconFilled() { return '<svg viewBox="0 0 24 24" fill="#fbbf24" stroke="#fff" stroke-width="1"><polygon points="12 2 15 9 22 10 17 15 18 22 12 19 6 22 7 15 2 10 9 9"/></svg>'; }
+function docIcon()        { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>'; }
 
 /* ─── SVG events (hover + click) ──────────────────────────────── */
 function bindSvgEvents(container) {
@@ -704,12 +1309,67 @@ function paintToolbar() {
   }
 }
 function paintRankCard() {
-  const aside = _state.rootEl?.querySelector('.me-rank');
-  if (aside) {
-    aside.innerHTML = renderRankCard() + renderLegend();
+  /* Compatibility shim: ahora se llama paintAside (puede mostrar rank
+     o detail panel según _state.selectedScenarioId) */
+  paintAside();
+}
+
+/* Re-render del aside: rank card por default, ficha de scenario si hay
+   uno seleccionado vía "Ver perfil completo". */
+function paintAside() {
+  const aside = _state.rootEl?.querySelector('#meAside');
+  if (!aside) return;
+  aside.innerHTML = renderAsideContent();
+  if (_state.selectedScenarioId) {
+    bindDetailPanelEvents(_state.rootEl);
+  } else {
     bindRankEvents(_state.rootEl);
   }
 }
+
+function bindDetailPanelEvents(pageEl) {
+  pageEl.querySelector('[data-detail-close]')?.addEventListener('click', () => {
+    _state.selectedScenarioId = null;
+    paintAside();
+    paintScenarioMarkers();    /* Quitar el ring de selected del marker */
+  });
+  /* Tabs */
+  pageEl.querySelectorAll('[data-tab]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.getAttribute('data-tab');
+      pageEl.querySelectorAll('[data-tab]').forEach(t => {
+        t.classList.toggle('me-detail__tab--active', t === tab);
+      });
+      pageEl.querySelectorAll('[data-tab-content]').forEach(c => {
+        c.hidden = c.getAttribute('data-tab-content') !== target;
+      });
+    });
+  });
+  /* Carrousel dots: click para cambiar foto activa (solo visual) */
+  pageEl.querySelectorAll('.me-detail__dot').forEach((dot, idx) => {
+    dot.addEventListener('click', () => {
+      pageEl.querySelectorAll('.me-detail__dot').forEach((d, i) => {
+        d.classList.toggle('me-detail__dot--active', i === idx);
+      });
+      const carrousel = pageEl.querySelector('.me-detail__carrousel');
+      if (carrousel) {
+        const photos = carrousel.querySelectorAll('.me-detail__photo');
+        photos.forEach((p, i) => {
+          p.style.opacity = i === idx ? '1' : '0';
+        });
+      }
+    });
+  });
+}
+/* Re-render de city pins (depto level) o scenario markers (city level)
+   según el nav state actual. Llamado después de cualquier cambio de
+   filtros (tipo, region, car, etc) para que los overlays se actualicen
+   sin tocar la base del mapa. */
+function paintMapOverlays() {
+  if (_state.nav.level === 'depto') renderCityPins();
+  else if (_state.nav.level === 'city') paintScenarioMarkers();
+}
+
 function paintBreadcrumb() {
   const bc = _state.rootEl?.querySelector('.me-breadcrumb');
   if (bc) {
@@ -773,6 +1433,7 @@ function bindToolbarEvents(pageEl) {
       paintToolbar();
       applyChoroplethColors();
       paintRankCard();
+      paintMapOverlays();
       pageEl.querySelector('#meSearch')?.focus();
     });
   }
@@ -802,6 +1463,7 @@ function bindToolbarEvents(pageEl) {
       paintToolbar();
       applyChoroplethColors();
       paintRankCard();
+      paintMapOverlays();
     });
   });
   pageEl.querySelectorAll('[data-dd-clear]').forEach(opt => {
@@ -812,6 +1474,7 @@ function bindToolbarEvents(pageEl) {
       paintToolbar();
       applyChoroplethColors();
       paintRankCard();
+      paintMapOverlays();
     });
   });
   document.addEventListener('click', () => {
@@ -838,6 +1501,7 @@ function bindToolbarEvents(pageEl) {
       paintToolbar();
       applyChoroplethColors();
       paintRankCard();
+      paintMapOverlays();
     });
   });
 
@@ -864,6 +1528,7 @@ function bindToolbarEvents(pageEl) {
       paintToolbar();
       applyChoroplethColors();
       paintRankCard();
+      paintMapOverlays();
     });
   });
 }
@@ -907,6 +1572,11 @@ function bindBreadcrumbEvents(pageEl) {
       e.stopPropagation();
       const lvl = btn.getAttribute('data-bc');
       if (lvl === 'country') resetZoom();
+      else if (lvl === 'depto' && _state.nav.depto) {
+        /* Volver al depto desde city level */
+        const deptoName = _state.nav.depto;
+        zoomToDepto(deptoName);
+      }
     });
   });
 }
