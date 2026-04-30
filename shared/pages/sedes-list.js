@@ -220,7 +220,11 @@ function renderRow(row) {
       </td>
       <td class="sd-td-actions">
         <button class="naowee-btn naowee-btn--mute naowee-btn--icon naowee-btn--small"
-                type="button" aria-label="${label}" data-action="${isEditable ? 'edit' : 'view'}">
+                type="button"
+                aria-label="${label}"
+                data-action="${isEditable ? 'edit' : 'view'}"
+                data-sede-code="${row.code}"
+                data-sede-status="${row.status}">
           ${icon}
         </button>
       </td>
@@ -343,11 +347,33 @@ function bindTableEvents(pageEl) {
   pageEl.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', () => {
       const action = btn.getAttribute('data-action');
-      if (action === 'edit') openCreateSedeModal();   /* abre el wizard en edición */
-      if (action === 'view') console.info('[sedes] view detail (preview-only)');
+      const code = btn.getAttribute('data-sede-code');
+      const status = btn.getAttribute('data-sede-status');
+      if (action === 'edit' && status === 'borrador') {
+        /* Borrador: re-abrir el modal de registro con datos pre-llenados
+           para que el usuario continúe el flujo. */
+        openCreateSedeModal();
+      } else if (action === 'edit' && status === 'rechazado') {
+        /* Rechazado: navegar al detail con la nota del revisor visible
+           y CTA "Corregir y reenviar". */
+        navigateToDetail(code, status);
+      } else if (action === 'view') {
+        /* Activo o En revisión → navegar al detail (perfil completo) */
+        navigateToDetail(code, status);
+      }
     });
   });
   pageEl.querySelector('#btnEmptyRegSede')?.addEventListener('click', () => openCreateSedeModal());
+}
+
+/* Navega al detail page conservando role + agregando code y status.
+   El handler de routing en perfil.html resuelve active=sede-detail. */
+function navigateToDetail(code, status) {
+  const params = new URLSearchParams(window.location.search);
+  params.set('active', 'sede-detail');
+  params.set('code', code);
+  params.set('status', status);
+  window.location.search = '?' + params.toString();
 }
 
 function bindPaginationEvents(pageEl) {
