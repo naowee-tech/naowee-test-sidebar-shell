@@ -449,7 +449,8 @@
 .sd-detail__back svg{ width:16px; height:16px; }
 
 .sd-detail__hero,
-.sd-detail__hero-simple{
+.sd-detail__hero-simple,
+.sd-detail__hero-card{
   background:#fff;
   border:1px solid var(--naowee-color-border-default, #e7e9f3);
   border-radius:16px;
@@ -461,6 +462,23 @@
   justify-content:space-between;
   gap:24px;
   flex-wrap:wrap;
+}
+/* Hero card para revision/rechazado: title arriba, message banner abajo */
+.sd-detail__hero-card{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.sd-detail__hero-row{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
+/* Message banner DS — full-width dentro del hero card */
+.sd-detail__msg{
+  width:100%;
 }
 .sd-detail__hero-head{
   display:flex;
@@ -520,45 +538,8 @@
 
 .sd-detail__hero-cta{ flex-shrink:0; }
 
-.sd-detail__status-banner{
-  display:flex;
-  align-items:flex-start;
-  gap:12px;
-  padding:14px 16px;
-  border-radius:10px;
-  flex-shrink:0;
-  max-width:520px;
-}
-.sd-detail__status-banner--revision{
-  background:#FFF3E6;
-  border:1px solid #FFD9B8;
-  color:#9A4B00;
-}
-.sd-detail__status-banner--rechazado{
-  background:#FFEDED;
-  border:1px solid #FFC4BB;
-  color:#C4031D;
-}
-.sd-detail__status-banner-icon{
-  flex-shrink:0;
-  width:24px; height:24px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.sd-detail__status-banner-icon svg{ width:20px; height:20px; }
-.sd-detail__status-banner-text{ flex:1; min-width:0; }
-.sd-detail__status-banner-title{
-  font-size:14px;
-  font-weight:700;
-  margin-bottom:2px;
-}
-.sd-detail__status-banner-sub{
-  font-size:12px;
-  font-weight:400;
-  opacity:.9;
-  line-height:1.45;
-}
+/* (.sd-detail__status-banner-* removidos — ahora usamos el DS
+   naowee-message --caution/--negative. Ver .sd-detail__msg arriba.) */
 
 /* Gallery: strip horizontal de thumbnails (varios visibles) — pattern
    del reference. Click en cualquier thumb abre el lightbox modal con
@@ -813,9 +794,18 @@
   background:#fff;
   border:1px solid var(--naowee-color-border-default, #e7e9f3);
   border-radius:16px;
+  /* Padding-top para que el hover de los tabs respire del top del
+     container — antes con overflow:hidden el hover quedaba pegado
+     al borde superior. */
+  padding-top:6px;
   overflow:hidden;
 }
-.sd-detail__tabs{ background:#fff; }
+.sd-detail__tabs{
+  background:#fff;
+  /* Margin lateral pequeño para que el hover background NO toque
+     los bordes laterales del card (más respiración visual). */
+  margin:0 6px;
+}
 
 .sd-detail__rejection{
   display:flex;
