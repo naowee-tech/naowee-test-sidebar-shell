@@ -159,16 +159,29 @@
 }
 .naowee-pagination.naowee-pagination--small .naowee-pagination__input{
   width:32px;
-  padding:4px 2px;
+  padding:4px 0;
+  text-align:center;
+  /* Quitar spinners nativos del input number — para que quede solo el dígito centrado */
+  -moz-appearance:textfield;
+}
+.naowee-pagination__input::-webkit-outer-spin-button,
+.naowee-pagination__input::-webkit-inner-spin-button{
+  -webkit-appearance:none;
+  margin:0;
 }
 
 /* ─── Tabla (DS cod-table) ───────────────────────────────────────── */
 .um-table-wrap{
-  /* Solo scroll horizontal si la tabla excede el ancho. NUNCA scroll vertical
-     interno: las 15 filas se muestran completas y la página scrollea naturalmente. */
+  /* Permite scroll horizontal si la tabla excede el ancho, pero el scrollbar
+     queda OCULTO visualmente para no reservar espacio (gutter) que generaba
+     el "vacío" raro al final de la tabla. La funcionalidad scroll se mantiene
+     intacta en mobile. */
   overflow-x:auto;
   overflow-y:visible;
+  scrollbar-width:none;          /* Firefox */
+  -ms-overflow-style:none;       /* IE/Edge legacy */
 }
+.um-table-wrap::-webkit-scrollbar{display:none}  /* Chrome/Safari */
 .um-table{
   width:100%;
   border-collapse:separate;
