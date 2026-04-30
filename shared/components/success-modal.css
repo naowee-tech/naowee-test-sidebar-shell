@@ -1,0 +1,368 @@
+/* ═══════════════════════════════════════════════════════════════
+   NAOWEE SUCCESS MODAL — receta del Design System
+   ───────────────────────────────────────────────────────────────
+   Modal de confirmación post-acción con check verde animado y
+   confetti opcional. Diseñado para celebrar resultados positivos
+   (programa creado, evento creado, escenario activado, etc.).
+
+   Estructura BEM:
+     .naowee-success-modal-overlay         → overlay oscuro con blur
+     .naowee-success-modal                 → tarjeta blanca centrada
+       .naowee-success-modal__close        → botón X top-right
+       .naowee-success-modal__confetti     → contenedor de partículas
+       .naowee-success-modal__hero         → wrapper del check + halo
+         .naowee-success-modal__ico        → círculo verde 88×88 con check
+       .naowee-success-modal__title        → h2
+       .naowee-success-modal__body         → párrafo descriptivo
+       .naowee-success-modal__note         → párrafo secundario gris
+       .naowee-success-modal__stats        → grid de stats (1-3)
+         .naowee-success-modal__stat       → card individual
+           __ico (variant: positive | informative | accent | neutral)
+           __label (con __dot decorativo)
+           __value
+       .naowee-success-modal__actions      → footer con CTAs
+
+   Variantes de stat (data-variant):
+     positive    → tint verde (default check)
+     informative → tint azul
+     accent      → tint naranja (Naowee brand)
+     neutral     → tint gris
+
+   Animaciones:
+     · Entrada: scaleIn .38s cubic-bezier(.175,.885,.32,1.275)  (overshoot)
+     · Check:   pop .5s cubic-bezier(.34, 1.56, .64, 1)
+     · Confetti: 42 partículas falling 1.8-3.2s con rotate y stagger
+     · Stats:   stagger fade-in (.55s/.65s/.75s)
+
+   prefers-reduced-motion: las animaciones complejas se anulan, queda
+   solo el fade del overlay.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Overlay oscuro con blur — mismo pattern que el modal del DS pero con
+   tinte azul más fuerte para enfatizar el "antes/después". */
+.naowee-success-modal-overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 1100;                /* por encima de modales del DS (1000) */
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: rgba(0, 43, 91, .45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: naoweeSuccessFadeIn .2s ease;
+}
+.naowee-success-modal-overlay.open{
+  display: flex;
+}
+@keyframes naoweeSuccessFadeIn{
+  from{ opacity: 0; }
+  to{ opacity: 1; }
+}
+
+/* Tarjeta — gradient sutil de fondo, sombra grande, esquinas suaves.
+   Animación spring overshoot al entrar (consistente con el wizard
+   pattern de programa-incentivos). */
+.naowee-success-modal{
+  position: relative;
+  width: 520px;
+  max-width: calc(100vw - 48px);
+  padding: 40px 36px 28px;
+  border-radius: 18px;
+  text-align: center;
+  background: linear-gradient(180deg, #fff 0%, #fafbfd 100%);
+  box-shadow: 0 28px 56px rgba(0, 43, 91, .28);
+  overflow: hidden;
+  animation: naoweeSuccessScaleIn .38s cubic-bezier(.175, .885, .32, 1.275);
+}
+@keyframes naoweeSuccessScaleIn{
+  from{ opacity: 0; transform: scale(.92) translateY(24px); }
+  to{   opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Botón X top-right — pattern del DS .naowee-modal__dismiss:
+   shape cuadrada con bordes redondos (border-radius small = 8px), no
+   pill. Hover gris suave matching el dismiss de los modales DS. */
+.naowee-success-modal__close{
+  position: absolute;
+  top: 12px; right: 12px;
+  z-index: 5;
+  width: 32px; height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--naowee-color-text-primary, #282834);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background .12s ease;
+}
+.naowee-success-modal__close:hover{
+  background: var(--naowee-color-gray-100, #f4f5f9);
+}
+.naowee-success-modal__close svg{ width: 18px; height: 18px; }
+
+/* ── Confetti container ── */
+.naowee-success-modal__confetti{
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+.naowee-success-modal__confetti-piece{
+  position: absolute;
+  top: 0;
+  width: 8px; height: 12px;
+  opacity: 0;
+  animation: naoweeSuccessConfettiFall 2.6s linear forwards;
+}
+@keyframes naoweeSuccessConfettiFall{
+  0%{   transform: translateY(-30px) rotate(0); opacity: 0; }
+  15%{  opacity: 1; }
+  100%{ transform: translateY(540px) rotate(720deg); opacity: 0; }
+}
+
+/* ── Hero (check + halo) ── */
+.naowee-success-modal__hero{
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 20px;
+  z-index: 2;
+}
+.naowee-success-modal__hero::before{
+  content: "";
+  position: absolute;
+  top: -50px; left: 50%;
+  transform: translateX(-50%);
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(31, 137, 35, .14) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.naowee-success-modal__ico{
+  position: relative;
+  z-index: 2;
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #25a12a, #1f8923);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 28px rgba(31, 137, 35, .35);
+  transform: scale(.5);
+  opacity: 0;
+  animation: naoweeSuccessIcoPop .5s cubic-bezier(.34, 1.56, .64, 1) forwards;
+  animation-delay: .1s;
+}
+@keyframes naoweeSuccessIcoPop{
+  0%{   transform: scale(.5);  opacity: 0; }
+  100%{ transform: scale(1);   opacity: 1; }
+}
+.naowee-success-modal__ico svg{
+  width: 44px; height: 44px;
+}
+
+/* Variantes alternas del hero (para futuro: warning amber, info blue) */
+.naowee-success-modal--informative .naowee-success-modal__hero::before{
+  background: radial-gradient(circle, rgba(31, 120, 209, .14) 0%, transparent 70%);
+}
+.naowee-success-modal--informative .naowee-success-modal__ico{
+  background: linear-gradient(135deg, #3b8ee0, #1f78d1);
+  box-shadow: 0 8px 28px rgba(31, 120, 209, .35);
+}
+
+/* ── Texto ── */
+.naowee-success-modal__title{
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -.015em;
+  color: var(--naowee-color-text-primary, #282834);
+  margin: 0 0 10px;
+  position: relative;
+  z-index: 2;
+}
+.naowee-success-modal__body,
+.naowee-success-modal__note{
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--naowee-color-text-secondary, #646587);
+  margin: 0 auto;
+  max-width: 400px;
+  position: relative;
+  z-index: 2;
+}
+.naowee-success-modal__body{ margin-bottom: 12px; }
+.naowee-success-modal__body strong{
+  color: var(--naowee-color-text-primary, #282834);
+  font-weight: 700;
+}
+.naowee-success-modal__note{ margin-bottom: 24px; }
+
+/* ── Stats grid (editorial glass cards) ── */
+.naowee-success-modal__stats{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 10px;
+  margin: 4px 0 24px;
+  position: relative;
+  z-index: 2;
+}
+.naowee-success-modal__stats--3 .naowee-success-modal__stat:last-child{
+  /* La 3ra columna queda un poco más ancha en el patrón de incentivos
+     para fechas tipo "01 abr → 09 abr". */
+  grid-column: auto;
+}
+.naowee-success-modal__stat{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  text-align: left;
+  padding: 14px 14px 16px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #fff 0%, #fafbfd 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(40, 40, 52, .05),
+    0 1px 2px rgba(40, 40, 52, .03);
+  transition: transform .25s cubic-bezier(.4, 0, .2, 1),
+              box-shadow  .25s cubic-bezier(.4, 0, .2, 1);
+  opacity: 0;
+}
+.naowee-success-modal-overlay.open .naowee-success-modal__stat{
+  animation: naoweeSuccessStatIn .5s cubic-bezier(.4, 0, .2, 1) both;
+}
+.naowee-success-modal-overlay.open .naowee-success-modal__stat:nth-child(1){ animation-delay: .55s; }
+.naowee-success-modal-overlay.open .naowee-success-modal__stat:nth-child(2){ animation-delay: .65s; }
+.naowee-success-modal-overlay.open .naowee-success-modal__stat:nth-child(3){ animation-delay: .75s; }
+.naowee-success-modal-overlay.open .naowee-success-modal__stat:nth-child(4){ animation-delay: .85s; }
+@keyframes naoweeSuccessStatIn{
+  from{ opacity: 0; transform: translateY(14px) scale(.98); }
+  to{   opacity: 1; transform: translateY(0)   scale(1);   }
+}
+.naowee-success-modal__stat:hover{
+  transform: translateY(-2px);
+}
+
+/* Tints por variante — bg sutil teñido para sensación etched */
+.naowee-success-modal__stat:has(.naowee-success-modal__stat-ico[data-variant="accent"]){
+  background: linear-gradient(160deg, #fff 0%, #fff8f2 100%);
+}
+.naowee-success-modal__stat:has(.naowee-success-modal__stat-ico[data-variant="accent"]):hover{
+  box-shadow: inset 0 0 0 1px rgba(215, 64, 9, .14), 0 10px 24px rgba(215, 64, 9, .10);
+}
+.naowee-success-modal__stat:has(.naowee-success-modal__stat-ico[data-variant="informative"]){
+  background: linear-gradient(160deg, #fff 0%, #f6faff 100%);
+}
+.naowee-success-modal__stat:has(.naowee-success-modal__stat-ico[data-variant="informative"]):hover{
+  box-shadow: inset 0 0 0 1px rgba(31, 120, 209, .14), 0 10px 24px rgba(31, 120, 209, .10);
+}
+.naowee-success-modal__stat:has(.naowee-success-modal__stat-ico[data-variant="positive"]){
+  background: linear-gradient(160deg, #fff 0%, #f5fbf6 100%);
+}
+.naowee-success-modal__stat:has(.naowee-success-modal__stat-ico[data-variant="positive"]):hover{
+  box-shadow: inset 0 0 0 1px rgba(31, 137, 35, .14), 0 10px 24px rgba(31, 137, 35, .10);
+}
+.naowee-success-modal__stat:has(.naowee-success-modal__stat-ico[data-variant="neutral"]){
+  background: linear-gradient(160deg, #fff 0%, #f7f8fc 100%);
+}
+
+/* Icono del stat — gradient color + soft glow + borde inset */
+.naowee-success-modal__stat-ico{
+  width: 40px; height: 40px;
+  border-radius: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .6);
+}
+.naowee-success-modal__stat-ico svg{
+  width: 20px; height: 20px;
+  stroke-width: 1.9;
+  filter: drop-shadow(0 1px 1px rgba(40, 40, 52, .08));
+}
+.naowee-success-modal__stat-ico[data-variant="accent"]{
+  background: linear-gradient(135deg, #ffe7cc 0%, #fff3e6 100%);
+  color: var(--naowee-color-text-accent, #d74009);
+  box-shadow: inset 0 0 0 1px rgba(215, 64, 9, .10), 0 2px 6px rgba(215, 64, 9, .12);
+}
+.naowee-success-modal__stat-ico[data-variant="informative"]{
+  background: linear-gradient(135deg, #d6e7fa 0%, #eef5ff 100%);
+  color: #1f78d1;
+  box-shadow: inset 0 0 0 1px rgba(31, 120, 209, .10), 0 2px 6px rgba(31, 120, 209, .12);
+}
+.naowee-success-modal__stat-ico[data-variant="positive"]{
+  background: linear-gradient(135deg, #cfe8d0 0%, #e6f4e7 100%);
+  color: var(--naowee-color-feedback-fill-positive-loud, #1f8923);
+  box-shadow: inset 0 0 0 1px rgba(31, 137, 35, .10), 0 2px 6px rgba(31, 137, 35, .12);
+}
+.naowee-success-modal__stat-ico[data-variant="neutral"]{
+  background: linear-gradient(135deg, #e7e9f3 0%, #f5f6fa 100%);
+  color: var(--naowee-color-text-secondary, #646587);
+  box-shadow: inset 0 0 0 1px rgba(40, 40, 52, .08);
+}
+
+/* Label uppercase + dot accent + value bold */
+.naowee-success-modal__stat-label{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--naowee-color-text-secondary, #646587);
+}
+.naowee-success-modal__stat-dot{
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .55;
+}
+.naowee-success-modal__stat-value{
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--naowee-color-text-primary, #282834);
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+/* ── Actions footer ── */
+.naowee-success-modal__actions{
+  display: flex;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+}
+.naowee-success-modal__actions .naowee-btn{
+  flex: 1;
+  justify-content: center;
+}
+/* Si hay solo un botón, fill width */
+.naowee-success-modal__actions:has(.naowee-btn:only-child) .naowee-btn{
+  width: 100%;
+}
+
+/* Reduced motion — respetar preferencia de a11y */
+@media (prefers-reduced-motion: reduce){
+  .naowee-success-modal,
+  .naowee-success-modal__ico,
+  .naowee-success-modal__stat,
+  .naowee-success-modal__confetti-piece{
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .naowee-success-modal__confetti{ display: none; }
+}
