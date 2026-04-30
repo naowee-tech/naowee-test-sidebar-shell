@@ -145,6 +145,7 @@ function renderStep1() {
                  data-field="name"
                  maxlength="120" />
         </div>
+        ${requiredHelper()}
       </div>
 
       <!-- Descripción del evento (textarea) -->
@@ -157,7 +158,7 @@ function renderStep1() {
         </div>
       </div>
 
-      <!-- Fechas inicio/fin (grid 2 cols con datepicker) -->
+      <!-- Fechas inicio/fin (date pickers nativos del browser) -->
       <div class="ev-grid-2">
         ${renderDatepicker('evStartDate', 'Fecha de inicio del evento', true, d.startDate, 'startDate')}
         ${renderDatepicker('evEndDate',   'Fecha final del evento',     true, d.endDate,   'endDate')}
@@ -182,17 +183,18 @@ function renderStep1() {
             <div class="naowee-dropdown__option" data-val="${c}">${c}</div>
           `).join('')}
         </div>
+        ${requiredHelper()}
       </div>
 
       <!-- Cuántas fases tiene? (input-stepper DS) -->
-      <div class="naowee-input-stepper">
+      <div class="naowee-input-stepper" id="evPhasesStepper">
         <label class="naowee-textfield__label">¿Cuántas fases tiene?</label>
         <div class="naowee-input-stepper__content">
           <div class="naowee-input-stepper__input">
             <button type="button" class="naowee-input-stepper__btn"
                     data-counter="dec"
                     ${d.phases <= 1 ? 'disabled' : ''}>${minusIcon()}</button>
-            <span class="naowee-input-stepper__value">${d.phases}</span>
+            <span class="naowee-input-stepper__value" id="evPhasesValue">${d.phases}</span>
             <button type="button" class="naowee-input-stepper__btn"
                     data-counter="inc">${plusIcon()}</button>
           </div>
@@ -211,6 +213,18 @@ function renderStep1() {
   `;
 }
 
+/* Helper de "Este campo es obligatorio" — patrón del DS naowee-helper */
+function requiredHelper() {
+  return `
+    <div class="naowee-helper">
+      <div class="naowee-helper__text">Este campo es obligatorio</div>
+    </div>
+  `;
+}
+
+/* Date picker — usa input type=date nativo (calendar del SO),
+   wrappeado en .naowee-textfield del DS con suffix de calendario.
+   Click en el suffix abre el picker nativo. */
 function renderDatepicker(id, label, required, value, fieldName) {
   return `
     <div class="naowee-textfield has-datepicker">
@@ -218,12 +232,12 @@ function renderDatepicker(id, label, required, value, fieldName) {
         ${label}
       </label>
       <div class="naowee-textfield__input-wrap">
-        <input class="naowee-textfield__input" type="text" id="${id}"
-               placeholder="dd mmm aaaa"
+        <input class="naowee-textfield__input ev-date-input" type="date" id="${id}"
                value="${value}"
                data-field="${fieldName}" />
-        <span class="naowee-textfield__suffix">${calendarIcon()}</span>
+        <span class="naowee-textfield__suffix ev-date-suffix" data-date-trigger="${id}">${calendarIcon()}</span>
       </div>
+      ${required ? requiredHelper() : ''}
     </div>
   `;
 }
@@ -283,36 +297,85 @@ function bindModalEvents() {
     });
   });
 
-  /* Counter de fases (input-stepper) */
+  /* Counter de fases (input-stepper) — update QUIRÚRGICO sin repaint
+     full para evitar flicker visual del modal. Solo actualiza el valor
+     y el disabled state del botón −. */
   overlay.querySelectorAll('[data-counter]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       const dir = btn.getAttribute('data-counter');
       if (dir === 'inc') _modalState.data.phases += 1;
       if (dir === 'dec' && _modalState.data.phases > 1) _modalState.data.phases -= 1;
-      repaint();
+
+      const valueEl = overlay.querySelector('#evPhasesValue');
+      if (valueEl) valueEl.textContent = _modalState.data.phases;
+      const decBtn = overlay.querySelector('[data-counter="dec"]');
+      if (decBtn) decBtn.disabled = _modalState.data.phases <= 1;
     });
   });
 
-  /* Dropdown de categoría — toggle abrir/cerrar + selección */
+  /* Click en suffix de los date pickers → abre el picker nativo */
+  overlay.querySelectorAll('[data-date-trigger]').forEach((suffix) => {
+    suffix.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const targetId = suffix.getAttribute('data-date-trigger');
+      const input = overlay.querySelector('#' + targetId);
+      if (input?.showPicker) input.showPicker();
+      else input?.focus();
+    });
+  });
+
+  /* Dropdown de categoría — abre con position:fixed para escapar el
+     overflow del modal__body. Posición calculada con getBoundingClientRect. */
   const dropdown = overlay.querySelector('#evCategoryDD');
   if (dropdown) {
     const trigger = dropdown.querySelector('.naowee-dropdown__trigger');
+    const menu = dropdown.querySelector('.naowee-dropdown__menu');
+
+    const positionMenu = () => {
+      if (!trigger || !menu) return;
+      const rect = trigger.getBoundingClientRect();
+      menu.style.position = 'fixed';
+      menu.style.top = `${rect.bottom + 6}px`;
+      menu.style.left = `${rect.left}px`;
+      menu.style.width = `${rect.width}px`;
+      menu.style.zIndex = '9999';
+    };
+
     trigger?.addEventListener('click', (e) => {
       e.stopPropagation();
+      const opening = !dropdown.classList.contains('naowee-dropdown--open');
       dropdown.classList.toggle('naowee-dropdown--open');
+      if (opening) positionMenu();
     });
+
+    /* Re-position al scrollear el body del modal o resize */
+    const body = overlay.querySelector('.naowee-modal__body');
+    body?.addEventListener('scroll', () => {
+      if (dropdown.classList.contains('naowee-dropdown--open')) positionMenu();
+    });
+    window.addEventListener('resize', () => {
+      if (dropdown.classList.contains('naowee-dropdown--open')) positionMenu();
+    });
+
     dropdown.querySelectorAll('.naowee-dropdown__option').forEach((opt) => {
       opt.addEventListener('click', (e) => {
         e.stopPropagation();
         _modalState.data.category = opt.getAttribute('data-val');
         dropdown.classList.remove('naowee-dropdown--open');
-        repaint();
+        /* Update quirúrgico del placeholder/value sin full repaint */
+        const ph = dropdown.querySelector('.naowee-dropdown__placeholder, .naowee-dropdown__value');
+        if (ph) {
+          ph.textContent = _modalState.data.category;
+          ph.classList.remove('naowee-dropdown__placeholder');
+          ph.classList.add('naowee-dropdown__value');
+        }
       });
     });
     document.addEventListener('click', () => {
       dropdown.classList.remove('naowee-dropdown--open');
-    }, { once: true });
+    });
   }
 
   /* Esc cierra */

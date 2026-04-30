@@ -86,20 +86,37 @@
    viene 100% del DS. */
 
 .ev-modal{
-  width:560px !important;
+  width:720px !important;            /* Más ancho para que el stepper de 4 pasos entre cómodo */
   max-width:calc(100vw - 48px);
 }
 
-/* Stepper compacto en el modal */
+/* Stepper compacto en el modal — sin divider abajo */
 .ev-modal__stepper{
-  padding:16px 24px;
-  border-bottom:1px solid var(--naowee-color-border-default, #e7e9f3);
+  padding:16px 24px 0 24px;
   margin:0;
 }
 
 /* Body padding ajustado para el contenido del form */
 .ev-modal__body{
   padding:20px 24px;
+}
+
+/* Date pickers nativos: oculta el ícono nativo del browser para usar
+   el suffix del DS como trigger. */
+.ev-date-input::-webkit-calendar-picker-indicator{
+  opacity:0;
+  position:absolute;
+  right:0;
+  width:36px;
+  height:100%;
+  cursor:pointer;
+}
+.ev-date-suffix{cursor:pointer}
+
+/* Helper de "Este campo es obligatorio" — text muted del DS */
+.ev-form .naowee-textfield > .naowee-helper,
+.ev-form .naowee-dropdown > .naowee-helper{
+  margin-top:4px;
 }
 
 /* Footer con botones full-width */
