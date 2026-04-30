@@ -297,9 +297,9 @@ function renderCheckbox(id, checked, indeterminate, rowIdx) {
 function renderBadge(status) {
   const map = {
     'creado':     { cls: 'naowee-badge naowee-badge--positive naowee-badge--quiet', label: 'Creado' },
-    'en-curso':   { cls: 'naowee-badge naowee-badge--negative naowee-badge--quiet', label: 'En curso' },
+    'en-curso':   { cls: 'naowee-badge naowee-badge--caution naowee-badge--quiet',  label: 'En curso' },
     'finalizado': { cls: 'naowee-badge naowee-badge--neutral naowee-badge--quiet',  label: 'Finalizado' },
-    'cancelado':  { cls: 'naowee-badge naowee-badge--neutral naowee-badge--quiet',  label: 'Cancelado' }
+    'cancelado':  { cls: 'naowee-badge naowee-badge--negative naowee-badge--quiet', label: 'Cancelado' }
   };
   const m = map[status] || map['creado'];
   return `<span class="${m.cls}">${m.label}</span>`;
