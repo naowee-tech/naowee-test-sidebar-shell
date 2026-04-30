@@ -65,6 +65,7 @@
   import { renderEventListPage } from './shared/pages/event-list.js';
   import { renderSedesListPage } from './shared/pages/sedes-list.js';
   import { renderSedeDetailPage } from './shared/pages/sede-detail.js';
+  import { renderDocsReviewPage } from './shared/pages/docs-review.js';
   import { renderMapaEscenariosPage } from './shared/pages/mapa-escenarios.js';
 
   const roleCode = getRoleFromQuery();
@@ -95,6 +96,14 @@
       const code = params.get('code');
       const status = params.get('status') || 'activo';
       renderSedeDetailPage(pageEl, { code, status });
+      return;
+    }
+
+    if (currentActive === 'docs') {
+      /* Documentación → vista del revisor de documentos
+         (rol DOCUMENTATION_REVIEWER). Lista de escenarios
+         pendientes con bulk-approve/reject. */
+      renderDocsReviewPage(pageEl);
       return;
     }
 
