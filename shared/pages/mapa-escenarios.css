@@ -107,28 +107,40 @@
    que el usuario veía como "gap entre dropdowns". Fix: forzar el
    trigger a width:100% para que llene el wrapper. */
 .me-dd{
-  flex:0 0 130px;
-  min-width:130px;
-  width:130px;
-  max-width:130px;
-  display:flex;             /* override del DS inline-flex */
+  flex:0 0 130px !important;
+  min-width:130px !important;
+  width:130px !important;
+  max-width:130px !important;
+  display:flex !important;             /* override del DS inline-flex */
+  overflow:hidden;                     /* clipping si algo crece adentro */
 }
 .me-dd .naowee-filter-dropdown__trigger{
-  width:100%;
+  display:flex !important;              /* override DS inline-flex (sino sizea al contenido) */
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
   box-sizing:border-box;
-  justify-content:space-between;  /* label izq, chev der — ya estaba en DS */
+  justify-content:space-between;
+  overflow:hidden;
 }
-/* Trigger label: truncate con ellipsis si el value es más largo
-   que el width del trigger. Display block + min-width:0 para que
-   el flex container respete el text-overflow. */
-.me-dd__trigger-label{
+/* Label del trigger: flex:1 + min-width:0 + ellipsis → trunca con "…"
+   cuando el value es más largo que el trigger (ej "Cancha múltiple",
+   "Complejo deportivo"). */
+.me-dd .me-dd__trigger-label{
   display:block;
+  flex:1 1 0;
   min-width:0;
-  flex:1;
+  max-width:100%;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
+/* Chev a la derecha: tamaño fijo, no shrinkear, no crece */
+.me-dd .naowee-filter-dropdown__chev{
+  flex:0 0 auto;
+}
+/* (Reglas del trigger label centralizadas arriba en .me-dd .me-dd__trigger-label
+   con !important para garantizar que ningún rule del DS las override.) */
 /* Menu width = contenido más largo (no width del trigger) */
 .naowee-filter-dropdown__menu{
   width:max-content !important;
