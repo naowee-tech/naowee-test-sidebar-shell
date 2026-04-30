@@ -1,24 +1,21 @@
 /**
  * Create Event Modal — wizard de 4 pasos.
- * Replica el modal del screenshot.
+ * Refactorizado para usar componentes del DS oficial:
+ *   - naowee-modal-overlay + naowee-modal (con --fixed-header --fixed-footer)
+ *   - naowee-modal__header / __title-group / __title / __subtitle / __dismiss
+ *   - naowee-stepper + __step + __step--active + __number + __label + __connector
+ *   - naowee-modal__body
+ *   - naowee-textfield + __label (--required) + __input-wrap + __input + __suffix
+ *   - naowee-textfield--textarea (para descripción)
+ *   - naowee-dropdown (para categoría)
+ *   - naowee-input-stepper (para "¿cuántas fases tiene?")
+ *   - naowee-btn (mute/loud) en el footer
  *
- * Pasos:
- *   1. Datos básicos (campos del formulario inicial)
- *   2. Cupos (placeholder)
- *   3. Documentos (placeholder)
- *   4. Resumen (placeholder)
- *
- * Usa .naowee-modal-overlay + .naowee-modal del DS.
- * Mount on demand: openCreateEventModal() crea overlay en body.
+ * Patrón validado en naowee-test-incentivos/shared/programa-wizard.html
  */
 
 const TOTAL_STEPS = 4;
-const STEP_TITLES = [
-  'Datos básicos',
-  'Cupos',
-  'Documentos',
-  'Resumen'
-];
+const STEP_LABELS = ['Datos básicos', 'Cupos', 'Documentos', 'Resumen'];
 
 const _modalState = {
   el: null,
@@ -36,7 +33,7 @@ const _modalState = {
 };
 
 export function openCreateEventModal() {
-  if (_modalState.el) return; /* ya abierto */
+  if (_modalState.el) return;
   _modalState.step = 1;
   _modalState.data = {
     name:'', description:'', startDate:'', endDate:'',
@@ -45,6 +42,8 @@ export function openCreateEventModal() {
 
   const overlay = document.createElement('div');
   overlay.className = 'naowee-modal-overlay open ev-modal-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
   overlay.innerHTML = renderModal();
   document.body.appendChild(overlay);
   _modalState.el = overlay;
@@ -69,33 +68,55 @@ function repaint() {
   bindModalEvents();
 }
 
+/* ─── Modal shell (DS components) ─────────────────────────────────── */
 function renderModal() {
-  const step = _modalState.step;
   return `
-    <div class="naowee-modal naowee-modal--scrollable ev-modal" role="dialog" aria-modal="true">
-      <header class="ev-modal__header">
-        <div class="ev-modal__step-info">
-          <span class="ev-modal__step-counter">${step} de ${TOTAL_STEPS}</span>
-          <h2 class="ev-modal__step-title">${STEP_TITLES[step - 1]}</h2>
+    <div class="naowee-modal naowee-modal--fixed-header naowee-modal--fixed-footer ev-modal" role="document">
+      <header class="naowee-modal__header">
+        <div class="naowee-modal__title-group">
+          <h2 class="naowee-modal__title">Crear nuevo evento</h2>
+          <div class="naowee-modal__subtitle">Completá los datos del evento. Podés guardar y retomar después.</div>
         </div>
-        <button class="ev-modal__close" type="button" aria-label="Cerrar" data-act="close">
+        <button class="naowee-modal__dismiss" type="button" data-act="close" aria-label="Cerrar">
           ${closeIcon()}
         </button>
       </header>
 
-      <div class="ev-modal__body">
-        ${renderStep(step)}
+      ${renderStepper()}
+
+      <div class="naowee-modal__body ev-modal__body">
+        ${renderStep(_modalState.step)}
       </div>
 
-      <footer class="ev-modal__footer">
-        <button class="naowee-btn naowee-btn--mute naowee-btn--medium" type="button" data-act="${step === 1 ? 'close' : 'prev'}">
-          ${step === 1 ? 'Cancelar' : 'Anterior'}
+      <footer class="naowee-modal__footer ev-modal__footer">
+        <button class="naowee-btn naowee-btn--mute naowee-btn--medium" type="button" data-act="${_modalState.step === 1 ? 'close' : 'prev'}">
+          ${_modalState.step === 1 ? 'Cancelar' : 'Anterior'}
         </button>
-        <button class="naowee-btn naowee-btn--loud naowee-btn--medium" type="button" data-act="${step === TOTAL_STEPS ? 'finish' : 'next'}">
-          ${step === TOTAL_STEPS ? 'Crear evento' : 'Siguiente'}
+        <button class="naowee-btn naowee-btn--loud naowee-btn--medium" type="button" data-act="${_modalState.step === TOTAL_STEPS ? 'finish' : 'next'}">
+          ${_modalState.step === TOTAL_STEPS ? 'Crear evento' : 'Siguiente'}
         </button>
       </footer>
     </div>
+  `;
+}
+
+function renderStepper() {
+  return `
+    <ol class="naowee-stepper ev-modal__stepper">
+      ${STEP_LABELS.map((label, i) => {
+        const stepNum = i + 1;
+        const cls = ['naowee-stepper__step'];
+        if (stepNum === _modalState.step) cls.push('naowee-stepper__step--active');
+        if (stepNum < _modalState.step)  cls.push('naowee-stepper__step--done');
+        return `
+          <li class="${cls.join(' ')}" data-step="${stepNum}">
+            <span class="naowee-stepper__number">${stepNum}</span>
+            <span class="naowee-stepper__label">${label}</span>
+            ${stepNum < TOTAL_STEPS ? '<span class="naowee-stepper__connector"></span>' : ''}
+          </li>
+        `;
+      }).join('')}
+    </ol>
   `;
 }
 
@@ -112,78 +133,96 @@ function renderStep1() {
   const d = _modalState.data;
   return `
     <div class="ev-form">
-      <div class="ev-form-field">
-        <label class="ev-form-label" for="evName">Nombre del evento <span class="ev-form-required">*</span></label>
-        <input type="text" class="ev-form-input" id="evName"
-               placeholder="Nombre del evento"
-               value="${escapeHtml(d.name)}" data-field="name" />
-      </div>
-
-      <div class="ev-form-field">
-        <label class="ev-form-label" for="evDescription">Descripción del evento</label>
-        <textarea class="ev-form-input ev-form-textarea" id="evDescription"
-                  rows="3" data-field="description">${escapeHtml(d.description)}</textarea>
-      </div>
-
-      <div class="ev-form-row">
-        <div class="ev-form-field">
-          <label class="ev-form-label" for="evStartDate">Fecha de inicio del evento <span class="ev-form-required">*</span></label>
-          <div class="ev-form-input-wrap">
-            <span class="ev-form-input-icon">${calendarIcon()}</span>
-            <input type="date" class="ev-form-input ev-form-input--with-icon" id="evStartDate"
-                   value="${d.startDate}" data-field="startDate" />
-          </div>
-        </div>
-        <div class="ev-form-field">
-          <label class="ev-form-label" for="evEndDate">Fecha final del evento <span class="ev-form-required">*</span></label>
-          <div class="ev-form-input-wrap">
-            <span class="ev-form-input-icon">${calendarIcon()}</span>
-            <input type="date" class="ev-form-input ev-form-input--with-icon" id="evEndDate"
-                   value="${d.endDate}" data-field="endDate" />
-          </div>
+      <!-- Nombre del evento (textfield required) -->
+      <div class="naowee-textfield">
+        <label class="naowee-textfield__label naowee-textfield__label--required" for="evName">
+          Nombre del evento
+        </label>
+        <div class="naowee-textfield__input-wrap">
+          <input class="naowee-textfield__input" type="text" id="evName"
+                 placeholder="Nombre del evento"
+                 value="${escapeHtml(d.name)}"
+                 data-field="name"
+                 maxlength="120" />
         </div>
       </div>
 
+      <!-- Descripción del evento (textarea) -->
+      <div class="naowee-textfield naowee-textfield--textarea">
+        <label class="naowee-textfield__label" for="evDescription">Descripción del evento</label>
+        <div class="naowee-textfield__input-wrap">
+          <textarea class="naowee-textfield__input" id="evDescription"
+                    rows="3" maxlength="300"
+                    data-field="description">${escapeHtml(d.description)}</textarea>
+        </div>
+      </div>
+
+      <!-- Fechas inicio/fin (grid 2 cols con datepicker) -->
+      <div class="ev-grid-2">
+        ${renderDatepicker('evStartDate', 'Fecha de inicio del evento', true, d.startDate, 'startDate')}
+        ${renderDatepicker('evEndDate',   'Fecha final del evento',     true, d.endDate,   'endDate')}
+      </div>
+
+      <!-- Sección CATEGORÍAS -->
       <div class="ev-form-section">CATEGORÍAS</div>
 
-      <div class="ev-form-field">
-        <label class="ev-form-label" for="evCategory">Categoría <span class="ev-form-required">*</span></label>
-        <div class="ev-form-input-wrap">
-          <input type="text" class="ev-form-input ev-form-input--select" id="evCategory"
-                 placeholder="Ej. Juvenil, Prejuvenil, Infantil"
-                 value="${escapeHtml(d.category)}" data-field="category" />
-          <span class="ev-form-input-suffix">${chevronDown()}</span>
+      <!-- Categoría (dropdown DS) -->
+      <div class="naowee-dropdown" id="evCategoryDD">
+        <label class="naowee-dropdown__label naowee-dropdown__label--required">Categoría</label>
+        <div class="naowee-dropdown__trigger" tabindex="0">
+          <span class="${d.category ? 'naowee-dropdown__value' : 'naowee-dropdown__placeholder'}">
+            ${d.category || 'Ej. Juvenil, Prejuvenil, Infantil'}
+          </span>
+          <div class="naowee-dropdown__controls">
+            <span class="naowee-dropdown__chevron">${chevronDown()}</span>
+          </div>
+        </div>
+        <div class="naowee-dropdown__menu" role="listbox">
+          ${['Infantil', 'Prejuvenil', 'Juvenil', 'Sub-23', 'Mayores', 'Master', 'Veteranos'].map((c) => `
+            <div class="naowee-dropdown__option" data-val="${c}">${c}</div>
+          `).join('')}
         </div>
       </div>
 
-      <div class="ev-form-field">
-        <label class="ev-form-label">¿Cuántas fases tiene?</label>
-        <div class="ev-counter">
-          <button type="button" class="ev-counter__btn" data-counter="dec">−</button>
-          <span class="ev-counter__value">${d.phases}</span>
-          <button type="button" class="ev-counter__btn ev-counter__btn--add" data-counter="inc">+</button>
+      <!-- Cuántas fases tiene? (input-stepper DS) -->
+      <div class="naowee-input-stepper">
+        <label class="naowee-textfield__label">¿Cuántas fases tiene?</label>
+        <div class="naowee-input-stepper__content">
+          <div class="naowee-input-stepper__input">
+            <button type="button" class="naowee-input-stepper__btn"
+                    data-counter="dec"
+                    ${d.phases <= 1 ? 'disabled' : ''}>${minusIcon()}</button>
+            <span class="naowee-input-stepper__value">${d.phases}</span>
+            <button type="button" class="naowee-input-stepper__btn"
+                    data-counter="inc">${plusIcon()}</button>
+          </div>
         </div>
       </div>
 
+      <!-- Sección INSCRIPCIONES -->
       <div class="ev-form-section">INSCRIPCIONES</div>
 
-      <div class="ev-form-row">
-        <div class="ev-form-field">
-          <label class="ev-form-label" for="evInscStart">Fecha inicio de inscripciones</label>
-          <div class="ev-form-input-wrap">
-            <span class="ev-form-input-icon">${calendarIcon()}</span>
-            <input type="date" class="ev-form-input ev-form-input--with-icon" id="evInscStart"
-                   value="${d.inscStart}" data-field="inscStart" />
-          </div>
-        </div>
-        <div class="ev-form-field">
-          <label class="ev-form-label" for="evInscEnd">Fecha fin de inscripciones <span class="ev-form-required">*</span></label>
-          <div class="ev-form-input-wrap">
-            <span class="ev-form-input-icon">${calendarIcon()}</span>
-            <input type="date" class="ev-form-input ev-form-input--with-icon" id="evInscEnd"
-                   value="${d.inscEnd}" data-field="inscEnd" />
-          </div>
-        </div>
+      <!-- Fechas inscripciones (grid 2 cols) -->
+      <div class="ev-grid-2">
+        ${renderDatepicker('evInscStart', 'Fecha inicio de inscripciones', false, d.inscStart, 'inscStart')}
+        ${renderDatepicker('evInscEnd',   'Fecha fin de inscripciones',    true,  d.inscEnd,   'inscEnd')}
+      </div>
+    </div>
+  `;
+}
+
+function renderDatepicker(id, label, required, value, fieldName) {
+  return `
+    <div class="naowee-textfield has-datepicker">
+      <label class="naowee-textfield__label ${required ? 'naowee-textfield__label--required' : ''}" for="${id}">
+        ${label}
+      </label>
+      <div class="naowee-textfield__input-wrap">
+        <input class="naowee-textfield__input" type="text" id="${id}"
+               placeholder="dd mmm aaaa"
+               value="${value}"
+               data-field="${fieldName}" />
+        <span class="naowee-textfield__suffix">${calendarIcon()}</span>
       </div>
     </div>
   `;
@@ -209,7 +248,7 @@ function bindModalEvents() {
     if (e.target === overlay) closeModal();
   });
 
-  /* Botones de acción */
+  /* Botones de acción (header dismiss + footer) */
   overlay.querySelectorAll('[data-act]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -226,6 +265,17 @@ function bindModalEvents() {
     });
   });
 
+  /* Click en step del stepper → ir a ese paso (solo si ya pasamos por él) */
+  overlay.querySelectorAll('.naowee-stepper__step[data-step]').forEach((stepEl) => {
+    stepEl.addEventListener('click', () => {
+      const target = parseInt(stepEl.getAttribute('data-step'), 10);
+      if (target < _modalState.step) {
+        _modalState.step = target;
+        repaint();
+      }
+    });
+  });
+
   /* Form fields (sync con state) */
   overlay.querySelectorAll('[data-field]').forEach((input) => {
     input.addEventListener('input', (e) => {
@@ -233,7 +283,7 @@ function bindModalEvents() {
     });
   });
 
-  /* Counter de fases */
+  /* Counter de fases (input-stepper) */
   overlay.querySelectorAll('[data-counter]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -243,6 +293,27 @@ function bindModalEvents() {
       repaint();
     });
   });
+
+  /* Dropdown de categoría — toggle abrir/cerrar + selección */
+  const dropdown = overlay.querySelector('#evCategoryDD');
+  if (dropdown) {
+    const trigger = dropdown.querySelector('.naowee-dropdown__trigger');
+    trigger?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown.classList.toggle('naowee-dropdown--open');
+    });
+    dropdown.querySelectorAll('.naowee-dropdown__option').forEach((opt) => {
+      opt.addEventListener('click', (e) => {
+        e.stopPropagation();
+        _modalState.data.category = opt.getAttribute('data-val');
+        dropdown.classList.remove('naowee-dropdown--open');
+        repaint();
+      });
+    });
+    document.addEventListener('click', () => {
+      dropdown.classList.remove('naowee-dropdown--open');
+    }, { once: true });
+  }
 
   /* Esc cierra */
   if (!document._evModalEscBound) {
@@ -255,8 +326,10 @@ function bindModalEvents() {
 
 /* ─── Iconos inline ────────────────────────────────────────────────── */
 function closeIcon()    { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'; }
-function calendarIcon() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'; }
+function calendarIcon() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'; }
 function chevronDown()  { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'; }
+function plusIcon()     { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'; }
+function minusIcon()    { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>'; }
 
 function escapeHtml(str) {
   return String(str)
