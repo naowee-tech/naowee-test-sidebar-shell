@@ -92,8 +92,11 @@
   min-width:200px;
   max-width:340px;
 }
+/* Searchbox: forzar altura 36px (igual a dropdowns y segment).
+   El DS --small por default es 32px, lo subimos a 36px para que toda
+   la fila de filtros quede uniforme. */
 .me-search .naowee-searchbox__input-wrap{
-  height:36px;
+  height:36px !important;
 }
 
 /* Filter dropdowns: width fijo + ellipsis. Cuando el usuario selecciona
@@ -111,16 +114,22 @@
   min-width:130px !important;
   width:130px !important;
   max-width:130px !important;
-  display:flex !important;             /* override del DS inline-flex */
-  overflow:hidden;                     /* clipping si algo crece adentro */
+  display:flex !important;
+  /* SIN overflow:hidden — clipearía el menu desplegable que vive
+     dentro del wrapper como children .naowee-filter-dropdown__menu.
+     El clipping del trigger se logra a nivel del trigger, no del wrapper. */
+  position:relative;
 }
 .me-dd .naowee-filter-dropdown__trigger{
-  display:flex !important;              /* override DS inline-flex (sino sizea al contenido) */
+  display:flex !important;
   width:100% !important;
+  height:36px !important;
   min-width:0 !important;
   max-width:100% !important;
   box-sizing:border-box;
   justify-content:space-between;
+  /* overflow:hidden acá para que el LABEL trunque sin afectar el menu
+     (que es sibling del trigger, no descendiente). */
   overflow:hidden;
 }
 /* Label del trigger: flex:1 + min-width:0 + ellipsis → trunca con "…"
@@ -177,22 +186,17 @@
 }
 .me-dd__dot--ph{ background:transparent; }
 
-/* Segment CAR: misma altura (36px) que el resto. El pill (background
-   blanco con border accent) se posiciona vía JS — ver wireSegmentPill. */
+/* Segment CAR: misma altura (36px) que searchbox y dropdowns.
+   !important para garantizar uniformidad pase lo que pase con el DS. */
 .me-car-segment{
   flex-shrink:0;
-  height:36px;
+  height:36px !important;
 }
-/* Override del DS para que el pill quede 4px de top/bottom (en lugar
-   del default xnano que asume segment de 40px). Con segment de 36px,
-   xnano (4px) ya da 28px al pill, que es lo que queremos. */
 .me-car-segment .naowee-segment__pill{
   top:4px;
   bottom:4px;
 }
-/* DS --small reduce font + svg, pero acá usamos altura 36 (no 32) y
-   queremos texto 13px en vez del 12px default del --small. */
-.me-car-segment.naowee-segment--small{ height:36px; }
+.me-car-segment.naowee-segment--small{ height:36px !important; }
 .me-car-segment.naowee-segment--small .naowee-segment__item{
   font-size:13px;
   padding:4px 14px;
