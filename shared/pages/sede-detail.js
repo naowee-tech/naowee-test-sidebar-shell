@@ -516,54 +516,165 @@ function roField(label, value, full = false) {
   `;
 }
 
-/* ─── Tab: Documentación ────────────────────────────────── */
-function renderDocsPanel(sede) {
-  const docs = [
-    { name: 'Acta de recepción', estado: 'Aprobado', fecha: 'Mar. 15, 2026' },
-    { name: 'Certificado catastral', estado: 'Aprobado', fecha: 'Mar. 18, 2026' },
-    { name: 'Planos arquitectónicos', estado: 'Aprobado', fecha: 'Mar. 20, 2026' },
-    { name: 'Licencia de construcción', estado: 'Aprobado', fecha: 'Mar. 22, 2026' },
-    { name: 'Estudio de impacto', estado: 'Aprobado', fecha: 'Mar. 24, 2026' }
+/* ─── Tab: Documentación ──────────────────────────────────
+   Layout 2-col del reference escenario-09: tabla a la izquierda,
+   preview del documento a la derecha con toolbar (zoom +/-, download). */
+
+/* Mock docs por status. Cuando es activo todos están aprobados;
+   en revision/rechazado algunos están en revisión y otros no
+   cargados (faltan por subir).
+   Cada doc tiene type (jpg/pdf) que controla el icono y el preview. */
+function getDocsForSede(status) {
+  const allActivo = [
+    { name: 'Foto frontal general',  type: 'jpg', estado: 'Aprobado',  fecha: '17 de abr de 2026', preview: '1577223625816-7546f13df25d' },
+    { name: 'Foto panoramica',       type: 'jpg', estado: 'Aprobado',  fecha: '17 de abr de 2026', preview: '1540747913346-19e32dc3e97e' },
+    { name: 'Fotos instalaciones',   type: 'jpg', estado: 'Aprobado',  fecha: '18 de abr de 2026', preview: '1574629810360-7efbbe195018' },
+    { name: 'Plano del escenario',   type: 'pdf', estado: 'Aprobado',  fecha: '18 de abr de 2026', preview: null },
+    { name: 'Plano de localizacion', type: 'pdf', estado: 'Aprobado',  fecha: '18 de abr de 2026', preview: null },
+    { name: 'Documento de propiedad',type: 'pdf', estado: 'Aprobado',  fecha: '18 de abr de 2026', preview: null },
+    { name: 'Concepto bomberos',     type: 'pdf', estado: 'Aprobado',  fecha: '18 de abr de 2026', preview: null },
+    { name: 'Concepto salud',        type: 'pdf', estado: 'Aprobado',  fecha: '18 de abr de 2026', preview: null }
   ];
+  if (status === 'activo') return allActivo;
+  /* Revision/Rechazado: algunos en revisión, otros faltan por subir */
+  return [
+    { name: 'Foto frontal general',  type: 'jpg', estado: 'En revisión', fecha: '17 de abr de 2026', preview: '1577223625816-7546f13df25d' },
+    { name: 'Foto panoramica',       type: 'jpg', estado: 'En revisión', fecha: '17 de abr de 2026', preview: '1540747913346-19e32dc3e97e' },
+    { name: 'Fotos instalaciones',   type: 'jpg', estado: 'No cargado',  fecha: null,                preview: null },
+    { name: 'Plano del escenario',   type: 'pdf', estado: 'En revisión', fecha: '18 de abr de 2026', preview: null },
+    { name: 'Plano de localizacion', type: 'pdf', estado: 'No cargado',  fecha: null,                preview: null },
+    { name: 'Documento de propiedad',type: 'pdf', estado: 'En revisión', fecha: '18 de abr de 2026', preview: null },
+    { name: 'Concepto bomberos',     type: 'pdf', estado: 'No cargado',  fecha: null,                preview: null },
+    { name: 'Concepto salud',        type: 'pdf', estado: 'No cargado',  fecha: null,                preview: null }
+  ];
+}
+
+function renderDocsPanel(sede) {
+  const docs = getDocsForSede(_state.sedeStatus);
+  /* Default selection: el primer doc que tenga preview (si hay), sino el primero */
+  const defaultIdx = docs.findIndex(d => d.estado !== 'No cargado');
+  const selectedIdx = defaultIdx >= 0 ? defaultIdx : 0;
   return `
     <div class="sd-detail__docs">
-      <div class="sd-detail__docs-header">
-        <h3 class="sd-detail__section-title">Documentos cargados</h3>
-        <span class="sd-detail__docs-count">${docs.length} documentos</span>
-      </div>
-      <table class="sd-detail__doc-table">
-        <thead>
-          <tr>
-            <th>Documento</th>
-            <th>Estado</th>
-            <th>Fecha de cargue</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          ${docs.map(doc => `
+      <!-- Left: tabla de documentos -->
+      <div class="sd-detail__docs-table-wrap">
+        <div class="sd-detail__docs-header">
+          <h3 class="sd-detail__docs-title">Fotografías del escenario</h3>
+          <div class="sd-detail__docs-fecha">
+            <span>Fecha de captura<span class="sd-detail__docs-fecha-req">*</span></span>
+            ${calendarMiniIcon()}
+            <span class="sd-detail__docs-fecha-val">--</span>
+          </div>
+        </div>
+
+        <table class="sd-detail__doc-table">
+          <thead>
             <tr>
-              <td>
-                <div class="sd-detail__doc-name">
-                  ${docIcon()}
-                  ${escapeHtml(doc.name)}
-                </div>
-              </td>
-              <td>
-                <span class="naowee-badge naowee-badge--quiet naowee-badge--positive">
-                  ${doc.estado}
-                </span>
-              </td>
-              <td>${doc.fecha}</td>
-              <td class="sd-detail__doc-actions">
-                <button type="button" class="naowee-btn naowee-btn--mute naowee-btn--icon naowee-btn--small" aria-label="Descargar">
-                  ${downloadIcon()}
-                </button>
-              </td>
+              <th>Documento</th>
+              <th class="sd-detail__doc-th-estado">Estado</th>
+              <th class="sd-detail__doc-th-fecha">Fecha de cargue</th>
+              <th class="sd-detail__doc-th-action">Acción</th>
             </tr>
-          `).join('')}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            ${docs.map((doc, i) => renderDocRow(doc, i, i === selectedIdx)).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Vertical divider -->
+      <div class="sd-detail__docs-divider"></div>
+
+      <!-- Right: preview panel -->
+      <div class="sd-detail__doc-preview-wrap">
+        <h3 class="sd-detail__doc-preview-title" data-doc-preview-title>${escapeHtml(docs[selectedIdx]?.name || 'Selecciona un documento')}</h3>
+        <div class="sd-detail__doc-preview" data-doc-preview>
+          <div class="sd-detail__doc-preview-toolbar">
+            <button type="button" class="sd-detail__doc-preview-btn" data-zoom="in" aria-label="Acercar">${zoomInIcon()}</button>
+            <button type="button" class="sd-detail__doc-preview-btn" data-zoom="out" aria-label="Alejar">${zoomOutIcon()}</button>
+            <button type="button" class="sd-detail__doc-preview-btn" data-doc-download aria-label="Descargar">${downloadIcon()}</button>
+          </div>
+          <div class="sd-detail__doc-preview-body" data-doc-preview-body>
+            ${renderDocPreview(docs[selectedIdx])}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDocRow(doc, idx, isSelected) {
+  const fileIcon = doc.type === 'pdf' ? pdfFileIcon() : jpgFileIcon();
+  const estadoMeta = getEstadoBadge(doc.estado);
+  const isNoCargado = doc.estado === 'No cargado';
+  return `
+    <tr class="sd-detail__doc-row ${isSelected ? 'sd-detail__doc-row--selected' : ''}"
+        data-doc-idx="${idx}"
+        ${isNoCargado ? 'data-doc-no-cargado="true"' : ''}>
+      <td>
+        <div class="sd-detail__doc-name">
+          ${fileIcon}
+          ${escapeHtml(doc.name)}
+        </div>
+      </td>
+      <td class="sd-detail__doc-td-estado">
+        <span class="naowee-badge naowee-badge--quiet naowee-badge--${estadoMeta.variant}">
+          ${estadoMeta.label}
+        </span>
+      </td>
+      <td class="sd-detail__doc-td-fecha">${doc.fecha || ''}</td>
+      <td class="sd-detail__doc-td-action">
+        ${isNoCargado
+          ? `<button type="button" class="sd-detail__doc-subir" data-doc-subir>
+               ${uploadIcon()} Subir
+             </button>`
+          : ''}
+      </td>
+    </tr>
+  `;
+}
+
+function getEstadoBadge(estado) {
+  if (estado === 'Aprobado')   return { label: 'Aprobado',    variant: 'positive' };
+  if (estado === 'En revisión') return { label: 'En revisión', variant: 'caution' };
+  if (estado === 'No cargado')  return { label: 'No cargado',  variant: 'neutral' };
+  return { label: estado, variant: 'neutral' };
+}
+
+/* Renderiza el contenido del preview según el tipo del doc.
+   - jpg: <img> de Unsplash (mismo pattern del banner)
+   - pdf: placeholder card con icon + label "Vista previa de PDF" */
+function renderDocPreview(doc) {
+  if (!doc) {
+    return `
+      <div class="sd-detail__doc-preview-empty">
+        ${imageIcon()}
+        <div>Selecciona un documento</div>
+      </div>
+    `;
+  }
+  if (doc.estado === 'No cargado') {
+    return `
+      <div class="sd-detail__doc-preview-empty">
+        ${docIcon()}
+        <div>Documento aún no cargado</div>
+        <div class="sd-detail__doc-preview-empty-sub">Haz click en "Subir" para agregarlo</div>
+      </div>
+    `;
+  }
+  if (doc.type === 'jpg' && doc.preview) {
+    return `
+      <img class="sd-detail__doc-preview-img" data-doc-img
+           src="https://images.unsplash.com/photo-${doc.preview}?w=900&h=600&fit=crop&q=85"
+           alt="${escapeHtml(doc.name)}" />
+    `;
+  }
+  /* PDF placeholder */
+  return `
+    <div class="sd-detail__doc-preview-pdf">
+      <div class="sd-detail__doc-preview-pdf-icon">${pdfFileIcon()}</div>
+      <div class="sd-detail__doc-preview-pdf-name">${escapeHtml(doc.name)}.pdf</div>
+      <div class="sd-detail__doc-preview-pdf-sub">Vista previa de PDF — descarga para ver el contenido completo</div>
     </div>
   `;
 }
@@ -666,6 +777,78 @@ function bindEvents(pageEl) {
   pageEl.querySelector('[data-edit-rejected]')?.addEventListener('click', () => {
     openCreateSedeModal();
   });
+
+  /* Documentación tab events */
+  bindDocsEvents(pageEl);
+}
+
+function bindDocsEvents(pageEl) {
+  const docs = getDocsForSede(_state.sedeStatus);
+
+  /* Click en row del doc → seleccionar y mostrar preview */
+  pageEl.querySelectorAll('[data-doc-idx]').forEach(row => {
+    row.addEventListener('click', (e) => {
+      /* No-op si el click fue en el botón "Subir" — ese tiene su propio handler */
+      if (e.target.closest('[data-doc-subir]')) return;
+      const idx = parseInt(row.getAttribute('data-doc-idx'), 10);
+      const doc = docs[idx];
+      if (!doc) return;
+      /* Update selected state quirúrgicamente */
+      pageEl.querySelectorAll('[data-doc-idx]').forEach(r => {
+        r.classList.toggle('sd-detail__doc-row--selected', r === row);
+      });
+      /* Update preview title + body */
+      const titleEl = pageEl.querySelector('[data-doc-preview-title]');
+      const bodyEl = pageEl.querySelector('[data-doc-preview-body]');
+      if (titleEl) titleEl.textContent = doc.name;
+      if (bodyEl) bodyEl.innerHTML = renderDocPreview(doc);
+      /* Reset zoom level cuando cambias de doc */
+      _state.docZoom = 1;
+      const img = pageEl.querySelector('[data-doc-img]');
+      if (img) img.style.transform = `scale(1)`;
+    });
+  });
+
+  /* Zoom in / out */
+  pageEl.querySelectorAll('[data-zoom]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dir = btn.getAttribute('data-zoom');
+      _state.docZoom = _state.docZoom || 1;
+      if (dir === 'in')  _state.docZoom = Math.min(3,    _state.docZoom * 1.25);
+      if (dir === 'out') _state.docZoom = Math.max(0.5,  _state.docZoom / 1.25);
+      const img = pageEl.querySelector('[data-doc-img]');
+      if (img) img.style.transform = `scale(${_state.docZoom})`;
+    });
+  });
+
+  /* Download button (preview-only — no real download) */
+  pageEl.querySelector('[data-doc-download]')?.addEventListener('click', () => {
+    flashDocAction(pageEl, 'Descarga iniciada (preview only)');
+  });
+
+  /* Subir → flash de feedback (preview-only) */
+  pageEl.querySelectorAll('[data-doc-subir]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      flashDocAction(pageEl, 'Selector de archivo (preview only)');
+    });
+  });
+}
+
+/* Toast feedback temporal en el preview body */
+function flashDocAction(pageEl, message) {
+  const body = pageEl.querySelector('[data-doc-preview-body]');
+  if (!body) return;
+  let toast = body.querySelector('.sd-detail__doc-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.className = 'sd-detail__doc-toast';
+    body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add('sd-detail__doc-toast--show');
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => toast.classList.remove('sd-detail__doc-toast--show'), 2000);
 }
 
 /* ─── Helpers ────────────────────────────────────────────── */
@@ -684,3 +867,11 @@ function alertIcon()     { return '<svg viewBox="0 0 24 24" fill="none" stroke="
 function editIcon()      { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'; }
 function docIcon()       { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>'; }
 function downloadIcon()  { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'; }
+function uploadIcon()    { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>'; }
+function zoomInIcon()    { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>'; }
+function zoomOutIcon()   { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>'; }
+function calendarMiniIcon() { return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>'; }
+function imageIcon()     { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;opacity:.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'; }
+/* Mini badges JPG/PDF para la columna Documento */
+function jpgFileIcon()   { return '<span class="sd-detail__file-badge sd-detail__file-badge--jpg">JPG</span>'; }
+function pdfFileIcon()   { return '<span class="sd-detail__file-badge sd-detail__file-badge--pdf">PDF</span>'; }
