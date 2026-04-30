@@ -19,15 +19,18 @@ const DOC_TYPES = [
   { code: 'CC',   label: 'Cédula de ciudadanía (CC)' },
   { code: 'TI',   label: 'Tarjeta de identidad (TI)' },
   { code: 'CE',   label: 'Cédula de extranjería (CE)' },
-  { code: 'PA',   label: 'Pasaporte (PA)' }
+  { code: 'PA',   label: 'Pasaporte (PA)' },
+  { code: 'PEP',  label: 'Permiso especial de permanencia (PEP)' },
+  { code: 'PPT',  label: 'Permiso por protección temporal (PPT)' },
+  { code: 'RC',   label: 'Registro Civil (RC)' }
 ];
 const NIT_TYPE  = { code: 'NIT',  label: 'NIT (Organizaciones)' };
 
 const ROLES_PERSONA = [
   { code: 'all',                   label: 'Todos los roles' },
-  { code: 'Personal deportivo',    label: 'Personal deportivo' },
   { code: 'Deportista',            label: 'Deportista' },
-  { code: 'Acudiente legal',       label: 'Acudiente legal' },
+  { code: 'Personal deportivo',    label: 'Personal deportivo' },
+  { code: 'Acudiente legal',       label: 'Padre/Tutor' },
   { code: 'Operador',              label: 'Operador' },
   { code: 'Digitador',             label: 'Digitador' },
   { code: 'Coordinador',           label: 'Coordinador' },
@@ -103,7 +106,9 @@ const _state = {
   docTypeFilter: 'all',
   roleFilter: 'all',
   page: 1,
-  pageSize: 10
+  pageSize: 10,
+  /* Search interno por dropdown — independiente del search general de la tabla */
+  ddSearch: { docType: '', role: '' }
 };
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
@@ -134,13 +139,26 @@ export function renderUserManagementPage(rootEl) {
   _state.page = 1;
   paintFull();
 
-  /* Click-out global cierra dropdowns y action menus.
+  /* Click-out global cierra dropdowns y action menus + resetea ddSearch.
      Lo agregamos UNA vez al document para que sobreviva re-renders. */
   if (!document._umClickOutBound) {
     document.addEventListener('click', () => {
-      document.querySelectorAll('.um-dropdown.is-open, .um-actions.is-open').forEach((el) => el.classList.remove('is-open'));
+      document.querySelectorAll('.um-dropdown.is-open').forEach((el) => {
+        el.classList.remove('is-open');
+        const ddType = el.getAttribute('data-dd-type');
+        if (ddType && _state.ddSearch) _state.ddSearch[ddType] = '';
+      });
+      document.querySelectorAll('.um-actions.is-open').forEach((el) => el.classList.remove('is-open'));
     });
     document._umClickOutBound = true;
+  }
+
+  /* Re-posicionar indicator del tab al hacer resize */
+  if (!window._umResizeBound) {
+    window.addEventListener('resize', () => {
+      if (_state.rootEl?.isConnected) updateTabIndicator();
+    });
+    window._umResizeBound = true;
   }
 }
 
@@ -173,6 +191,8 @@ function paintFull() {
   `;
 
   bindAllEvents();
+  /* Posicionar el indicator del tab activo (necesita el DOM ya pintado) */
+  requestAnimationFrame(updateTabIndicator);
 }
 
 /* Render parcial — solo tabla + paginación (al tipear search) */
@@ -193,30 +213,41 @@ function paintTableOnly() {
   }
 }
 
-/* ─── Render: tabs ─────────────────────────────────────────────────── */
+/* ─── Render: tabs (DS naowee-tabs--animated con indicator) ───────── */
 function renderTabs() {
   return `
-    <div class="um-tabs" role="tablist">
+    <div class="um-tabs" id="umTabs" role="tablist">
       <button class="um-tab ${_state.tab === 'persona' ? 'is-active' : ''}" data-tab="persona" role="tab">
         Persona Natural
       </button>
       <button class="um-tab ${_state.tab === 'organizacion' ? 'is-active' : ''}" data-tab="organizacion" role="tab">
         Organización
       </button>
+      <span class="um-tabs__indicator" id="umTabsIndicator"></span>
     </div>
   `;
+}
+
+/* Posiciona el indicator debajo del tab activo (ancho exacto del label).
+   Se llama después de cada paint y al cambiar de tab. */
+function updateTabIndicator() {
+  const tabs = _state.rootEl.querySelector('#umTabs');
+  const ind = _state.rootEl.querySelector('#umTabsIndicator');
+  if (!tabs || !ind) return;
+  const active = tabs.querySelector('.um-tab.is-active');
+  if (!active) return;
+  const tRect = tabs.getBoundingClientRect();
+  const aRect = active.getBoundingClientRect();
+  const left = aRect.left - tRect.left;
+  ind.style.transform = `translateX(${left}px)`;
+  ind.style.width = `${aRect.width}px`;
 }
 
 /* ─── Render: toolbar (search + dropdowns) ─────────────────────────── */
 function renderToolbarLeft() {
   const docOpts = docTypes();
   const roleOpts = rolesList();
-  const docCurrent = docOpts.find((o) => o.code === _state.docTypeFilter) || docOpts[0];
-  const roleCurrent = roleOpts.find((o) => o.code === _state.roleFilter) || roleOpts[0];
   const hasSearch = _state.search.length > 0;
-
-  const docLabel = _state.docTypeFilter === 'all' ? 'Tipo: Todos' : `Tipo: ${docCurrent.label.split(' (')[0]}`;
-  const roleLabel = _state.roleFilter === 'all' ? 'Roles: Todos' : `Roles: ${roleCurrent.label}`;
 
   return `
     <div class="um-toolbar__left">
@@ -230,34 +261,45 @@ function renderToolbarLeft() {
         </button>
       </label>
 
-      <div class="um-dropdown" id="umDocTypeDD">
-        <button class="um-dropdown__trigger" type="button">
-          <span>${docLabel}</span>
-          <span class="um-dropdown__chev">${getIcon('chevron')}</span>
-        </button>
-        <div class="um-dropdown__menu">
-          ${docOpts.map((o) => `
-            <button type="button" class="um-dropdown__opt"
-                    data-dd="docType" data-value="${o.code}"
-                    aria-selected="${o.code === _state.docTypeFilter}">
-              <span>${o.label}</span>
-              <span class="um-dropdown__opt-check">${getIcon('check')}</span>
-            </button>
-          `).join('')}
-        </div>
-      </div>
+      ${renderDropdown('docType', 'Tipo de documento', docOpts, _state.docTypeFilter)}
+      ${renderDropdown('role', 'Filtrar por Roles', roleOpts, _state.roleFilter)}
+    </div>
+  `;
+}
 
-      <div class="um-dropdown" id="umRoleDD">
-        <button class="um-dropdown__trigger" type="button">
-          <span>${roleLabel}</span>
-          <span class="um-dropdown__chev">${getIcon('chevron')}</span>
-        </button>
-        <div class="um-dropdown__menu">
-          ${roleOpts.map((o) => `
+/* Dropdown con search interno — filtra opciones live al tipear */
+function renderDropdown(ddType, placeholder, options, selectedCode) {
+  const ddSearch = (_state.ddSearch[ddType] || '').toLowerCase();
+  const filtered = ddSearch
+    ? options.filter((o) => o.label.toLowerCase().includes(ddSearch))
+    : options;
+  const current = options.find((o) => o.code === selectedCode) || options[0];
+  const triggerLabel = selectedCode === 'all'
+    ? placeholder
+    : current.label;
+
+  return `
+    <div class="um-dropdown" data-dd-type="${ddType}">
+      <button class="um-dropdown__trigger" type="button">
+        <span>${escapeHtml(triggerLabel)}</span>
+        <span class="um-dropdown__chev">${getIcon('chevron')}</span>
+      </button>
+      <div class="um-dropdown__menu">
+        <div class="um-dropdown__search">
+          <span class="um-dropdown__search-icon">${searchIcon()}</span>
+          <input type="text" class="um-dropdown__search-input"
+                 data-dd-search="${ddType}"
+                 placeholder="Buscar..."
+                 value="${escapeHtml(_state.ddSearch[ddType] || '')}" />
+        </div>
+        <div class="um-dropdown__list">
+          ${filtered.length === 0 ? `
+            <div class="um-dropdown__no-results">Sin coincidencias</div>
+          ` : filtered.map((o) => `
             <button type="button" class="um-dropdown__opt"
-                    data-dd="role" data-value="${o.code}"
-                    aria-selected="${o.code === _state.roleFilter}">
-              <span>${o.label}</span>
+                    data-dd="${ddType}" data-value="${o.code}"
+                    aria-selected="${o.code === selectedCode}">
+              <span>${escapeHtml(o.label)}</span>
               <span class="um-dropdown__opt-check">${getIcon('check')}</span>
             </button>
           `).join('')}
@@ -415,24 +457,73 @@ function bindToolbarEvents() {
     trigger?.addEventListener('click', (e) => {
       e.stopPropagation();
       _state.rootEl.querySelectorAll('.um-dropdown.is-open').forEach((other) => {
-        if (other !== dd) other.classList.remove('is-open');
+        if (other !== dd) {
+          other.classList.remove('is-open');
+          /* Reset del search interno cuando se cierra otro dropdown */
+          const otherType = other.getAttribute('data-dd-type');
+          if (otherType) _state.ddSearch[otherType] = '';
+        }
       });
       dd.classList.toggle('is-open');
+      /* Si se abrió, focus en el search interno para tipear directo */
+      if (dd.classList.contains('is-open')) {
+        const ddSearchInput = dd.querySelector('.um-dropdown__search-input');
+        ddSearchInput?.focus();
+      }
+    });
+    /* Click dentro del menu (excepto en options) NO cierra */
+    dd.querySelector('.um-dropdown__menu')?.addEventListener('click', (e) => e.stopPropagation());
+  });
+
+  /* Dropdown search interno — filter live sin cerrar el dropdown */
+  _state.rootEl.querySelectorAll('.um-dropdown__search-input').forEach((input) => {
+    input.addEventListener('input', (e) => {
+      const ddType = input.getAttribute('data-dd-search');
+      _state.ddSearch[ddType] = e.target.value;
+      /* Re-render solo la lista del dropdown — mantiene focus del input */
+      const dd = input.closest('.um-dropdown');
+      const list = dd.querySelector('.um-dropdown__list');
+      if (!list) return;
+
+      const opts = ddType === 'docType' ? docTypes() : rolesList();
+      const q = e.target.value.toLowerCase();
+      const filtered = q ? opts.filter((o) => o.label.toLowerCase().includes(q)) : opts;
+      const selectedCode = ddType === 'docType' ? _state.docTypeFilter : _state.roleFilter;
+
+      list.innerHTML = filtered.length === 0
+        ? `<div class="um-dropdown__no-results">Sin coincidencias</div>`
+        : filtered.map((o) => `
+            <button type="button" class="um-dropdown__opt"
+                    data-dd="${ddType}" data-value="${o.code}"
+                    aria-selected="${o.code === selectedCode}">
+              <span>${escapeHtml(o.label)}</span>
+              <span class="um-dropdown__opt-check">${getIcon('check')}</span>
+            </button>
+          `).join('');
+
+      /* Re-bind options en la nueva lista */
+      list.querySelectorAll('.um-dropdown__opt').forEach((opt) => {
+        opt.addEventListener('click', onDropdownOptClick);
+      });
     });
   });
 
   /* Dropdown options */
   _state.rootEl.querySelectorAll('.um-dropdown__opt').forEach((opt) => {
-    opt.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const ddType = opt.getAttribute('data-dd');
-      const value = opt.getAttribute('data-value');
-      if (ddType === 'docType') _state.docTypeFilter = value;
-      if (ddType === 'role')    _state.roleFilter = value;
-      _state.page = 1;
-      paintFull();
-    });
+    opt.addEventListener('click', onDropdownOptClick);
   });
+}
+
+function onDropdownOptClick(e) {
+  e.stopPropagation();
+  const opt = e.currentTarget;
+  const ddType = opt.getAttribute('data-dd');
+  const value = opt.getAttribute('data-value');
+  if (ddType === 'docType') _state.docTypeFilter = value;
+  if (ddType === 'role')    _state.roleFilter = value;
+  _state.ddSearch[ddType] = '';
+  _state.page = 1;
+  paintFull();
 }
 
 function bindPaginationEvents() {

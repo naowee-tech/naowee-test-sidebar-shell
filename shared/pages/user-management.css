@@ -26,35 +26,41 @@
   display:flex;flex-direction:column;gap:18px;
 }
 
-/* ─── Tabs (dentro del card) ─────────────────────────────────────── */
+/* ─── Tabs (DS naowee-tabs--animated con indicator que se desliza) ─── */
 .um-tabs{
+  position:relative;
   display:flex;
   border-bottom:1px solid var(--border);
   flex-shrink:0;
-  margin:-4px -4px 0;
-  padding:0 4px;
+  /* Margin negativo + padding compensa el padding:20px del card → divider full-width */
+  margin:0 -20px;
+  padding:0 20px;
 }
 .um-tab{
   position:relative;
-  background:none;border:none;padding:14px 0;margin-right:32px;
+  background:none;border:none;
+  padding:14px 0;margin-right:32px;
   font-family:inherit;font-size:14px;font-weight:600;
   color:var(--text-secondary);
   cursor:pointer;
-  transition:color .2s ease;
+  transition:color .25s ease;
 }
 .um-tab:hover{color:var(--text-primary)}
 .um-tab.is-active{color:var(--accent)}
-.um-tab.is-active::after{
-  content:'';
+
+/* Indicator que se desliza entre tabs (posicionado por JS con transform) */
+.um-tabs__indicator{
   position:absolute;
-  left:0;right:0;bottom:-1px;
-  height:2px;background:var(--accent);
+  bottom:-1px;
+  left:0;
+  height:2px;
+  background:var(--accent);
   border-radius:2px 2px 0 0;
-  animation:tabBarIn .32s cubic-bezier(.16,1,.3,1) both;
-}
-@keyframes tabBarIn{
-  from{transform:scaleX(0);transform-origin:left}
-  to{transform:scaleX(1)}
+  transform:translateX(0);
+  width:0;
+  pointer-events:none;
+  transition:transform .36s cubic-bezier(.16,1,.3,1),
+             width .36s cubic-bezier(.16,1,.3,1);
 }
 
 /* ─── Toolbar (search + filtros + paginación en una sola fila) ──── */
@@ -133,18 +139,65 @@
 
 .um-dropdown__menu{
   position:absolute;top:calc(100% + 6px);left:0;z-index:50;
-  min-width:100%;
+  min-width:240px;
   background:#fff;
   border:1px solid var(--border);border-radius:10px;
   box-shadow:0 12px 32px rgba(40,40,52,.12);
   padding:6px;
-  white-space:nowrap;
   opacity:0;transform:translateY(-6px);pointer-events:none;
   transition:opacity .18s, transform .18s;
-  max-height:320px;overflow-y:auto;
+  display:flex;flex-direction:column;gap:4px;
+  max-height:380px;
 }
 .um-dropdown.is-open .um-dropdown__menu{
   opacity:1;transform:translateY(0);pointer-events:auto;
+}
+
+/* Search interno del dropdown */
+.um-dropdown__search{
+  position:relative;
+  padding:4px 4px 6px;
+  flex-shrink:0;
+}
+.um-dropdown__search-input{
+  width:100%;
+  height:32px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:0 10px 0 32px;
+  font:inherit;font-size:12.5px;
+  color:var(--text-primary);
+  background:#fff;
+  outline:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+.um-dropdown__search-input::placeholder{color:#9ca0b8}
+.um-dropdown__search-input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(215,64,9,.12);
+}
+.um-dropdown__search-icon{
+  position:absolute;
+  left:14px;top:50%;transform:translateY(-50%);
+  width:14px;height:14px;
+  color:var(--text-secondary);
+  pointer-events:none;
+}
+
+/* Lista scrolleable de opciones */
+.um-dropdown__list{
+  overflow-y:auto;
+  flex:1;
+  scrollbar-width:thin;
+  scrollbar-color:var(--border-dark) transparent;
+}
+.um-dropdown__list::-webkit-scrollbar{width:6px}
+.um-dropdown__list::-webkit-scrollbar-thumb{background:var(--border-dark);border-radius:3px}
+.um-dropdown__no-results{
+  padding:14px 10px;
+  text-align:center;
+  font-size:12px;
+  color:var(--text-secondary);
 }
 .um-dropdown__opt{
   display:flex;align-items:center;gap:10px;
@@ -253,46 +306,57 @@
   /* Inter — no monospace */
 }
 
-/* ─── Badge status (DS cod-state-pill) ───────────────────────────── */
+/* ─── Badge status (DS — con border + más padding, estilo "Asignado") ─ */
 .um-badge{
   display:inline-flex;align-items:center;
-  padding:2px 8px;
+  padding:3px 10px;
   border-radius:9999px;
-  font-size:10.5px;font-weight:700;
+  font-size:11px;font-weight:700;
   letter-spacing:.2px;
+  border:1px solid transparent;
 }
 .um-badge--active{
   background:var(--green-bg, #e6f4e7);
   color:var(--green, #1f8923);
+  border-color:var(--green-border, #b7dfb9);
 }
 .um-badge--inactive{
-  background:#f5f6fa;color:var(--text-secondary);
+  background:#f5f6fa;
+  color:var(--text-secondary);
+  border-color:var(--border, #e7e9f3);
 }
 .um-badge--pending{
-  background:#fff3e6;color:var(--accent);
+  background:#fff3e6;
+  color:var(--accent);
+  border-color:#ffbf75;
 }
 
-/* ─── Action button 3-dots (DS rev-history-btn pattern) ──────────── */
+/* ─── Action button 3-dots (GHOST — transparente, hover sutil) ─────── */
 .um-actions{position:relative;display:inline-block}
 .um-actions__trigger{
   width:28px;height:28px;
   border:none;border-radius:6px;
-  background:#fff3e6;
+  background:transparent;
   display:inline-flex;align-items:center;justify-content:center;
-  color:var(--accent);
+  color:var(--text-secondary);
   cursor:pointer;
-  transition:background .15s, transform .12s;
+  transition:background .15s, color .15s;
   padding:0;flex-shrink:0;
 }
-.um-actions__trigger:hover{background:#ffdaa3;transform:scale(1.08)}
-.um-actions__trigger svg{width:14px;height:14px}
+.um-actions__trigger:hover{
+  background:#f5f6fa;
+  color:var(--text-primary);
+}
+.um-actions__trigger svg{width:16px;height:16px}
 .um-actions.is-open .um-actions__trigger{
-  background:#ffdaa3;transform:scale(1.04);
+  background:#fff3e6;
+  color:var(--accent);
 }
 
+/* Action menu — width auto al texto más largo */
 .um-actions__menu{
   position:absolute;top:calc(100% + 4px);right:0;
-  width:200px;
+  width:max-content;
   background:#fff;
   border:1px solid var(--border);border-radius:10px;
   box-shadow:0 12px 32px rgba(40,40,52,.12);
@@ -307,12 +371,13 @@
 .um-actions__item{
   display:flex;align-items:center;gap:10px;
   width:100%;
-  padding:9px 10px;
+  padding:9px 12px;
   border:none;background:none;
   font-family:inherit;font-size:13px;font-weight:500;
   color:var(--text-primary);text-align:left;
   border-radius:6px;
   cursor:pointer;
+  white-space:nowrap;
   transition:background .12s;
 }
 .um-actions__item:hover{background:#f5f6fa}
@@ -320,6 +385,7 @@
 .um-actions__item--danger:hover{background:#fff0ee;color:#a80f0f}
 .um-actions__item-icon{
   width:16px;height:16px;flex-shrink:0;color:currentColor;
+  display:inline-flex;align-items:center;justify-content:center;
 }
 .um-actions__item-icon svg{width:16px;height:16px}
 
