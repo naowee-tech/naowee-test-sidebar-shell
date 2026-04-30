@@ -468,7 +468,10 @@ a{color:inherit;text-decoration:none}
   bottom:14px;
   left:50%;
   transform:translateX(-50%);
-  z-index:60;
+  /* z-index 9999 → arriba de map popovers (1500), tooltips (2000),
+     y cualquier overlay flotante de las páginas internas. Es un control
+     de demo siempre accesible. */
+  z-index:9999;
 }
 .demo-role-switcher__toggle{
   display:inline-flex;align-items:center;gap:8px;
