@@ -150,48 +150,9 @@
 }
 .um-dropdown__opt[aria-selected="true"] .um-dropdown__opt-check{opacity:1}
 
-/* ─── Paginación (DS naowee-pagination) ──────────────────────────── */
-.um-pagination{
-  display:flex;align-items:center;gap:0;
-  font-family:'Inter',sans-serif;
-}
-.um-pagination__label,
-.um-pagination__total{
-  font-size:12px;line-height:16px;
-  color:var(--text-secondary);
-  white-space:nowrap;
-}
-.um-pagination__label{margin-right:8px}
-.um-pagination__total{margin-left:6px}
-.um-pagination__total strong{color:var(--text-primary);font-weight:600}
-.um-pagination__input{
-  width:48px;height:32px;
-  border:1px solid var(--border);
-  border-radius:8px;
-  text-align:center;
-  font:inherit;font-size:12px;font-weight:400;
-  color:var(--text-primary);
-  outline:none;background:#fff;padding:4px 6px;
-}
-.um-pagination__input:focus{
-  border-width:2px;
-  border-color:var(--accent);
-  padding:3px 5px;
-}
-.um-pagination__controls{display:flex;gap:6px;margin-left:8px}
-.um-pagination__btn{
-  width:32px;height:32px;
-  border:none;border-radius:8px;
-  background:#fff3e6;
-  cursor:pointer;
-  display:inline-flex;align-items:center;justify-content:center;
-  color:var(--accent);
-  transition:background .15s;
-  flex-shrink:0;padding:0;
-}
-.um-pagination__btn:hover:not(:disabled){background:#ffdaa3}
-.um-pagination__btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
-.um-pagination__btn svg{width:16px;height:16px}
+/* ─── Paginación — DS oficial (.naowee-pagination, .--small) ────────
+   Sin overrides locales — el DS provee label, input, total, controls,
+   btn (con bg quiet, hover, disabled). Solo usamos el componente. */
 
 /* ─── Tabla (DS cod-table) ───────────────────────────────────────── */
 .um-table-wrap{overflow-x:auto}

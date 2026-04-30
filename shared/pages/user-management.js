@@ -173,7 +173,7 @@ function paintFull() {
         ${renderTabs()}
         <div class="um-toolbar" id="umToolbar">
           ${renderToolbarLeft()}
-          <div class="um-pagination" id="umPagination">
+          <div class="naowee-pagination naowee-pagination--small" id="umPagination">
             ${renderPagination(filtered.length, totalPages)}
           </div>
         </div>
@@ -290,18 +290,20 @@ function renderDropdown(ddType, placeholder, options, selectedCode) {
   `;
 }
 
-/* ─── Render: paginación ──────────────────────────────────────────── */
+/* ─── Render: paginación (DS oficial naowee-pagination) ───────────── */
 function renderPagination(totalFiltered, totalPages) {
   return `
-    <span class="um-pagination__label">Página</span>
-    <input type="number" class="um-pagination__input" id="umPageInput"
-           min="1" max="${totalPages}" value="${_state.page}" />
-    <span class="um-pagination__total">de <strong>${totalPages}</strong></span>
-    <div class="um-pagination__controls">
-      <button class="um-pagination__btn" id="umPrev" ${_state.page === 1 ? 'disabled' : ''} aria-label="Página anterior">
+    <div class="naowee-pagination__pages">
+      <span class="naowee-pagination__label">Página</span>
+      <input type="number" class="naowee-pagination__input" id="umPageInput"
+             min="1" max="${totalPages}" value="${_state.page}" />
+      <span class="naowee-pagination__total">de <strong>${totalPages}</strong></span>
+    </div>
+    <div class="naowee-pagination__controls">
+      <button class="naowee-pagination__btn" id="umPrev" ${_state.page === 1 ? 'disabled' : ''} aria-label="Página anterior">
         ${chevronLeft()}
       </button>
-      <button class="um-pagination__btn" id="umNext" ${_state.page >= totalPages ? 'disabled' : ''} aria-label="Página siguiente">
+      <button class="naowee-pagination__btn" id="umNext" ${_state.page >= totalPages ? 'disabled' : ''} aria-label="Página siguiente">
         ${chevronRight()}
       </button>
     </div>
@@ -395,7 +397,8 @@ function bindAllEvents() {
 }
 
 function bindTabsEvents() {
-  _state.rootEl.querySelectorAll('.um-tab').forEach((t) => {
+  /* Selector: .naowee-tab[data-tab] — DS class después de migración */
+  _state.rootEl.querySelectorAll('.naowee-tab[data-tab]').forEach((t) => {
     t.addEventListener('click', () => {
       const tab = t.getAttribute('data-tab');
       if (tab === _state.tab) return;
