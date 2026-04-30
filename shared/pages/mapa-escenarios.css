@@ -98,12 +98,25 @@
 
 /* Filter dropdowns: width fijo + ellipsis. Cuando el usuario selecciona
    un valor largo (ej "Cancha múltiple"), se trunca con "…", el trigger
-   no crece y todos los dropdowns quedan alineados con gap uniforme. */
+   no crece y todos los dropdowns quedan alineados con gap uniforme.
+
+   ROOT CAUSE BUG (resuelto): el wrapper .naowee-filter-dropdown del DS
+   usa display:inline-flex, lo que hace que el trigger interno se sice
+   a su CONTENIDO (~70px para "Tipo ⌄") y NO al width del wrapper. Eso
+   dejaba un hueco de ~60px DENTRO del wrapper a la derecha del trigger
+   que el usuario veía como "gap entre dropdowns". Fix: forzar el
+   trigger a width:100% para que llene el wrapper. */
 .me-dd{
   flex:0 0 130px;
   min-width:130px;
   width:130px;
   max-width:130px;
+  display:flex;             /* override del DS inline-flex */
+}
+.me-dd .naowee-filter-dropdown__trigger{
+  width:100%;
+  box-sizing:border-box;
+  justify-content:space-between;  /* label izq, chev der — ya estaba en DS */
 }
 /* Trigger label: truncate con ellipsis si el value es más largo
    que el width del trigger. Display block + min-width:0 para que
