@@ -58,7 +58,11 @@ const _state = {
 export function renderDocsReviewPage(pageEl) {
   pageEl.classList.remove('um-page');
   pageEl.classList.remove('me-page');
-  pageEl.classList.add('sd-page');     /* reuso del layout full-width del sandbox */
+  pageEl.classList.remove('sd-page');  /* CRÍTICO: sd-page tiene overrides de table-cols
+                                          (28%/18%/8% etc) que estaban pisando los
+                                          widths de la tabla del revisor — usamos clase
+                                          dedicada para evitar el conflicto. */
+  pageEl.classList.add('dr-page');
   _state.rootEl = pageEl;
   _state.selected = new Set();
   pageEl.innerHTML = renderShell();

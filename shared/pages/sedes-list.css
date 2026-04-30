@@ -1225,6 +1225,17 @@
    Pattern del reference escenario-11-revisor-dashboard.
    ═══════════════════════════════════════════════════════════════ */
 
+/* Page wrapper dedicado (NO usa .sd-page para evitar conflicto con
+   las reglas de table-cols de la lista de sedes). */
+.dr-page{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  width:100%;
+  max-width:1800px;
+  margin:0 auto;
+}
+
 .dr-card{
   display:flex;
   flex-direction:column;
@@ -1264,25 +1275,30 @@
   margin-right:8px;
 }
 
-/* Table styles — column widths explícitos para que la tabla NO
-   distribuya en auto-layout (que dejaba el checkbox column muy
-   ancho con espacio fantasma a la izquierda). */
+/* Table styles — column widths explícitos.
+   IMPORTANT: usamos !important + selectors muy específicos para que
+   ninguna regla de otras clases (.sd-page .naowee-table--in-card etc)
+   pueda pisar nuestras widths. Tabla de 7 columnas:
+   1) checkbox  2) Escenario  3) ID único  4) CAR
+   5) Estado   6) Última actualización  7) Acciones */
 .dr-table{
-  width:100%;
-  table-layout:fixed;
+  width:100% !important;
+  table-layout:fixed !important;
 }
-.dr-table th.dr-th-check,
-.dr-table td.dr-td-check{
-  width:48px;
-  padding-left:18px;
-  padding-right:0;
-}
-.dr-table thead th:nth-child(3){ width:140px; }     /* ID único */
-.dr-table thead th:nth-child(4){ width:60px; }      /* CAR */
-.dr-table thead th:nth-child(5){ width:130px; }     /* Estado */
-.dr-table thead th:nth-child(6){ width:200px; }     /* Última actualización */
-.dr-th-actions{
+.dr-table thead th:nth-child(1),
+.dr-table tbody td:nth-child(1){
   width:48px !important;
+  padding-left:18px !important;
+  padding-right:0 !important;
+}
+.dr-table thead th:nth-child(2){ width:auto !important; }              /* Escenario o sede — toma el resto */
+.dr-table thead th:nth-child(3){ width:140px !important; }             /* ID único */
+.dr-table thead th:nth-child(4){ width:70px !important; }              /* CAR */
+.dr-table thead th:nth-child(5){ width:130px !important; }             /* Estado */
+.dr-table thead th:nth-child(6){ width:240px !important; }             /* Última actualización (con autor "De Juan Hernandez Granados" sin wrap) */
+.dr-table thead th:nth-child(7),
+.dr-table tbody td:nth-child(7){
+  width:60px !important;
   text-align:right;
   padding-right:18px !important;
 }
