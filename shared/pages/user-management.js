@@ -141,7 +141,7 @@ export function renderUserManagementPage(rootEl) {
      Lo agregamos UNA vez al document para que sobreviva re-renders. */
   if (!document._umClickOutBound) {
     document.addEventListener('click', () => {
-      document.querySelectorAll('.um-dropdown.is-open').forEach((el) => el.classList.remove('is-open'));
+      document.querySelectorAll('.naowee-filter-dropdown.is-open').forEach((el) => el.classList.remove('is-open'));
       document.querySelectorAll('.naowee-table-card__row-actions.is-open').forEach((el) => el.classList.remove('is-open'));
     });
     document._umClickOutBound = true;
@@ -164,10 +164,10 @@ function paintFull() {
 
   _state.rootEl.innerHTML = `
     <div class="um-page">
-      <div class="um-page__header">
-        <h1>Gestión de usuarios</h1>
-        <p>Administra los usuarios y sus roles en el sistema</p>
-      </div>
+      <header class="naowee-page-header">
+        <h1 class="naowee-page-header__title">Gestión de usuarios</h1>
+        <p class="naowee-page-header__subtitle">Administra los usuarios y sus roles en el sistema</p>
+      </header>
 
       <div class="naowee-table-card">
         ${renderTabs()}
@@ -248,16 +248,18 @@ function renderToolbarLeft() {
   const hasSearch = _state.search.length > 0;
 
   return `
-    <div class="um-toolbar__left">
-      <label class="um-search ${hasSearch ? 'has-value' : ''}">
-        <span class="um-search__icon">${searchIcon()}</span>
-        <input type="text" class="um-search__input" id="umSearch"
-               placeholder="Buscar por documento o correo"
-               value="${escapeHtml(_state.search)}" />
-        <button class="um-search__clear" type="button" id="umSearchClear" aria-label="Limpiar búsqueda">
-          ${closeIcon()}
-        </button>
-      </label>
+    <div class="naowee-table-card__toolbar-left">
+      <div class="naowee-searchbox naowee-searchbox--small ${hasSearch ? 'naowee-searchbox--has-value' : ''}" style="width:280px">
+        <div class="naowee-searchbox__input-wrap">
+          <span class="naowee-searchbox__icon">${searchIcon()}</span>
+          <input type="text" class="naowee-searchbox__input" id="umSearch"
+                 placeholder="Buscar por documento o correo"
+                 value="${escapeHtml(_state.search)}" />
+          <button class="naowee-searchbox__clear" type="button" id="umSearchClear" aria-label="Limpiar búsqueda">
+            ${closeIcon()}
+          </button>
+        </div>
+      </div>
 
       ${renderDropdown('docType', 'Tipo de documento', docOpts, _state.docTypeFilter)}
       ${renderDropdown('role', 'Filtrar por Roles', roleOpts, _state.roleFilter)}
@@ -265,24 +267,24 @@ function renderToolbarLeft() {
   `;
 }
 
-/* Dropdown simple (sin search interno) — solo lista de opciones */
+/* Dropdown DS oficial (.naowee-filter-dropdown) — sin search interno */
 function renderDropdown(ddType, placeholder, options, selectedCode) {
   const current = options.find((o) => o.code === selectedCode) || options[0];
   const triggerLabel = selectedCode === 'all' ? placeholder : current.label;
 
   return `
-    <div class="um-dropdown" data-dd-type="${ddType}">
-      <button class="um-dropdown__trigger" type="button">
+    <div class="naowee-filter-dropdown" data-dd-type="${ddType}">
+      <button class="naowee-filter-dropdown__trigger" type="button">
         <span>${escapeHtml(triggerLabel)}</span>
-        <span class="um-dropdown__chev">${getIcon('chevron')}</span>
+        <span class="naowee-filter-dropdown__chev">${getIcon('chevron')}</span>
       </button>
-      <div class="um-dropdown__menu">
+      <div class="naowee-filter-dropdown__menu">
         ${options.map((o) => `
-          <button type="button" class="um-dropdown__opt"
+          <button type="button" class="naowee-filter-dropdown__option"
                   data-dd="${ddType}" data-value="${o.code}"
                   aria-selected="${o.code === selectedCode}">
             <span>${escapeHtml(o.label)}</span>
-            <span class="um-dropdown__opt-check">${getIcon('check')}</span>
+            <span class="naowee-filter-dropdown__option-check">${getIcon('check')}</span>
           </button>
         `).join('')}
       </div>
@@ -381,11 +383,16 @@ function renderBadge(status) {
 
 function renderEmpty() {
   return `
-    <div class="um-empty">
-      <h3>Sin resultados</h3>
-      <p>Prueba a limpiar los filtros o cambiar la búsqueda.</p>
+    <div class="naowee-empty-state">
+      <span class="naowee-empty-state__icon">${searchEmptyIcon()}</span>
+      <h3 class="naowee-empty-state__title">Sin resultados</h3>
+      <p class="naowee-empty-state__description">Prueba a limpiar los filtros o cambiar la búsqueda.</p>
     </div>
   `;
+}
+
+function searchEmptyIcon() {
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><line x1="8" y1="11" x2="14" y2="11"/></svg>';
 }
 
 /* ─── Eventos ──────────────────────────────────────────────────────── */
@@ -415,12 +422,12 @@ function bindTabsEvents() {
 function bindToolbarEvents() {
   /* Search input — re-render parcial (mantiene focus) */
   const searchInput = _state.rootEl.querySelector('#umSearch');
-  const searchWrap = searchInput?.closest('.um-search');
+  const searchWrap = searchInput?.closest('.naowee-searchbox');
   searchInput?.addEventListener('input', (e) => {
     _state.search = e.target.value;
     _state.page = 1;
     /* Actualizamos solo la clase has-value y la tabla — NO regeneramos el input */
-    if (searchWrap) searchWrap.classList.toggle('has-value', _state.search.length > 0);
+    if (searchWrap) searchWrap.classList.toggle('naowee-searchbox--has-value', _state.search.length > 0);
     paintTableOnly();
     /* El input mantiene focus porque NO fue rerenderizado */
   });
@@ -431,25 +438,25 @@ function bindToolbarEvents() {
     _state.search = '';
     _state.page = 1;
     if (searchInput) searchInput.value = '';
-    if (searchWrap) searchWrap.classList.remove('has-value');
+    if (searchWrap) searchWrap.classList.remove('naowee-searchbox--has-value');
     paintTableOnly();
     searchInput?.focus();
   });
 
-  /* Dropdown trigger toggle */
-  _state.rootEl.querySelectorAll('.um-dropdown').forEach((dd) => {
-    const trigger = dd.querySelector('.um-dropdown__trigger');
+  /* Filter dropdown trigger toggle */
+  _state.rootEl.querySelectorAll('.naowee-filter-dropdown').forEach((dd) => {
+    const trigger = dd.querySelector('.naowee-filter-dropdown__trigger');
     trigger?.addEventListener('click', (e) => {
       e.stopPropagation();
-      _state.rootEl.querySelectorAll('.um-dropdown.is-open').forEach((other) => {
+      _state.rootEl.querySelectorAll('.naowee-filter-dropdown.is-open').forEach((other) => {
         if (other !== dd) other.classList.remove('is-open');
       });
       dd.classList.toggle('is-open');
     });
   });
 
-  /* Dropdown options */
-  _state.rootEl.querySelectorAll('.um-dropdown__opt').forEach((opt) => {
+  /* Filter dropdown options */
+  _state.rootEl.querySelectorAll('.naowee-filter-dropdown__option').forEach((opt) => {
     opt.addEventListener('click', (e) => {
       e.stopPropagation();
       const ddType = opt.getAttribute('data-dd');

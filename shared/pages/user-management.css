@@ -1,144 +1,30 @@
 /* ═══════════════════════════════════════════════════════════════
    USER MANAGEMENT — Gestión de usuarios
-   Migrado a v1.5.0 del DS oficial. La mayoría de los estilos vienen
-   del CDN: .naowee-table-card, .naowee-table--in-card, .naowee-tabs,
-   .naowee-pagination, .naowee-badge, .naowee-btn--icon.
+   Migrado a v1.6.0 del DS oficial. CERO componentes custom locales.
 
-   Solo conservamos estilos locales para componentes que el DS no provee:
-   - Page header (título + subtítulo de la página)
-   - Search con botón clear (el .naowee-searchbox del DS no expone clear logic
-     reactivo a value)
-   - Filter dropdown custom (el .naowee-dropdown del DS está pensado para forms,
-     no para filters de toolbar)
-   - Empty state
+   El layout depende de:
+   - .naowee-page-header (header)
+   - .naowee-table-card + composición (tabla compuesta)
+   - .naowee-searchbox--small + --has-value (búsqueda con clear)
+   - .naowee-filter-dropdown (filtros del toolbar)
+   - .naowee-empty-state (estado vacío)
+   - .naowee-tabs--animated, .naowee-pagination, .naowee-badge,
+     .naowee-btn--icon (todos del DS)
+
+   Acá solo conservamos el wrapper de la página y el responsive.
    ═══════════════════════════════════════════════════════════════ */
 
-/* ─── Page wrapper + header ──────────────────────────────────────── */
 .um-page{
-  display:flex;flex-direction:column;gap:20px;
-  max-width:1400px;margin:0 auto;
-}
-.um-page__header h1{
-  font-size:24px;font-weight:700;color:var(--naowee-color-text-primary, var(--text-primary));
-  margin:0 0 4px;letter-spacing:-.3px;
-}
-.um-page__header p{
-  font-size:13px;color:var(--naowee-color-text-secondary, var(--text-secondary));margin:0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-/* ─── Search pill custom (con botón clear) ───────────────────────── */
-.um-search{
-  position:relative;
-  display:flex;align-items:center;
-  width:280px;max-width:100%;
-  height:36px;
-  background:#fff;
-  border:1px solid #8788ab;
-  border-radius:9999px;
-  padding:4px 12px 4px 36px;
-  transition:border-color .15s, box-shadow .15s;
-}
-.um-search:focus-within{
-  border-color:var(--naowee-color-text-accent, var(--accent));
-  box-shadow:0 0 0 3px rgba(215,64,9,.15);
-}
-.um-search__icon{
-  position:absolute;left:12px;top:50%;transform:translateY(-50%);
-  width:16px;height:16px;color:var(--naowee-color-text-secondary, var(--text-secondary));
-  pointer-events:none;
-}
-.um-search__input{
-  border:none;outline:none;background:transparent;
-  font-family:inherit;font-size:13px;font-weight:400;
-  color:var(--naowee-color-text-primary, var(--text-primary));
-  width:100%;height:100%;padding-right:24px;
-}
-.um-search__input::placeholder{color:#9ca0b8}
-.um-search__clear{
-  position:absolute;right:8px;top:50%;transform:translateY(-50%);
-  width:20px;height:20px;border:none;background:none;
-  display:none;align-items:center;justify-content:center;
-  border-radius:50%;color:var(--naowee-color-text-secondary, var(--text-secondary));cursor:pointer;
-  transition:background .12s, color .12s;
-}
-.um-search.has-value .um-search__clear{display:inline-flex}
-.um-search__clear:hover{background:#f5f6fa;color:var(--naowee-color-text-primary, var(--text-primary))}
-.um-search__clear svg{width:12px;height:12px}
-
-/* ─── Filter dropdown custom (para toolbar) ──────────────────────── */
-.um-dropdown{position:relative;display:inline-flex}
-.um-dropdown__trigger{
-  position:relative;display:inline-flex;align-items:center;gap:8px;justify-content:space-between;
-  height:36px;padding:4px 12px 4px 14px;
-  background:#fff;border:1px solid #8788ab;border-radius:8px;
-  font-family:'Inter',sans-serif;font-size:12.5px;font-weight:500;
-  color:var(--naowee-color-text-primary, var(--text-primary));
-  cursor:pointer;
-  transition:border-color .15s, box-shadow .15s;
-}
-.um-dropdown__trigger:hover{border-color:#646587}
-.um-dropdown.is-open .um-dropdown__trigger,
-.um-dropdown__trigger:focus-visible{
-  outline:none;
-  border-color:var(--naowee-color-text-accent, var(--accent));
-  box-shadow:0 0 0 3px rgba(215,64,9,.15);
-}
-.um-dropdown__chev{
-  width:16px;height:16px;flex-shrink:0;
-  color:var(--naowee-color-text-secondary, var(--text-secondary));
-  transition:transform .2s;
-}
-.um-dropdown.is-open .um-dropdown__chev{transform:rotate(180deg)}
-
-.um-dropdown__menu{
-  position:absolute;top:calc(100% + 6px);left:0;z-index:50;
-  min-width:240px;
-  background:#fff;
-  border:1px solid var(--naowee-color-border-default, var(--border));border-radius:10px;
-  box-shadow:0 12px 32px rgba(40,40,52,.12);
-  padding:6px;
-  opacity:0;transform:translateY(-6px);pointer-events:none;
-  transition:opacity .18s, transform .18s;
-  display:flex;flex-direction:column;gap:4px;
-  max-height:380px;overflow-y:auto;
-}
-.um-dropdown.is-open .um-dropdown__menu{
-  opacity:1;transform:translateY(0);pointer-events:auto;
-}
-.um-dropdown__opt{
-  display:flex;align-items:center;gap:10px;
-  width:100%;
-  padding:9px 10px;
-  border:none;background:none;
-  font-family:inherit;font-size:13px;font-weight:500;
-  color:var(--naowee-color-text-primary, var(--text-primary));text-align:left;
-  border-radius:6px;
-  cursor:pointer;
-  transition:background .12s;
-}
-.um-dropdown__opt:hover{background:#f5f6fa}
-.um-dropdown__opt[aria-selected="true"]{
-  background:#fff3e6;color:var(--naowee-color-text-accent, var(--accent));font-weight:600;
-}
-.um-dropdown__opt-check{
-  width:14px;height:14px;
-  margin-left:auto;
-  opacity:0;color:var(--naowee-color-text-accent, var(--accent));
-}
-.um-dropdown__opt[aria-selected="true"] .um-dropdown__opt-check{opacity:1}
-
-/* ─── Empty state ─────────────────────────────────────────────────── */
-.um-empty{
-  padding:60px 24px;text-align:center;
-  color:var(--naowee-color-text-secondary, var(--text-secondary));
-}
-.um-empty h3{
-  font-size:16px;font-weight:700;color:var(--naowee-color-text-primary, var(--text-primary));
-  margin:0 0 6px;
-}
-.um-empty p{font-size:13px;margin:0}
-
-/* Responsive */
-@media (max-width:1100px){
-  .um-search{width:240px}
+/* Responsive — el searchbox del DS reduce su width en mobile */
+@media (max-width: 1100px){
+  .um-page .naowee-searchbox{
+    width: 240px !important;
+  }
 }
