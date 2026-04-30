@@ -68,10 +68,13 @@
      Más apretado que 10px (que se sentía spread). */
   gap:6px;
 }
-/* Items del toolbar: flex-grow:0 para que ninguno crezca y rompa el
-   ritmo. margin:0 para no acumular margins extra. El único con
-   margin-left:auto es el reset (al final). */
-.me-toolbar__row > *{ flex-grow:0; flex-shrink:0; margin:0; }
+/* Items del toolbar: margin:0 universal para no acumular margins
+   extra. flex-grow:0 EXCEPTO en el searchbox (que debe absorber el
+   spare space). margin-left:auto en reset → siempre al extremo derecho.
+   IMPORTANTE: no agregar flex-grow:0 universal porque sobreescribe el
+   flex:1 del .me-search. */
+.me-toolbar__row > *{ flex-shrink:0; margin:0; }
+.me-toolbar__row > *:not(.me-search){ flex-grow:0; }
 .me-toolbar__row > .me-filter-reset{ margin-left:auto; }
 .me-toolbar__chips{
   display:flex;
@@ -80,20 +83,22 @@
   gap:8px;
 }
 
-/* Searchbox: ancho fijo. Mismo height (36px) que dropdowns y segment. */
+/* Searchbox: GROWABLE (flex:1) para absorber el spare space del row.
+   Sin esto, el spare space se acumulaba antes del reset (margin-left:
+   auto) creando la ilusión de "gaps grandes" entre dropdowns. Pattern
+   del reference escenario-13-mapa.html (.filter-search). */
 .me-search{
-  flex:0 0 280px;
-  max-width:280px;
+  flex:1 1 240px;
+  min-width:200px;
+  max-width:340px;
 }
 .me-search .naowee-searchbox__input-wrap{
   height:36px;
 }
 
-/* Filter dropdowns: TODOS al MISMO width fijo (130px) con
-   text-overflow:ellipsis. Si el valor seleccionado es muy largo (ej
-   "Cancha múltiple", "Complejo deportivo") se trunca con "…", el
-   trigger no crece y todos los dropdowns quedan alineados con gap
-   uniforme. */
+/* Filter dropdowns: width fijo + ellipsis. Cuando el usuario selecciona
+   un valor largo (ej "Cancha múltiple"), se trunca con "…", el trigger
+   no crece y todos los dropdowns quedan alineados con gap uniforme. */
 .me-dd{
   flex:0 0 130px;
   min-width:130px;
