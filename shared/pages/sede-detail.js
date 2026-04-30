@@ -265,13 +265,14 @@ function renderActiveHero(sede) {
         </button>
       </div>
 
-      <!-- Photo gallery -->
+      <!-- Photo gallery: strip de thumbnails (6 visibles a la vez).
+           Click en cualquier thumb abre el lightbox modal con prev/next. -->
       <div class="sd-detail__gallery">
         <div class="sd-detail__gallery-track" id="sdGalleryTrack">
           ${GALLERY_PHOTOS.map((id, i) => `
-            <div class="sd-detail__gallery-item">
-              <img src="https://images.unsplash.com/photo-${id}?w=600&h=320&fit=crop&q=80" alt="Foto ${i + 1}" />
-            </div>
+            <button type="button" class="sd-detail__gallery-thumb" data-photo-idx="${i}" aria-label="Ver foto ${i + 1}">
+              <img src="https://images.unsplash.com/photo-${id}?w=400&h=300&fit=crop&q=80" alt="Foto ${i + 1}" loading="lazy" />
+            </button>
           `).join('')}
         </div>
         <button type="button" class="sd-detail__gallery-nav sd-detail__gallery-nav--prev" data-gallery="prev" aria-label="Anterior">
@@ -282,12 +283,123 @@ function renderActiveHero(sede) {
         </button>
         <div class="sd-detail__gallery-dots">
           ${GALLERY_PHOTOS.map((_, i) => `
-            <button type="button" class="sd-detail__gallery-dot ${i === 0 ? 'sd-detail__gallery-dot--active' : ''}" data-gallery-dot="${i}"></button>
+            <button type="button" class="sd-detail__gallery-dot ${i === 0 ? 'sd-detail__gallery-dot--active' : ''}" data-gallery-dot="${i}" aria-label="Ir a página ${i + 1}"></button>
           `).join('')}
         </div>
       </div>
     </div>
   `;
+}
+
+/* ─── Lightbox modal (full-screen photo viewer) ──────────────── */
+function openLightbox(startIdx = 0) {
+  /* Si ya hay un lightbox abierto, lo removemos primero */
+  closeLightbox();
+  const overlay = document.createElement('div');
+  overlay.className = 'sd-lightbox';
+  overlay.innerHTML = renderLightbox(startIdx);
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+  bindLightboxEvents(overlay);
+  /* Animación de entrada */
+  requestAnimationFrame(() => overlay.classList.add('sd-lightbox--open'));
+}
+
+function closeLightbox() {
+  const overlay = document.querySelector('.sd-lightbox');
+  if (!overlay) return;
+  overlay.classList.remove('sd-lightbox--open');
+  setTimeout(() => {
+    overlay.remove();
+    document.body.style.overflow = '';
+  }, 200);
+}
+
+function renderLightbox(idx) {
+  const photoId = GALLERY_PHOTOS[idx];
+  return `
+    <button type="button" class="sd-lightbox__close" data-lb-close aria-label="Cerrar">
+      ${closeIcon()}
+    </button>
+    <button type="button" class="sd-lightbox__nav sd-lightbox__nav--prev" data-lb-nav="prev" aria-label="Anterior">
+      ${chevronLeft()}
+    </button>
+    <div class="sd-lightbox__main">
+      <img class="sd-lightbox__img" data-lb-img
+           src="https://images.unsplash.com/photo-${photoId}?w=1600&h=1000&fit=crop&q=85"
+           alt="Foto ${idx + 1}" />
+    </div>
+    <button type="button" class="sd-lightbox__nav sd-lightbox__nav--next" data-lb-nav="next" aria-label="Siguiente">
+      ${chevronRight()}
+    </button>
+    <div class="sd-lightbox__strip" data-lb-strip>
+      ${GALLERY_PHOTOS.map((id, i) => `
+        <button type="button" class="sd-lightbox__strip-thumb ${i === idx ? 'sd-lightbox__strip-thumb--active' : ''}" data-lb-thumb="${i}">
+          <img src="https://images.unsplash.com/photo-${id}?w=200&h=140&fit=crop&q=80" alt="" />
+        </button>
+      `).join('')}
+    </div>
+    <div class="sd-lightbox__counter" data-lb-counter>${idx + 1} / ${GALLERY_PHOTOS.length}</div>
+  `;
+}
+
+function bindLightboxEvents(overlay) {
+  let currentIdx = parseInt(
+    overlay.querySelector('[data-lb-thumb].sd-lightbox__strip-thumb--active')?.getAttribute('data-lb-thumb') || '0',
+    10
+  );
+
+  const updateLightbox = (idx) => {
+    currentIdx = (idx + GALLERY_PHOTOS.length) % GALLERY_PHOTOS.length;
+    const photoId = GALLERY_PHOTOS[currentIdx];
+    const img = overlay.querySelector('[data-lb-img]');
+    if (img) img.src = `https://images.unsplash.com/photo-${photoId}?w=1600&h=1000&fit=crop&q=85`;
+    overlay.querySelectorAll('[data-lb-thumb]').forEach(t => {
+      const isActive = parseInt(t.getAttribute('data-lb-thumb'), 10) === currentIdx;
+      t.classList.toggle('sd-lightbox__strip-thumb--active', isActive);
+      if (isActive) t.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    });
+    const counter = overlay.querySelector('[data-lb-counter]');
+    if (counter) counter.textContent = `${currentIdx + 1} / ${GALLERY_PHOTOS.length}`;
+  };
+
+  /* Close: click en backdrop, X button, o ESC */
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeLightbox();
+  });
+  overlay.querySelector('[data-lb-close]')?.addEventListener('click', closeLightbox);
+
+  /* Prev/next nav */
+  overlay.querySelectorAll('[data-lb-nav]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dir = btn.getAttribute('data-lb-nav');
+      updateLightbox(currentIdx + (dir === 'next' ? 1 : -1));
+    });
+  });
+
+  /* Click en thumbnail strip → ir a esa foto */
+  overlay.querySelectorAll('[data-lb-thumb]').forEach(thumb => {
+    thumb.addEventListener('click', () => {
+      const idx = parseInt(thumb.getAttribute('data-lb-thumb'), 10);
+      updateLightbox(idx);
+    });
+  });
+
+  /* Keyboard nav: ESC, ←/→ */
+  if (!document._sdLightboxKeyBound) {
+    document._sdLightboxKeyBound = true;
+    document.addEventListener('keydown', (e) => {
+      const open = document.querySelector('.sd-lightbox');
+      if (!open) return;
+      if (e.key === 'Escape') closeLightbox();
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        /* Re-bind nav handlers — no podemos reusar updateLightbox del closure
+           anterior, así que disparamos los buttons de nav. */
+        const dir = e.key === 'ArrowRight' ? 'next' : 'prev';
+        open.querySelector(`[data-lb-nav="${dir}"]`)?.click();
+      }
+    });
+  }
 }
 
 /* ─── Status banner (revision/rechazado) ──────────────────────── */
@@ -509,37 +621,43 @@ function bindEvents(pageEl) {
     });
   });
 
-  /* Galería navegación (solo en activo) */
+  /* Galería: prev/next desplazan el strip (1 thumb a la vez) */
   pageEl.querySelectorAll('[data-gallery]').forEach(btn => {
     btn.addEventListener('click', () => {
       const dir = btn.getAttribute('data-gallery');
-      const total = GALLERY_PHOTOS.length;
-      _state.galleryIdx = dir === 'next'
-        ? (_state.galleryIdx + 1) % total
-        : (_state.galleryIdx - 1 + total) % total;
-      updateGallery(pageEl);
+      const track = pageEl.querySelector('#sdGalleryTrack');
+      if (!track) return;
+      const thumb = track.querySelector('.sd-detail__gallery-thumb');
+      if (!thumb) return;
+      const thumbWidth = thumb.getBoundingClientRect().width + 12;  /* gap inclusivo */
+      track.scrollBy({ left: dir === 'next' ? thumbWidth * 2 : -thumbWidth * 2, behavior: 'smooth' });
     });
   });
+
+  /* Click en thumbnail → abrir lightbox modal */
+  pageEl.querySelectorAll('[data-photo-idx]').forEach(thumb => {
+    thumb.addEventListener('click', () => {
+      const idx = parseInt(thumb.getAttribute('data-photo-idx'), 10);
+      openLightbox(idx);
+    });
+  });
+
+  /* Dots → scroll a la foto correspondiente */
   pageEl.querySelectorAll('[data-gallery-dot]').forEach(dot => {
     dot.addEventListener('click', () => {
-      _state.galleryIdx = parseInt(dot.getAttribute('data-gallery-dot'), 10);
-      updateGallery(pageEl);
+      const idx = parseInt(dot.getAttribute('data-gallery-dot'), 10);
+      const track = pageEl.querySelector('#sdGalleryTrack');
+      const target = track?.querySelector(`[data-photo-idx="${idx}"]`);
+      if (target) target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      pageEl.querySelectorAll('[data-gallery-dot]').forEach((d, i) => {
+        d.classList.toggle('sd-detail__gallery-dot--active', i === idx);
+      });
     });
   });
 
   /* "Corregir y reenviar" → abre modal con datos actuales */
   pageEl.querySelector('[data-edit-rejected]')?.addEventListener('click', () => {
     openCreateSedeModal();
-  });
-}
-
-function updateGallery(pageEl) {
-  const track = pageEl.querySelector('#sdGalleryTrack');
-  if (track) {
-    track.style.transform = `translateX(-${_state.galleryIdx * 100}%)`;
-  }
-  pageEl.querySelectorAll('[data-gallery-dot]').forEach((dot, i) => {
-    dot.classList.toggle('sd-detail__gallery-dot--active', i === _state.galleryIdx);
   });
 }
 
@@ -551,6 +669,7 @@ function escapeHtml(str) {
 }
 
 function arrowLeftIcon() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7M19 12H5"/></svg>'; }
+function closeIcon()     { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'; }
 function chevronLeft()   { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>'; }
 function chevronRight()  { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'; }
 function clockIcon()     { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'; }
