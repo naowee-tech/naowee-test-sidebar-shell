@@ -6,15 +6,22 @@
    ═══════════════════════════════════════════════════════════════ */
 
 /* ─── Page header con botón CTA a la derecha ─────────────────────── */
+/* .naowee-page-header del DS tiene flex-direction:column. Acá pisamos
+   con !important porque la especificidad de la clase del DS gana sobre
+   nuestra extensión .ev-page-header (mismo peso, pero la del DS se
+   carga después en cascade). */
 .ev-page-header{
-  display:flex;
-  align-items:center;             /* CTA centrado vertical con el bloque title+subtitle */
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
   justify-content:space-between;
   gap:16px;
   flex-wrap:wrap;
+  margin-bottom:0;
 }
 .ev-page-header__text{
   display:flex;flex-direction:column;gap:4px;
+  flex:1;min-width:0;
 }
 .ev-btn-icon{
   display:inline-flex;align-items:center;justify-content:center;
