@@ -1472,15 +1472,21 @@
   height:44px;
   font-size:14px;
 }
-/* Cancel: estilo mute (cream bg) en lugar de link, así pesa visualmente
-   igual al confirm (no se ve como un link suelto al lado de un loud). */
+/* Cancel: GHOST button (transparent bg + accent text). Hover muestra
+   cream sutil como feedback. Mismo pattern que naowee-btn--mute del
+   DS (que el DS llama "Ghost/Tertiary"). Sigue manteniéndose
+   visualmente proporcional al confirm porque ambos tienen flex:1 y
+   height:44px en .dr-dialog__footer .naowee-btn. */
 .dr-dialog__cancel{
-  background:#FFEDC7 !important;
+  background:transparent !important;
   color:var(--naowee-color-text-accent, #d74009) !important;
   border:none !important;
 }
 .dr-dialog__cancel:hover{
-  background:#FFD9B8 !important;
+  background:var(--naowee-color-interactive-fill-mute-hover, #FFEDC7) !important;
+}
+.dr-dialog__cancel:active{
+  background:var(--naowee-color-interactive-fill-mute-active, #FFD9B8) !important;
 }
 /* Confirm verde (aprobar) — solo cuando NO está disabled */
 .dr-dialog__confirm--positive:not(:disabled){
