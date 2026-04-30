@@ -69,7 +69,9 @@ const ICONS = {
   /* File search — para módulo Auditoría */
   audit:       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h7"/><path d="M14 2l6 6"/><path d="M14 2v6h6"/><circle cx="17" cy="17" r="3"/><path d="M19.2 19.2L21 21"/></svg>',
   /* Module — para "Activación de módulos" */
-  module:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>'
+  module:      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>',
+  /* Map (folded) — para "Mapa de escenarios" */
+  map:         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 8 3 16 6 23 3 23 18 16 21 8 18 1 21 1 6"/><line x1="8" y1="3" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="21"/></svg>'
 };
 
 export function getIcon(name) {
@@ -107,6 +109,7 @@ const ITEMS = {
                         { id: 'sedes-lista',     label: 'Listado',     route: '/home/sedes' },
                         { id: 'sedes-aprobacion',label: 'Aprobación', route: '/home/inspector' }
                       ]},
+  mapaEscenarios:   { id: 'mapa-escenarios', label: 'Mapa de escenarios',    icon: 'map',      route: '/home/sedes/mapa' },
   inspeccion:       { id: 'inspector',       label: 'Inspección',            icon: 'shield',   route: '/home/inspector' },
 
   // DIGITACIÓN
@@ -162,7 +165,7 @@ export const MENU_BY_ROLE = {
     { section: 'INSCRIPCIONES',            items: [ITEMS.inscripciones] },
     { section: 'DIGITACIÓN',               items: [ITEMS.miDigitacion, ITEMS.digitadores, ITEMS.coordinadores] },
     { section: 'DOCUMENTACIÓN',            items: [ITEMS.documentacion] },
-    { section: 'ESCENARIOS',               items: [ITEMS.sedes] },
+    { section: 'ESCENARIOS',               items: [ITEMS.sedes, ITEMS.mapaEscenarios] },
     { section: 'INCENTIVOS',               items: [ITEMS.asignarIncentivos] },
     { section: 'ACREDITACIÓN',             items: [ITEMS.acreditaciones] },
     { section: 'REPORTERÍA',               items: [ITEMS.dashboards, ITEMS.reportes] },
@@ -179,7 +182,7 @@ export const MENU_BY_ROLE = {
     { section: 'INSCRIPCIONES',            items: [ITEMS.inscripciones] },
     { section: 'DIGITACIÓN',               items: [ITEMS.miDigitacion, ITEMS.digitadores, ITEMS.coordinadores] },
     { section: 'DOCUMENTACIÓN',            items: [ITEMS.documentacion] },
-    { section: 'ESCENARIOS',               items: [ITEMS.sedes] },
+    { section: 'ESCENARIOS',               items: [ITEMS.sedes, ITEMS.mapaEscenarios] },
     { section: 'INCENTIVOS',               items: [ITEMS.asignarIncentivos] },
     { section: 'ACREDITACIÓN',             items: [ITEMS.acreditaciones] },
     { section: 'REPORTERÍA',               items: [ITEMS.dashboards, ITEMS.reportes] },
@@ -248,7 +251,7 @@ export const MENU_BY_ROLE = {
 
   VENUE_SURVEYOR: [
     { section: null,                       items: [ITEMS.inicio] },
-    { section: 'ESCENARIOS',               items: [ITEMS.sedes] }
+    { section: 'ESCENARIOS',               items: [ITEMS.sedes, ITEMS.mapaEscenarios] }
   ],
 
   VENUE_INSPECTOR: [

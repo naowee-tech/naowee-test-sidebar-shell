@@ -9,6 +9,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+<!-- Leaflet (mapa real para sedes — usado en el modal Registrar sede o
+     escenario). Tiles CartoDB light_all = base muy clara, casi blanca.
+     Usado vía CDN (no instalable). -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" defer></script>
+
 <!-- Naowee Design System (CDN oficial) — versión taggeada (jsDelivr cachea
      @main agresivamente y puede tardar 12h en propagar; @vX.Y.Z es inmediato).
      v1.8.0 agrega wizard recipe: stepper--pulse/--distributed, .naowee-shake,
@@ -18,6 +24,8 @@
 <link rel="stylesheet" href="shared/shell.css">
 <link rel="stylesheet" href="shared/pages/user-management.css">
 <link rel="stylesheet" href="shared/pages/event-list.css">
+<link rel="stylesheet" href="shared/pages/sedes-list.css">
+<link rel="stylesheet" href="shared/pages/mapa-escenarios.css">
 </head>
 <body>
 
@@ -55,6 +63,8 @@
   import { mountSidebar, mountHeader, mountDemoRoleSwitcher, getRoleFromQuery } from './shared/sidebar.js';
   import { renderUserManagementPage } from './shared/pages/user-management.js';
   import { renderEventListPage } from './shared/pages/event-list.js';
+  import { renderSedesListPage } from './shared/pages/sedes-list.js';
+  import { renderMapaEscenariosPage } from './shared/pages/mapa-escenarios.js';
 
   const roleCode = getRoleFromQuery();
   const activeId = new URLSearchParams(window.location.search).get('active') || 'inicio';
@@ -71,6 +81,16 @@
 
     if (currentActive === 'eventos' || currentActive === 'eventos-lista') {
       renderEventListPage(pageEl);
+      return;
+    }
+
+    if (currentActive === 'sedes' || currentActive === 'sedes-lista') {
+      renderSedesListPage(pageEl);
+      return;
+    }
+
+    if (currentActive === 'mapa-escenarios') {
+      renderMapaEscenariosPage(pageEl);
       return;
     }
 

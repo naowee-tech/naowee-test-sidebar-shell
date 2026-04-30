@@ -1,0 +1,575 @@
+/* ═══════════════════════════════════════════════════════════════
+   MAPA DE ESCENARIOS — vista coroplética con zoom + breadcrumb
+   Replica de: escenario-13-mapa.html
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Page container ─────────────────────────────────────────── */
+.me-page{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  width:100%;
+  max-width:1800px;
+  margin:0 auto;
+}
+
+/* ─── Page header — sin border, sin background ─────────────────── */
+.me-page-head{
+  padding:0;
+  background:transparent;
+  border:none;
+}
+.me-page-head h1{
+  font-size:22px;
+  font-weight:700;
+  margin:0;
+  color:var(--naowee-color-text-primary, #282834);
+}
+.me-page-head p{
+  font-size:13px;
+  color:var(--naowee-color-text-secondary, #646587);
+  margin:4px 0 0;
+}
+
+/* ─── Canvas card unificada ────────────────────────────────────── */
+.me-canvas{
+  display:flex;
+  flex-direction:column;
+  padding:20px 24px 24px;
+  background:#fff;
+  border:1px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius:16px;
+}
+.me-body{
+  display:grid;
+  grid-template-columns:1fr 480px;
+  gap:24px;
+}
+
+/* ─── Filter toolbar ──────────────────────────────────────────────
+   Todos los controles a la misma altura (36px). Searchbox flex-grow
+   para ocupar el espacio inicial; dropdowns con min-width chico para
+   que entren todos en una línea. Reset al final con margin-left:auto. */
+.me-toolbar{
+  position:relative;
+  z-index:500;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding-bottom:18px;
+  margin-bottom:18px;
+  border-bottom:1px solid var(--naowee-color-border-default, #e7e9f3);
+}
+.me-toolbar__row{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.me-toolbar__chips{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+/* Searchbox: ancho fijo, NO grow → controles a la derecha quedan
+   pegados al searchbox (no spread). Mismo height que dropdowns (36px). */
+.me-search{
+  flex:0 0 300px;
+  max-width:300px;
+}
+.me-search .naowee-searchbox__input-wrap{
+  height:36px;
+}
+
+/* Filter dropdowns: width fijo para que todos midan igual y queden
+   alineados sin gaps fantasma entre Region/Tipo/Estado. */
+.me-dd{
+  flex:0 0 130px;
+  min-width:130px;
+}
+.me-dd__trigger--active{
+  background:#FFEDC7 !important;
+  color:var(--naowee-color-text-accent, #d74009) !important;
+  border-color:var(--naowee-color-text-accent, #d74009) !important;
+}
+.me-dd__opt-clear{
+  color:var(--naowee-color-text-secondary, #646587) !important;
+  font-style:italic;
+  font-size:12px !important;
+  border-bottom:1px solid var(--naowee-color-border-default, #e7e9f3);
+}
+.me-estado-opt{ display:flex; align-items:center; gap:10px; }
+.me-dd__dot{
+  width:8px; height:8px;
+  border-radius:9999px;
+  flex-shrink:0;
+  display:inline-block;
+}
+.me-dd__dot--ph{ background:transparent; }
+
+/* Segment CAR: misma altura (36px) que el resto. El pill (background
+   blanco con border accent) se posiciona vía JS — ver wireSegmentPill. */
+.me-car-segment{
+  flex-shrink:0;
+  height:36px;
+}
+/* Override del DS para que el pill quede 4px de top/bottom (en lugar
+   del default xnano que asume segment de 40px). Con segment de 36px,
+   xnano (4px) ya da 28px al pill, que es lo que queremos. */
+.me-car-segment .naowee-segment__pill{
+  top:4px;
+  bottom:4px;
+}
+/* DS --small reduce font + svg, pero acá usamos altura 36 (no 32) y
+   queremos texto 13px en vez del 12px default del --small. */
+.me-car-segment.naowee-segment--small{ height:36px; }
+.me-car-segment.naowee-segment--small .naowee-segment__item{
+  font-size:13px;
+  padding:4px 14px;
+}
+
+/* Reset button al final */
+.me-filter-reset{
+  margin-left:auto;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:600;
+  color:var(--naowee-color-text-accent, #d74009);
+  background:none;
+  border:none;
+  cursor:pointer;
+  padding:6px 10px;
+  border-radius:6px;
+  height:36px;
+  white-space:nowrap;
+  transition:background .12s;
+}
+.me-filter-reset:hover{ background:#FFEDC7; }
+.me-filter-reset:disabled{
+  color:var(--naowee-color-text-secondary, #646587);
+  cursor:default;
+}
+.me-filter-reset:disabled:hover{ background:none; }
+
+/* Active chips */
+.me-chip{ animation:meChipIn .18s cubic-bezier(.4, 0, .2, 1); }
+.me-chip__dot{
+  width:8px; height:8px;
+  border-radius:9999px;
+  display:inline-block;
+  margin-right:4px;
+  box-shadow:0 0 0 1.5px #fff;
+}
+.me-chip .naowee-tag__active-area{ cursor:pointer; }
+.me-chip .naowee-tag__active-area:hover .naowee-tag__close{
+  color:var(--naowee-color-text-accent, #d74009);
+}
+@keyframes meChipIn{
+  from{ opacity:0; transform:translateY(-4px); }
+  to  { opacity:1; transform:none; }
+}
+
+/* ─── Breadcrumb (Colombia > Antioquia) ──────────────────────── */
+.me-breadcrumb{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-bottom:12px;
+  min-height:24px;
+  font-size:13px;
+  font-weight:500;
+}
+.me-breadcrumb__link{
+  background:none;
+  border:none;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:500;
+  color:var(--naowee-color-text-secondary, #646587);
+  cursor:pointer;
+  padding:2px 4px;
+  border-radius:4px;
+  transition:color .12s, background .12s;
+}
+.me-breadcrumb__link:hover{
+  color:var(--naowee-color-text-accent, #d74009);
+  background:#FFEDC7;
+}
+.me-breadcrumb__sep{
+  display:inline-flex;
+  align-items:center;
+  color:var(--naowee-color-text-secondary, #646587);
+  flex-shrink:0;
+}
+.me-breadcrumb__sep svg{ width:14px; height:14px; }
+.me-breadcrumb__current{
+  color:var(--naowee-color-text-accent, #d74009);
+  font-weight:600;
+}
+
+/* ─── Map stage ───────────────────────────────────────────────── */
+.me-stage{
+  position:relative;
+  width:100%;
+  height:600px;
+  min-height:480px;
+  max-height:720px;
+  border-radius:12px;
+  overflow:hidden;
+  background:#f8f9fc;
+  border:1px solid var(--naowee-color-border-default, #e7e9f3);
+}
+.me-map-container{
+  width:100%;
+  height:100%;
+}
+.me-map-container > svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+
+/* ─── Skeleton ────────────────────────────────────────────────── */
+.me-skeleton{
+  position:absolute;
+  inset:0;
+  z-index:50;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f8f9fc;
+  transition:opacity .35s ease;
+}
+.me-skeleton--fading{
+  opacity:0;
+  pointer-events:none;
+}
+.me-skeleton__shape{
+  width:46%;
+  height:66%;
+  border-radius:42% 58% 50% 50% / 35% 40% 60% 65%;
+  transform:rotate(-4deg);
+  background:linear-gradient(90deg, #f1f2f7 0%, #e4e7ef 50%, #f1f2f7 100%);
+  background-size:200% 100%;
+  animation:meSkelShimmer 1.4s linear infinite;
+}
+.me-skeleton__hint{
+  position:absolute;
+  bottom:32px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:12px;
+  color:var(--naowee-color-text-secondary, #646587);
+  letter-spacing:.3px;
+}
+@keyframes meSkelShimmer{
+  0%   { background-position:200% 0; }
+  100% { background-position:-200% 0; }
+}
+
+/* ─── Zoom controls ───────────────────────────────────────────── */
+.me-zoom{
+  position:absolute;
+  top:14px; left:14px;
+  z-index:600;
+  display:flex;
+  flex-direction:column;
+  background:#fff;
+  border:1px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius:10px;
+  box-shadow:0 2px 8px rgba(0, 0, 0, .12);
+  overflow:hidden;
+}
+.me-zoom__btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:36px; height:36px;
+  background:transparent;
+  border:none;
+  color:var(--naowee-color-text-primary, #282834);
+  cursor:pointer;
+  transition:background .12s;
+  padding:0;
+}
+.me-zoom__btn:hover{ background:#f5f6fa; }
+.me-zoom__btn + .me-zoom__btn{
+  border-top:1px solid var(--naowee-color-border-default, #e7e9f3);
+}
+.me-zoom__btn svg{ width:16px; height:16px; }
+
+/* ─── Tooltip flotante (dark card con tipos breakdown) ────────── */
+.me-tooltip{
+  position:fixed;
+  z-index:2000;
+  background:#1a2340;
+  color:#fff;
+  border-radius:14px;
+  padding:18px 20px;
+  box-shadow:0 12px 32px rgba(0, 0, 0, .25);
+  min-width:280px;
+  max-width:340px;
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(-4px);
+  transition:opacity .12s ease, transform .12s ease;
+  font-family:'Inter', sans-serif;
+}
+.me-tooltip--visible{
+  opacity:1;
+  transform:translateY(0);
+}
+.me-tooltip__title{
+  font-size:16px;
+  font-weight:700;
+  color:#fff;
+  margin:0 0 2px;
+}
+.me-tooltip__region{
+  font-size:10px;
+  font-weight:700;
+  color:rgba(255, 255, 255, .55);
+  letter-spacing:.6px;
+  margin-bottom:14px;
+}
+.me-tooltip__big{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  padding:10px 0 14px;
+  border-top:1px solid rgba(255, 255, 255, .1);
+}
+.me-tooltip__big-label{
+  font-size:13px;
+  color:rgba(255, 255, 255, .8);
+}
+.me-tooltip__big-value{
+  font-size:24px;
+  font-weight:800;
+  color:#fff;
+  line-height:1;
+}
+.me-tooltip__section-title{
+  font-size:10px;
+  font-weight:700;
+  color:rgba(255, 255, 255, .55);
+  letter-spacing:.6px;
+  padding:10px 0 6px;
+  border-top:1px solid rgba(255, 255, 255, .1);
+}
+.me-tooltip__row{
+  display:grid;
+  grid-template-columns:24px 1fr auto;
+  gap:8px;
+  align-items:center;
+  padding:5px 0;
+  font-size:13px;
+  color:rgba(255, 255, 255, .85);
+}
+.me-tooltip__row-icon{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:24px; height:24px;
+  border-radius:6px;
+  background:rgba(255, 255, 255, .08);
+  color:rgba(255, 255, 255, .9);
+}
+.me-tooltip__row-icon svg{ width:14px; height:14px; }
+.me-tooltip__row-label{
+  font-weight:500;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.me-tooltip__row-value{
+  font-weight:700;
+  color:#fff;
+}
+.me-tooltip__footer{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid rgba(255, 255, 255, .1);
+  font-size:12px;
+  color:rgba(255, 255, 255, .7);
+}
+.me-tooltip__footer svg{ width:12px; height:12px; }
+
+/* ─── Rank card ──────────────────────────────────────────────── */
+.me-rank{
+  display:flex;
+  flex-direction:column;
+}
+.me-rank__card{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  padding-top:4px;
+}
+.me-rank__title{
+  font-size:11px;
+  font-weight:700;
+  color:var(--naowee-color-text-secondary, #646587);
+  letter-spacing:.8px;
+  text-transform:uppercase;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--naowee-color-border-default, #e7e9f3);
+  margin-bottom:6px;
+}
+.me-rank__row{
+  display:grid;
+  grid-template-columns:24px 1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:6px;
+  margin:0 -6px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:background .12s;
+}
+.me-rank__row:hover{ background:#f8f8fb; }
+.me-rank__row--active{
+  background:#FFEDC7;
+}
+.me-rank__row--active .me-rank__bar-fill{
+  background:var(--naowee-color-text-accent, #d74009) !important;
+}
+.me-rank__idx{
+  font-size:11px;
+  font-weight:700;
+  color:var(--naowee-color-text-secondary, #646587);
+  text-align:right;
+}
+.me-rank__body{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width:0;
+}
+.me-rank__name-line{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+}
+.me-rank__name{
+  font-size:13px;
+  font-weight:500;
+  color:var(--naowee-color-text-primary, #282834);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.me-rank__car-dot{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  height:16px;
+  padding:0 6px;
+  border-radius:9999px;
+  background:#fef3c7;
+  color:#a16207;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.3px;
+  flex-shrink:0;
+  border:1px solid #fcd34d;
+}
+.me-rank__bar{
+  height:3px;
+  background:#f3f4f6;
+  border-radius:3px;
+  overflow:hidden;
+}
+.me-rank__bar-fill{
+  height:100%;
+  background:#475569;
+  border-radius:3px;
+  width:0;
+  animation:meRankBarGrow .7s cubic-bezier(.25, .1, .25, 1) var(--bar-delay, 0ms) forwards;
+  transition:background .2s ease;
+}
+.me-rank__row:hover .me-rank__bar-fill{
+  background:var(--naowee-color-text-accent, #d74009);
+}
+@keyframes meRankBarGrow{
+  from{ width:0; }
+  to  { width:var(--bar-pct, 0%); }
+}
+.me-rank__value{
+  font-size:12px;
+  font-weight:600;
+  color:var(--naowee-color-text-secondary, #646587);
+  min-width:48px;
+  text-align:right;
+}
+.me-rank__empty{
+  font-size:12px;
+  color:var(--naowee-color-text-secondary, #646587);
+  font-style:italic;
+  padding:14px 0;
+}
+
+/* ─── Legend ──────────────────────────────────────────────────── */
+.me-legend{
+  margin-top:18px;
+  padding:14px 0 0;
+  border-top:1px solid var(--naowee-color-border-default, #e7e9f3);
+}
+.me-legend__title{
+  font-size:11px;
+  font-weight:700;
+  color:var(--naowee-color-text-secondary, #646587);
+  letter-spacing:.8px;
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+.me-legend__gradient{
+  height:10px;
+  border-radius:9999px;
+  margin-bottom:6px;
+  background:linear-gradient(90deg,
+    #fee8cd 0%, #fddbb4 15%, #fcc693 30%, #faaf72 45%,
+    #f59456 60%, #ef7a3c 80%, #d74009 100%);
+}
+.me-legend__ticks{
+  display:flex;
+  justify-content:space-between;
+  font-size:10px;
+  font-weight:500;
+  color:var(--naowee-color-text-secondary, #646587);
+}
+.me-legend__row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:12px;
+  padding-top:10px;
+  border-top:1px dashed var(--naowee-color-border-default, #e7e9f3);
+  font-size:12px;
+  color:var(--naowee-color-text-secondary, #646587);
+}
+.me-legend__sin-datos{
+  display:inline-block;
+  width:18px; height:10px;
+  background:#ecedf5;
+  border-radius:3px;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 1240px){
+  .me-body{ grid-template-columns:1fr; }
+  .me-rank{ margin-top:8px; }
+}
+@media (max-width: 720px){
+  .me-toolbar__row{ gap:6px; }
+  .me-search{ flex:1 1 100%; max-width:100%; }
+  .me-dd{ flex:1 1 calc(50% - 6px); min-width:0; }
+  .me-car-segment{ flex:1 1 100%; justify-content:center; }
+  .me-filter-reset{ margin-left:0; }
+}
