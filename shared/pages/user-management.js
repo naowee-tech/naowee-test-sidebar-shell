@@ -1,9 +1,15 @@
 /**
  * User Management Page — Gestión de usuarios.
- * Container card con tabs (Persona Natural / Organización) + filters bar
- * (search + tipo de doc + roles + paginación) + tabla + 3-dots menu.
+ * Container card (tablet pattern) con tabs (Persona Natural / Organización) +
+ * toolbar (search + tipo de doc + roles + paginación) + tabla + 3-dots menu.
  *
- * Datos mock realistas. Toda la lógica es preview-only (no backend).
+ * Patrones del DS portados desde naowee-test-incentivos (cod-table, toolbar-dd,
+ * naowee-searchbox--pill, naowee-pagination, cod-state-pill, rev-history-btn).
+ *
+ * Render parcial: paint() rerenders solo la parte que cambia.
+ *   - paintTable() → solo tabla + sección de paginación (al tipear search)
+ *   - paintFull()  → todo (tab change, dropdown filter change)
+ * Esto garantiza que el search no pierda focus al tipear.
  */
 import { getIcon } from '../menu-data.js';
 
@@ -35,9 +41,7 @@ const ROLES_ORG = [
   { code: 'Club',                  label: 'Club' }
 ];
 
-/* ─── Datos mock ─────────────────────────────────────────────────────
-   Realistas: nombres colombianos, emails coherentes, números cédula,
-   variedad de tipos doc, menor de edad bool, roles, status. */
+/* ─── Datos mock ─────────────────────────────────────────────────── */
 const PERSONAS_NATURALES = [
   { name:'Juan Camilo Pérez Dolores',  email:'wydoka@example.com',          docType:'CC', docNum:'686482',         minor:true,  role:'Personal deportivo', status:'active' },
   { name:'Lasa Olas',                  email:'as3a@gmail.com',              docType:'CC', docNum:'43634636',       minor:false, role:'Personal deportivo', status:'active' },
@@ -103,31 +107,24 @@ const _state = {
 };
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
-function getDataset() {
-  return _state.tab === 'persona' ? PERSONAS_NATURALES : ORGANIZACIONES;
-}
-function getDocTypes() {
-  return _state.tab === 'persona' ? DOC_TYPES : [{ code:'all', label:'Todos los tipos' }, NIT_TYPE];
-}
-function getRoles() {
-  return _state.tab === 'persona' ? ROLES_PERSONA : ROLES_ORG;
-}
-function getFilteredData() {
-  const all = getDataset();
+const dataset    = () => _state.tab === 'persona' ? PERSONAS_NATURALES : ORGANIZACIONES;
+const docTypes   = () => _state.tab === 'persona' ? DOC_TYPES : [{ code:'all', label:'Todos los tipos' }, NIT_TYPE];
+const rolesList  = () => _state.tab === 'persona' ? ROLES_PERSONA : ROLES_ORG;
+
+function getFiltered() {
   const q = _state.search.trim().toLowerCase();
-  return all.filter((u) => {
+  return dataset().filter((u) => {
     if (q && !u.name.toLowerCase().includes(q) && !u.email.toLowerCase().includes(q) && !u.docNum.toLowerCase().includes(q)) return false;
     if (_state.docTypeFilter !== 'all' && u.docType !== _state.docTypeFilter) return false;
     if (_state.roleFilter !== 'all' && u.role !== _state.roleFilter) return false;
     return true;
   });
 }
-function getPaginated(filtered) {
-  const start = (_state.page - 1) * _state.pageSize;
-  return filtered.slice(start, start + _state.pageSize);
+function getTotalPages(filtered) {
+  return Math.max(1, Math.ceil(filtered.length / _state.pageSize));
 }
 
-/* ─── Render ───────────────────────────────────────────────────────── */
+/* ─── Render principal ─────────────────────────────────────────────── */
 export function renderUserManagementPage(rootEl) {
   _state.rootEl = rootEl;
   _state.tab = 'persona';
@@ -135,14 +132,23 @@ export function renderUserManagementPage(rootEl) {
   _state.docTypeFilter = 'all';
   _state.roleFilter = 'all';
   _state.page = 1;
-  paint();
+  paintFull();
+
+  /* Click-out global cierra dropdowns y action menus.
+     Lo agregamos UNA vez al document para que sobreviva re-renders. */
+  if (!document._umClickOutBound) {
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.um-dropdown.is-open, .um-actions.is-open').forEach((el) => el.classList.remove('is-open'));
+    });
+    document._umClickOutBound = true;
+  }
 }
 
-function paint() {
-  const filtered = getFilteredData();
-  const totalPages = Math.max(1, Math.ceil(filtered.length / _state.pageSize));
+/* Render completo (tab change, dropdown filter change) */
+function paintFull() {
+  const filtered = getFiltered();
+  const totalPages = getTotalPages(filtered);
   if (_state.page > totalPages) _state.page = totalPages;
-  const pageData = getPaginated(filtered);
 
   _state.rootEl.innerHTML = `
     <div class="um-page">
@@ -153,15 +159,41 @@ function paint() {
 
       <div class="um-card">
         ${renderTabs()}
-        ${renderFilters(filtered.length)}
-        ${pageData.length === 0 ? renderEmpty() : renderTable(pageData)}
+        <div class="um-toolbar" id="umToolbar">
+          ${renderToolbarLeft()}
+          <div class="um-pagination" id="umPagination">
+            ${renderPagination(filtered.length, totalPages)}
+          </div>
+        </div>
+        <div class="um-table-wrap" id="umTableWrap">
+          ${filtered.length === 0 ? renderEmpty() : renderTable(filtered)}
+        </div>
       </div>
     </div>
   `;
 
-  bindEvents();
+  bindAllEvents();
 }
 
+/* Render parcial — solo tabla + paginación (al tipear search) */
+function paintTableOnly() {
+  const filtered = getFiltered();
+  const totalPages = getTotalPages(filtered);
+  if (_state.page > totalPages) _state.page = totalPages;
+
+  const tableWrap = _state.rootEl.querySelector('#umTableWrap');
+  const pagination = _state.rootEl.querySelector('#umPagination');
+  if (tableWrap) {
+    tableWrap.innerHTML = filtered.length === 0 ? renderEmpty() : renderTable(filtered);
+    bindTableEvents();
+  }
+  if (pagination) {
+    pagination.innerHTML = renderPagination(filtered.length, totalPages);
+    bindPaginationEvents();
+  }
+}
+
+/* ─── Render: tabs ─────────────────────────────────────────────────── */
 function renderTabs() {
   return `
     <div class="um-tabs" role="tablist">
@@ -175,127 +207,139 @@ function renderTabs() {
   `;
 }
 
-function renderFilters(totalFiltered) {
-  const docOpts = getDocTypes();
-  const roleOpts = getRoles();
+/* ─── Render: toolbar (search + dropdowns) ─────────────────────────── */
+function renderToolbarLeft() {
+  const docOpts = docTypes();
+  const roleOpts = rolesList();
   const docCurrent = docOpts.find((o) => o.code === _state.docTypeFilter) || docOpts[0];
   const roleCurrent = roleOpts.find((o) => o.code === _state.roleFilter) || roleOpts[0];
+  const hasSearch = _state.search.length > 0;
 
-  const totalPages = Math.max(1, Math.ceil(totalFiltered / _state.pageSize));
-  const from = totalFiltered === 0 ? 0 : (_state.page - 1) * _state.pageSize + 1;
-  const to = Math.min(_state.page * _state.pageSize, totalFiltered);
+  const docLabel = _state.docTypeFilter === 'all' ? 'Tipo: Todos' : `Tipo: ${docCurrent.label.split(' (')[0]}`;
+  const roleLabel = _state.roleFilter === 'all' ? 'Roles: Todos' : `Roles: ${roleCurrent.label}`;
 
   return `
-    <div class="um-filters">
-      <div class="um-filters__left">
-        <label class="um-search">
-          <span class="um-search__icon">${getIcon('search') || searchIcon()}</span>
-          <input type="text" class="um-search__input" id="umSearch"
-                 placeholder="Buscar por documento o correo"
-                 value="${escapeHtml(_state.search)}" />
-        </label>
+    <div class="um-toolbar__left">
+      <label class="um-search ${hasSearch ? 'has-value' : ''}">
+        <span class="um-search__icon">${searchIcon()}</span>
+        <input type="text" class="um-search__input" id="umSearch"
+               placeholder="Buscar por documento o correo"
+               value="${escapeHtml(_state.search)}" />
+        <button class="um-search__clear" type="button" id="umSearchClear" aria-label="Limpiar búsqueda">
+          ${closeIcon()}
+        </button>
+      </label>
 
-        <div class="um-dropdown" id="umDocTypeDD">
-          <button class="um-dropdown__trigger" type="button">
-            <span>${docCurrent.label === 'Todos los tipos' ? 'Tipo de documento' : docCurrent.label}</span>
-            <span class="um-dropdown__chev">${getIcon('chevron')}</span>
-          </button>
-          <div class="um-dropdown__menu">
-            ${docOpts.map((o) => `
-              <button type="button" class="um-dropdown__opt ${o.code === _state.docTypeFilter ? 'is-selected' : ''}" data-dd="docType" data-value="${o.code}">
-                <span>${o.label}</span>
-                <span class="um-dropdown__opt-check">${getIcon('check')}</span>
-              </button>
-            `).join('')}
-          </div>
-        </div>
-
-        <div class="um-dropdown" id="umRoleDD">
-          <button class="um-dropdown__trigger" type="button">
-            <span>${roleCurrent.label === 'Todos los roles' ? 'Filtrar por roles' : roleCurrent.label}</span>
-            <span class="um-dropdown__chev">${getIcon('chevron')}</span>
-          </button>
-          <div class="um-dropdown__menu">
-            ${roleOpts.map((o) => `
-              <button type="button" class="um-dropdown__opt ${o.code === _state.roleFilter ? 'is-selected' : ''}" data-dd="role" data-value="${o.code}">
-                <span>${o.label}</span>
-                <span class="um-dropdown__opt-check">${getIcon('check')}</span>
-              </button>
-            `).join('')}
-          </div>
+      <div class="um-dropdown" id="umDocTypeDD">
+        <button class="um-dropdown__trigger" type="button">
+          <span>${docLabel}</span>
+          <span class="um-dropdown__chev">${getIcon('chevron')}</span>
+        </button>
+        <div class="um-dropdown__menu">
+          ${docOpts.map((o) => `
+            <button type="button" class="um-dropdown__opt"
+                    data-dd="docType" data-value="${o.code}"
+                    aria-selected="${o.code === _state.docTypeFilter}">
+              <span>${o.label}</span>
+              <span class="um-dropdown__opt-check">${getIcon('check')}</span>
+            </button>
+          `).join('')}
         </div>
       </div>
 
-      <div class="um-filters__right">
-        <span class="um-pagination__info">
-          <strong>${from}-${to}</strong> de <strong>${totalFiltered}</strong>
-        </span>
-        <div class="um-pagination">
-          <button class="um-pagination__btn" id="umPrev" ${_state.page === 1 ? 'disabled' : ''} aria-label="Página anterior">
-            ${chevronLeft()}
-          </button>
-          <button class="um-pagination__btn" id="umNext" ${_state.page >= totalPages ? 'disabled' : ''} aria-label="Página siguiente">
-            ${chevronRight()}
-          </button>
+      <div class="um-dropdown" id="umRoleDD">
+        <button class="um-dropdown__trigger" type="button">
+          <span>${roleLabel}</span>
+          <span class="um-dropdown__chev">${getIcon('chevron')}</span>
+        </button>
+        <div class="um-dropdown__menu">
+          ${roleOpts.map((o) => `
+            <button type="button" class="um-dropdown__opt"
+                    data-dd="role" data-value="${o.code}"
+                    aria-selected="${o.code === _state.roleFilter}">
+              <span>${o.label}</span>
+              <span class="um-dropdown__opt-check">${getIcon('check')}</span>
+            </button>
+          `).join('')}
         </div>
       </div>
     </div>
   `;
 }
 
-function renderTable(rows) {
-  const isPersona = _state.tab === 'persona';
+/* ─── Render: paginación ──────────────────────────────────────────── */
+function renderPagination(totalFiltered, totalPages) {
   return `
-    <div class="um-table-wrap">
-      <table class="um-table">
-        <thead>
-          <tr>
-            <th>${isPersona ? 'Nombre' : 'Razón social'}</th>
-            <th>Correo</th>
-            <th>Tipo de doc.</th>
-            <th>Número de Documento</th>
-            ${isPersona ? '<th>Menor de edad</th>' : '<th>Tipo</th>'}
-            <th>Roles</th>
-            <th>Estatus</th>
-            <th class="um-th-actions"></th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows.map((u, idx) => `
-            <tr>
-              <td class="um-td-name">${escapeHtml(u.name)}</td>
-              <td class="um-td-email">${escapeHtml(u.email)}</td>
-              <td class="um-td-doc-type">${u.docType}</td>
-              <td class="um-td-doc-num">${u.docNum}</td>
-              <td>${isPersona ? (u.minor ? 'Sí' : 'No') : u.role}</td>
-              <td>${escapeHtml(u.role)}</td>
-              <td>${renderBadge(u.status)}</td>
-              <td>
-                <div class="um-actions" data-row="${idx}">
-                  <button class="um-actions__trigger" type="button" aria-label="Acciones">
-                    ${dotsIcon()}
-                  </button>
-                  <div class="um-actions__menu">
-                    <button class="um-actions__item" data-act="view">
-                      <span class="um-actions__item-icon">${getIcon('user')}</span> Ver perfil
-                    </button>
-                    <button class="um-actions__item" data-act="edit">
-                      <span class="um-actions__item-icon">${editIcon()}</span> Editar
-                    </button>
-                    <button class="um-actions__item" data-act="role">
-                      <span class="um-actions__item-icon">${getIcon('shield')}</span> Cambiar rol
-                    </button>
-                    <button class="um-actions__item um-actions__item--danger" data-act="deactivate">
-                      <span class="um-actions__item-icon">${getIcon('logout')}</span> Desactivar
-                    </button>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
+    <span class="um-pagination__label">Página</span>
+    <input type="number" class="um-pagination__input" id="umPageInput"
+           min="1" max="${totalPages}" value="${_state.page}" />
+    <span class="um-pagination__total">de <strong>${totalPages}</strong></span>
+    <div class="um-pagination__controls">
+      <button class="um-pagination__btn" id="umPrev" ${_state.page === 1 ? 'disabled' : ''} aria-label="Página anterior">
+        ${chevronLeft()}
+      </button>
+      <button class="um-pagination__btn" id="umNext" ${_state.page >= totalPages ? 'disabled' : ''} aria-label="Página siguiente">
+        ${chevronRight()}
+      </button>
     </div>
+  `;
+}
+
+/* ─── Render: tabla ───────────────────────────────────────────────── */
+function renderTable(filtered) {
+  const isPersona = _state.tab === 'persona';
+  const start = (_state.page - 1) * _state.pageSize;
+  const rows = filtered.slice(start, start + _state.pageSize);
+
+  return `
+    <table class="um-table">
+      <thead>
+        <tr>
+          <th>${isPersona ? 'Nombre' : 'Razón social'}</th>
+          <th>Correo</th>
+          <th>Tipo de doc.</th>
+          <th>Número de Documento</th>
+          ${isPersona ? '<th>Menor de edad</th>' : '<th>Tipo</th>'}
+          <th>Roles</th>
+          <th>Estatus</th>
+          <th class="um-th-actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map((u, idx) => `
+          <tr>
+            <td class="um-td-name">${escapeHtml(u.name)}</td>
+            <td class="um-td-email">${escapeHtml(u.email)}</td>
+            <td class="um-td-doc-type">${u.docType}</td>
+            <td class="um-td-doc-num">${u.docNum}</td>
+            <td>${isPersona ? (u.minor ? 'Sí' : 'No') : u.role}</td>
+            <td>${escapeHtml(u.role)}</td>
+            <td>${renderBadge(u.status)}</td>
+            <td class="um-cell-actions">
+              <div class="um-actions" data-row="${idx}">
+                <button class="um-actions__trigger" type="button" aria-label="Acciones">
+                  ${dotsIcon()}
+                </button>
+                <div class="um-actions__menu">
+                  <button class="um-actions__item" data-act="view">
+                    <span class="um-actions__item-icon">${getIcon('user')}</span> Ver perfil
+                  </button>
+                  <button class="um-actions__item" data-act="edit">
+                    <span class="um-actions__item-icon">${editIcon()}</span> Editar
+                  </button>
+                  <button class="um-actions__item" data-act="role">
+                    <span class="um-actions__item-icon">${getIcon('shield')}</span> Cambiar rol
+                  </button>
+                  <button class="um-actions__item um-actions__item--danger" data-act="deactivate">
+                    <span class="um-actions__item-icon">${getIcon('logout')}</span> Desactivar
+                  </button>
+                </div>
+              </div>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
   `;
 }
 
@@ -319,11 +363,15 @@ function renderEmpty() {
 }
 
 /* ─── Eventos ──────────────────────────────────────────────────────── */
-function bindEvents() {
-  const root = _state.rootEl;
+function bindAllEvents() {
+  bindTabsEvents();
+  bindToolbarEvents();
+  bindPaginationEvents();
+  bindTableEvents();
+}
 
-  /* Tabs */
-  root.querySelectorAll('.um-tab').forEach((t) => {
+function bindTabsEvents() {
+  _state.rootEl.querySelectorAll('.um-tab').forEach((t) => {
     t.addEventListener('click', () => {
       const tab = t.getAttribute('data-tab');
       if (tab === _state.tab) return;
@@ -332,33 +380,41 @@ function bindEvents() {
       _state.docTypeFilter = 'all';
       _state.roleFilter = 'all';
       _state.page = 1;
-      paint();
+      paintFull();
     });
   });
+}
 
-  /* Search */
-  const search = root.querySelector('#umSearch');
-  if (search) {
-    search.addEventListener('input', (e) => {
-      _state.search = e.target.value;
-      _state.page = 1;
-      paint();
-      // restore focus + cursor
-      const newSearch = _state.rootEl.querySelector('#umSearch');
-      if (newSearch) {
-        newSearch.focus();
-        newSearch.setSelectionRange(_state.search.length, _state.search.length);
-      }
-    });
-  }
+function bindToolbarEvents() {
+  /* Search input — re-render parcial (mantiene focus) */
+  const searchInput = _state.rootEl.querySelector('#umSearch');
+  const searchWrap = searchInput?.closest('.um-search');
+  searchInput?.addEventListener('input', (e) => {
+    _state.search = e.target.value;
+    _state.page = 1;
+    /* Actualizamos solo la clase has-value y la tabla — NO regeneramos el input */
+    if (searchWrap) searchWrap.classList.toggle('has-value', _state.search.length > 0);
+    paintTableOnly();
+    /* El input mantiene focus porque NO fue rerenderizado */
+  });
 
-  /* Dropdowns trigger */
-  root.querySelectorAll('.um-dropdown').forEach((dd) => {
+  /* Clear button del search */
+  const clearBtn = _state.rootEl.querySelector('#umSearchClear');
+  clearBtn?.addEventListener('click', () => {
+    _state.search = '';
+    _state.page = 1;
+    if (searchInput) searchInput.value = '';
+    if (searchWrap) searchWrap.classList.remove('has-value');
+    paintTableOnly();
+    searchInput?.focus();
+  });
+
+  /* Dropdown trigger toggle */
+  _state.rootEl.querySelectorAll('.um-dropdown').forEach((dd) => {
     const trigger = dd.querySelector('.um-dropdown__trigger');
     trigger?.addEventListener('click', (e) => {
       e.stopPropagation();
-      // close others
-      root.querySelectorAll('.um-dropdown.is-open').forEach((other) => {
+      _state.rootEl.querySelectorAll('.um-dropdown.is-open').forEach((other) => {
         if (other !== dd) other.classList.remove('is-open');
       });
       dd.classList.toggle('is-open');
@@ -366,7 +422,7 @@ function bindEvents() {
   });
 
   /* Dropdown options */
-  root.querySelectorAll('.um-dropdown__opt').forEach((opt) => {
+  _state.rootEl.querySelectorAll('.um-dropdown__opt').forEach((opt) => {
     opt.addEventListener('click', (e) => {
       e.stopPropagation();
       const ddType = opt.getAttribute('data-dd');
@@ -374,51 +430,63 @@ function bindEvents() {
       if (ddType === 'docType') _state.docTypeFilter = value;
       if (ddType === 'role')    _state.roleFilter = value;
       _state.page = 1;
-      paint();
+      paintFull();
     });
   });
+}
 
-  /* Pagination */
-  root.querySelector('#umPrev')?.addEventListener('click', () => {
-    if (_state.page > 1) { _state.page -= 1; paint(); }
+function bindPaginationEvents() {
+  const pageInput = _state.rootEl.querySelector('#umPageInput');
+  pageInput?.addEventListener('change', () => {
+    const total = getTotalPages(getFiltered());
+    let val = parseInt(pageInput.value, 10);
+    if (isNaN(val) || val < 1) val = 1;
+    if (val > total) val = total;
+    _state.page = val;
+    paintTableOnly();
   });
-  root.querySelector('#umNext')?.addEventListener('click', () => {
-    const total = getFilteredData().length;
-    const totalPages = Math.max(1, Math.ceil(total / _state.pageSize));
-    if (_state.page < totalPages) { _state.page += 1; paint(); }
+  pageInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') pageInput.blur();
   });
 
-  /* Action menus */
-  root.querySelectorAll('.um-actions').forEach((actions) => {
+  _state.rootEl.querySelector('#umPrev')?.addEventListener('click', () => {
+    if (_state.page > 1) { _state.page -= 1; paintTableOnly(); }
+  });
+  _state.rootEl.querySelector('#umNext')?.addEventListener('click', () => {
+    const total = getTotalPages(getFiltered());
+    if (_state.page < total) { _state.page += 1; paintTableOnly(); }
+  });
+}
+
+function bindTableEvents() {
+  /* Action menus (3-dots) */
+  _state.rootEl.querySelectorAll('.um-actions').forEach((actions) => {
     const trigger = actions.querySelector('.um-actions__trigger');
     trigger?.addEventListener('click', (e) => {
       e.stopPropagation();
-      root.querySelectorAll('.um-actions.is-open').forEach((other) => {
+      _state.rootEl.querySelectorAll('.um-actions.is-open').forEach((other) => {
         if (other !== actions) other.classList.remove('is-open');
       });
       actions.classList.toggle('is-open');
     });
   });
-  root.querySelectorAll('.um-actions__item').forEach((item) => {
+  _state.rootEl.querySelectorAll('.um-actions__item').forEach((item) => {
     item.addEventListener('click', (e) => {
       e.stopPropagation();
       const act = item.getAttribute('data-act');
       const row = item.closest('.um-actions').getAttribute('data-row');
-      // Preview-only — solo log; en producción lanza la acción real
       console.info(`[user-management] action=${act} row=${row}`);
       item.closest('.um-actions').classList.remove('is-open');
     });
   });
-
-  /* Click-out cierra dropdowns y action menus */
-  document.addEventListener('click', () => {
-    root.querySelectorAll('.um-dropdown.is-open, .um-actions.is-open').forEach((el) => el.classList.remove('is-open'));
-  }, { once: true });
 }
 
-/* ─── Iconos inline (fallback) ─────────────────────────────────────── */
+/* ─── Iconos inline ────────────────────────────────────────────────── */
 function searchIcon() {
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>';
+}
+function closeIcon() {
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
 }
 function chevronLeft() {
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
@@ -433,7 +501,6 @@ function editIcon() {
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
 }
 
-/* HTML escape (defensivo aunque los datos son mock) */
 function escapeHtml(str) {
   return String(str)
     .replaceAll('&', '&amp;')
