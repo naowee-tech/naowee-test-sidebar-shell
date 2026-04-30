@@ -64,8 +64,13 @@
   display:flex;
   align-items:center;
   flex-wrap:wrap;
-  gap:6px;
+  gap:10px;
 }
+/* Asegurar que todos los items del toolbar tengan flex-grow:0 para que
+   el flex no agregue espacio extra a uno solo. El único con
+   margin-left:auto es el reset (al final). */
+.me-toolbar__row > *{ flex-grow:0; flex-shrink:0; margin:0; }
+.me-toolbar__row > .me-filter-reset{ margin-left:auto; }
 .me-toolbar__chips{
   display:flex;
   align-items:center;
@@ -192,42 +197,12 @@
   to  { opacity:1; transform:none; }
 }
 
-/* ─── Breadcrumb (Colombia > Antioquia) ──────────────────────── */
+/* ─── Breadcrumb (DS naowee-breadcrumb) ─────────────────────── */
+/* La estética viene 100% del DS. Acá solo agregamos margin-bottom
+   para separar del mapa. */
 .me-breadcrumb{
-  display:flex;
-  align-items:center;
-  gap:6px;
   margin-bottom:12px;
   min-height:24px;
-  font-size:13px;
-  font-weight:500;
-}
-.me-breadcrumb__link{
-  background:none;
-  border:none;
-  font-family:inherit;
-  font-size:13px;
-  font-weight:500;
-  color:var(--naowee-color-text-secondary, #646587);
-  cursor:pointer;
-  padding:2px 4px;
-  border-radius:4px;
-  transition:color .12s, background .12s;
-}
-.me-breadcrumb__link:hover{
-  color:var(--naowee-color-text-accent, #d74009);
-  background:#FFEDC7;
-}
-.me-breadcrumb__sep{
-  display:inline-flex;
-  align-items:center;
-  color:var(--naowee-color-text-secondary, #646587);
-  flex-shrink:0;
-}
-.me-breadcrumb__sep svg{ width:14px; height:14px; }
-.me-breadcrumb__current{
-  color:var(--naowee-color-text-accent, #d74009);
-  font-weight:600;
 }
 
 /* ─── Map stage ───────────────────────────────────────────────── */
@@ -304,6 +279,27 @@
   transform:translate(-50%, -50%) scale(1.06);
   box-shadow:0 8px 20px rgba(0, 0, 0, .2);
   z-index:200;
+}
+/* Sub-zoomed: ring naranja pulsante invitando al 2do click → enter Leaflet.
+   Reusa la misma curva del DS naowee-stepper--pulse para coherencia. */
+.me-cluster-pin--zoomed{
+  z-index:300;
+  animation:meClusterPulse 1.6s cubic-bezier(.4, 0, .6, 1) infinite;
+}
+.me-cluster-pin--zoomed .me-cluster-pin__count{
+  background:var(--naowee-color-text-accent, #d74009);
+}
+@keyframes meClusterPulse{
+  0%, 100%{
+    transform:translate(-50%, -50%) scale(1);
+    box-shadow:0 0 0 0 rgba(215, 64, 9, .45),
+               0 4px 12px rgba(0, 0, 0, .15);
+  }
+  50%{
+    transform:translate(-50%, -50%) scale(1.04);
+    box-shadow:0 0 0 8px rgba(215, 64, 9, 0),
+               0 4px 12px rgba(0, 0, 0, .15);
+  }
 }
 .me-cluster-pin__count{
   display:inline-flex;
