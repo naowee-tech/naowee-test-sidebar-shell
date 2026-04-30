@@ -212,14 +212,27 @@
 .um-table tbody tr:hover{background:#fafbfd}
 .um-table tbody tr:last-child td{border-bottom:none}
 
-.um-table .um-td-name{font-weight:600;color:var(--text-primary);font-size:13px}
-.um-table .um-td-email{color:var(--text-secondary);font-size:12.5px}
+/* Tipografía de las celdas — alineada al peso medium del DS para no
+   generar contraste excesivo en una tabla densa. */
+.um-table .um-td-name{
+  font-weight:500;
+  color:var(--naowee-color-text-primary, var(--text-primary));
+  font-size:13px;
+}
+.um-table .um-td-email{
+  color:var(--naowee-color-text-secondary, var(--text-secondary));
+  font-size:12.5px;
+  font-weight:400;
+}
 .um-table .um-td-doc-type{
-  font-size:12px;font-weight:600;color:var(--text-secondary);
+  font-size:12px;
+  font-weight:500;
+  color:var(--naowee-color-text-secondary, var(--text-secondary));
 }
 .um-table .um-td-doc-num{
-  font-size:13px;color:var(--text-primary);
-  /* Inter — no monospace */
+  font-size:13px;
+  font-weight:400;
+  color:var(--naowee-color-text-primary, var(--text-primary));
 }
 
 /* ─── Badge status — DS oficial (.naowee-badge variants quiet) ──────
