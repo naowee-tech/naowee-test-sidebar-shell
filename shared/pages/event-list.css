@@ -107,6 +107,75 @@
   padding:20px 24px;
 }
 
+/* ─── Multi-select dropdown: option-check + tags ────────────────────
+   El DS provee la mecánica visual base (.naowee-dropdown__option-check
+   + .naowee-dropdown__option--selected). Acá solo ajustamos el SVG del
+   checkmark dentro del check para que ocupe bien el espacio. */
+.naowee-dropdown__option-check svg{
+  width:12px; height:12px;
+}
+.naowee-dropdown__option{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  cursor:pointer;
+}
+/* Tags dentro del trigger: line-height tighter para que no estiren la altura */
+.naowee-dropdown__trigger .naowee-dropdown__tags{
+  padding:4px 0;
+}
+
+/* ─── Hover cuadrado en la X de cada tag ──────────────────────────────
+   El DS no define hover para __close — lo agregamos local. La hit-area
+   sigue siendo el __active-area (wrapper grande, click-friendly), pero
+   el feedback visual (fondo redondeado-cuadrado) se aplica solo al
+   __close para que sea un cuadrado perfecto.
+
+   Tag --small es 24px de alto. Close de 18×18 deja 3px de gap arriba/
+   abajo. Para igualar el gap derecho, override el padding-right del
+   active-area al mismo 3px (DS default es 8px, demasiado holgado).
+   El padding-left lo mantenemos en 4px (separación visual del label).
+
+   Tokens DS: --interactive-fill-mute-hover/active (orange-100/200) +
+   --text-accent — coherente con el resto del DS. */
+.naowee-dropdown__trigger .naowee-tag__active-area{
+  padding-right:3px !important;   /* override DS 8px → 3px (== gap top/bottom) */
+}
+.naowee-dropdown__trigger .naowee-tag__close{
+  width:18px;
+  height:18px;
+  border-radius:var(--naowee-border-radius-tiny, 4px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:background .12s ease, color .12s ease;
+}
+.naowee-dropdown__trigger .naowee-tag__close svg{
+  width:12px;
+  height:12px;
+  stroke:currentColor;
+}
+.naowee-dropdown__trigger .naowee-tag__active-area:hover .naowee-tag__close{
+  background:var(--naowee-color-interactive-fill-mute-hover);
+  color:var(--naowee-color-text-accent);
+}
+.naowee-dropdown__trigger .naowee-tag__active-area:active .naowee-tag__close{
+  background:var(--naowee-color-interactive-fill-mute-active);
+  color:var(--naowee-color-text-accent);
+}
+
+/* ─── Lock hint para inscStart bloqueado al startDate ────────────────
+   Helper text de información sin badge — color text-secondary. */
+.ev-lock-hint{
+  font-size:11.5px;
+  color:var(--naowee-color-text-secondary, #646587);
+  font-style:italic;
+}
+/* El icono de candado en el suffix muestra ligeramente más opaco */
+.ev-locked .ev-date-suffix{
+  opacity:.6;
+}
+
 /* Date picker custom (DS-styled) — input read-only + popup calendar
    El input no tiene caret y todo el wrap es clickeable. El popup se
    inyecta al body con position:fixed (escapa el overflow del modal). */

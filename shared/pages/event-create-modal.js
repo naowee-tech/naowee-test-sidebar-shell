@@ -28,6 +28,8 @@ const MONTHS_LONG  = ['enero','febrero','marzo','abril','mayo','junio','julio','
 const MONTHS_SHORT = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 const WEEKDAYS     = ['L','M','X','J','V','S','D'];
 
+const CATEGORIES = ['Infantil', 'Prejuvenil', 'Juvenil', 'Sub-23', 'Mayores', 'Master', 'Veteranos'];
+
 const _modalState = {
   el: null,
   step: 1,
@@ -38,9 +40,9 @@ const _modalState = {
     description: '',
     startDate: '',  /* ISO yyyy-mm-dd */
     endDate: '',
-    category: '',
+    categories: [], /* multi-select array */
     phases: 1,
-    inscStart: '',
+    inscStart: '',  /* auto-igual a startDate, locked */
     inscEnd: ''
   }
 };
@@ -51,7 +53,7 @@ export function openCreateEventModal() {
   _modalState.errors = {};
   _modalState.data = {
     name:'', description:'', startDate:'', endDate:'',
-    category:'', phases:1, inscStart:'', inscEnd:''
+    categories:[], phases:1, inscStart:'', inscEnd:''
   };
 
   const overlay = document.createElement('div');
@@ -94,11 +96,11 @@ function validateStep(step) {
   const errors = {};
   const d = _modalState.data;
   if (step === 1) {
-    if (!d.name.trim())     errors.name = true;
-    if (!d.startDate)       errors.startDate = true;
-    if (!d.endDate)         errors.endDate = true;
-    if (!d.category)        errors.category = true;
-    if (!d.inscEnd)         errors.inscEnd = true;
+    if (!d.name.trim())              errors.name = true;
+    if (!d.startDate)                errors.startDate = true;
+    if (!d.endDate)                  errors.endDate = true;
+    if (!d.categories || !d.categories.length) errors.categories = true;
+    if (!d.inscEnd)                  errors.inscEnd = true;
 
     /* Rango "event": fin >= inicio */
     if (d.startDate && d.endDate && d.endDate < d.startDate) {
@@ -215,23 +217,30 @@ function renderStep1() {
       <!-- Sección CATEGORÍAS -->
       <div class="ev-form-section">CATEGORÍAS</div>
 
-      <!-- Categoría (dropdown DS) -->
-      <div class="naowee-dropdown ${e.category ? 'naowee-dropdown--error' : ''}" id="evCategoryDD" data-field-wrap="category">
+      <!-- Categoría (dropdown DS multi-select con tags + option-checks) -->
+      <div class="naowee-dropdown naowee-dropdown--multiple ${e.categories ? 'naowee-dropdown--error' : ''}"
+           id="evCategoryDD"
+           data-field-wrap="categories">
         <label class="naowee-dropdown__label naowee-dropdown__label--required">Categoría</label>
         <div class="naowee-dropdown__trigger" tabindex="0">
-          <span class="${d.category ? 'naowee-dropdown__value' : 'naowee-dropdown__placeholder'}">
-            ${d.category || 'Ej. Juvenil, Prejuvenil, Infantil'}
-          </span>
+          ${renderCategoryTriggerContent(d.categories)}
           <div class="naowee-dropdown__controls">
             <span class="naowee-dropdown__chevron">${chevronDown()}</span>
           </div>
         </div>
         <div class="naowee-dropdown__menu" role="listbox">
-          ${['Infantil', 'Prejuvenil', 'Juvenil', 'Sub-23', 'Mayores', 'Master', 'Veteranos'].map((c) => `
-            <div class="naowee-dropdown__option" data-val="${c}">${c}</div>
-          `).join('')}
+          ${CATEGORIES.map((c) => {
+            const isSel = d.categories.includes(c);
+            return `
+              <div class="naowee-dropdown__option ${isSel ? 'naowee-dropdown__option--selected' : ''}"
+                   data-val="${c}">
+                <span class="naowee-dropdown__option-check">${isSel ? checkIcon() : ''}</span>
+                <span>${c}</span>
+              </div>
+            `;
+          }).join('')}
         </div>
-        ${e.category ? errorHelper() : ''}
+        ${e.categories ? errorHelper() : ''}
       </div>
 
       <!-- Cuántas fases tiene? (input-stepper DS) -->
@@ -252,12 +261,39 @@ function renderStep1() {
       <!-- Sección INSCRIPCIONES -->
       <div class="ev-form-section">INSCRIPCIONES</div>
 
-      <!-- Fechas inscripciones (rango "inscriptions") -->
+      <!-- Fechas inscripciones (rango "inscriptions").
+           inscStart está LOCKED al startDate del evento — se auto-rellena
+           y el field se deshabilita. Si el usuario quiere cambiar la fecha
+           de inicio de inscripciones, debe primero modificar la fecha de
+           inicio del evento. -->
       <div class="ev-grid-2">
-        ${renderDatepicker('evInscStart', 'Fecha inicio de inscripciones', false, d.inscStart, 'inscStart', false,    { range:'from', rangeName:'inscriptions' })}
+        ${renderDatepicker('evInscStart', 'Fecha inicio de inscripciones', false, d.startDate, 'inscStart', false,    { range:'from', rangeName:'inscriptions', locked:true, lockHint:'Igual a la fecha de inicio del evento' })}
         ${renderDatepicker('evInscEnd',   'Fecha fin de inscripciones',    true,  d.inscEnd,   'inscEnd',   e.inscEnd, { range:'to',   rangeName:'inscriptions' })}
       </div>
     </div>
+  `;
+}
+
+/* Trigger content del dropdown de categorías:
+   - Si no hay seleccionadas → placeholder
+   - Si hay seleccionadas → tags pill (DS naowee-tag --accent --small) con
+     active-area + close button. Click en X quita la categoría sin abrir
+     el menú. */
+function renderCategoryTriggerContent(categories) {
+  if (!categories || categories.length === 0) {
+    return `<span class="naowee-dropdown__placeholder">Seleccioná una o más categorías</span>`;
+  }
+  return `
+    <span class="naowee-dropdown__tags">
+      ${categories.map((c) => `
+        <span class="naowee-tag naowee-tag--accent naowee-tag--small" data-tag="${c}">
+          ${c}
+          <span class="naowee-tag__active-area" data-remove-tag="${c}">
+            <span class="naowee-tag__close">${closeIconSmall()}</span>
+          </span>
+        </span>
+      `).join('')}
+    </span>
   `;
 }
 
@@ -304,8 +340,21 @@ function renderDatepicker(id, label, required, isoValue, fieldName, hasError, ra
   const rangeAttrs = rangeOpts
     ? `data-range="${rangeOpts.range}" data-range-name="${rangeOpts.rangeName}"`
     : '';
+  /* Locked: el field está bloqueado por dependencia con otro field
+     (ej: inscStart depende de startDate). Visualmente disabled, sin wire
+     de calendar, con helper hint informativo. */
+  const locked = !!(rangeOpts && rangeOpts.locked);
+  const lockHint = (rangeOpts && rangeOpts.lockHint) || '';
+  const wrapClasses = [
+    'naowee-textfield',
+    'has-datepicker',
+    hasError ? 'naowee-textfield--error' : '',
+    locked   ? 'naowee-textfield--disabled' : '',
+    locked   ? 'ev-locked' : ''
+  ].filter(Boolean).join(' ');
+
   return `
-    <div class="naowee-textfield has-datepicker ${hasError ? 'naowee-textfield--error' : ''}"
+    <div class="${wrapClasses}"
          data-ev-datepicker
          data-field-wrap="${fieldName}"
          ${rangeAttrs}>
@@ -315,13 +364,15 @@ function renderDatepicker(id, label, required, isoValue, fieldName, hasError, ra
       <div class="naowee-textfield__input-wrap">
         <input class="naowee-textfield__input ev-date-input" type="text" id="${id}"
                readonly
+               ${locked ? 'disabled' : ''}
                placeholder="dd mmm aaaa"
                value="${display}"
                data-iso="${isoValue || ''}"
                data-field="${fieldName}" />
-        <span class="naowee-textfield__suffix ev-date-suffix">${calendarIcon()}</span>
+        <span class="naowee-textfield__suffix ev-date-suffix">${locked ? lockIcon() : calendarIcon()}</span>
       </div>
       <div class="ev-range-helper" data-range-helper hidden></div>
+      ${locked && lockHint ? `<div class="naowee-helper"><div class="naowee-helper__text ev-lock-hint">${lockHint}</div></div>` : ''}
       ${hasError ? errorHelper() : ''}
     </div>
   `;
@@ -451,6 +502,10 @@ function bindModalEvents() {
     };
 
     trigger?.addEventListener('click', (e) => {
+      /* Si el click fue sobre el X (active-area) de un tag, NO toggleamos
+         el dropdown — el handler de remove-tag se encarga de quitar la
+         categoría sin abrir/cerrar el menú. */
+      if (e.target.closest('[data-remove-tag]')) return;
       e.stopPropagation();
       const opening = !dropdown.classList.contains('naowee-dropdown--open');
       /* Cerrar otros datepickers abiertos */
@@ -469,20 +524,80 @@ function bindModalEvents() {
       if (dropdown.classList.contains('naowee-dropdown--open')) positionMenu();
     });
 
+    /* Multi-select: cada click toggle add/remove de la categoría.
+       NO cierra el menú — el usuario puede seleccionar varias.
+       Update quirúrgico del trigger + del check de la opción para no
+       perder el estado abierto del menú. */
     dropdown.querySelectorAll('.naowee-dropdown__option').forEach((opt) => {
       opt.addEventListener('click', (e) => {
         e.stopPropagation();
-        _modalState.data.category = opt.getAttribute('data-val');
-        dropdown.classList.remove('naowee-dropdown--open');
-        const ph = dropdown.querySelector('.naowee-dropdown__placeholder, .naowee-dropdown__value');
-        if (ph) {
-          ph.textContent = _modalState.data.category;
-          ph.classList.remove('naowee-dropdown__placeholder');
-          ph.classList.add('naowee-dropdown__value');
+        const val = opt.getAttribute('data-val');
+        const categories = _modalState.data.categories;
+        const idx = categories.indexOf(val);
+        if (idx >= 0) categories.splice(idx, 1);
+        else          categories.push(val);
+
+        /* Update visual del check + selected state de la opción */
+        const check = opt.querySelector('.naowee-dropdown__option-check');
+        if (idx >= 0) {
+          opt.classList.remove('naowee-dropdown__option--selected');
+          if (check) check.innerHTML = '';
+        } else {
+          opt.classList.add('naowee-dropdown__option--selected');
+          if (check) check.innerHTML = checkIcon();
         }
-        clearFieldError('category');
+
+        /* Update visual del trigger (placeholder ↔ tags) */
+        refreshCategoryTrigger(dropdown);
+        clearFieldError('categories');
+        /* Re-position por si los tags hicieron crecer el trigger */
+        positionMenu();
       });
     });
+
+    /* Click en X de un tag → quitar esa categoría sin abrir/cerrar el menú.
+       Bind UNA sola vez por overlay (el modal se destruye y rebindea limpio
+       la próxima vez) — evita stack de handlers entre repaints. */
+    if (!overlay._evRemoveTagBound) {
+      overlay._evRemoveTagBound = true;
+      overlay.addEventListener('click', (e) => {
+        const removeBtn = e.target.closest('[data-remove-tag]');
+        if (!removeBtn) return;
+        /* StopPropagation aquí para que el document.click que cierra el
+           dropdown NO se dispare cuando el usuario solo quería borrar un tag. */
+        e.stopPropagation();
+        e.preventDefault();
+        const val = removeBtn.getAttribute('data-remove-tag');
+        const categories = _modalState.data.categories;
+        const idx = categories.indexOf(val);
+        if (idx < 0) return;
+        categories.splice(idx, 1);
+        /* Sync option__check de esa categoría en el menú */
+        const dd = overlay.querySelector('#evCategoryDD');
+        if (dd) {
+          const opt = dd.querySelector(`.naowee-dropdown__option[data-val="${val}"]`);
+          if (opt) {
+            opt.classList.remove('naowee-dropdown__option--selected');
+            const ch = opt.querySelector('.naowee-dropdown__option-check');
+            if (ch) ch.innerHTML = '';
+          }
+          refreshCategoryTrigger(dd);
+          if (dd.classList.contains('naowee-dropdown--open')) {
+            const t = dd.querySelector('.naowee-dropdown__trigger');
+            const m = dd.querySelector('.naowee-dropdown__menu');
+            if (t && m) {
+              const r = t.getBoundingClientRect();
+              m.style.position = 'fixed';
+              m.style.top = `${r.bottom + 6}px`;
+              m.style.left = `${r.left}px`;
+              m.style.width = `${r.width}px`;
+              m.style.zIndex = '9999';
+            }
+          }
+        }
+      });
+    }
+
     document.addEventListener('click', () => {
       dropdown.classList.remove('naowee-dropdown--open');
     });
@@ -558,6 +673,21 @@ function showErrorsSurgically(errors) {
   }, 260);
 }
 
+/* Refresca el contenido del trigger del dropdown de categorías
+   (placeholder ↔ tags) sin tocar el menu/options. */
+function refreshCategoryTrigger(dropdown) {
+  const trigger = dropdown.querySelector('.naowee-dropdown__trigger');
+  if (!trigger) return;
+  const controls = trigger.querySelector('.naowee-dropdown__controls');
+  /* Quitar el contenido actual (placeholder o tags) — todo lo que NO sea
+     el bloque de controls */
+  Array.from(trigger.children).forEach((child) => {
+    if (child !== controls) child.remove();
+  });
+  /* Insertar el nuevo contenido al inicio */
+  trigger.insertAdjacentHTML('afterbegin', renderCategoryTriggerContent(_modalState.data.categories));
+}
+
 /* ─── Validación: clear surgical error de un campo ─────────────────── */
 function clearFieldError(fieldName) {
   if (!_modalState.errors[fieldName]) return;
@@ -577,6 +707,11 @@ function clearFieldError(fieldName) {
 function wireDatepicker(field, overlay) {
   if (field.dataset.evWired) return;
   field.dataset.evWired = '1';
+
+  /* Locked: no instanciamos popup ni wire de click — el field está
+     deshabilitado por dependencia con otro (ej: inscStart locked al
+     startDate del evento). */
+  if (field.classList.contains('ev-locked')) return;
 
   const input = field.querySelector('input');
   const wrap  = field.querySelector('.naowee-textfield__input-wrap');
@@ -722,6 +857,22 @@ function wireDatepicker(field, overlay) {
       pop.classList.remove('naowee-datepicker--open');
       clearFieldError(fieldName);
 
+      /* Propagación startDate → inscStart (locked).
+         La fecha de inicio de inscripciones está atada a la fecha de
+         inicio del evento — cualquier cambio en startDate se replica
+         quirúrgicamente al inscStart sin re-render. */
+      if (fieldName === 'startDate') {
+        _modalState.data.inscStart = iso;
+        const inscStartWrap = overlay.querySelector('[data-field-wrap="inscStart"]');
+        if (inscStartWrap) {
+          const inscInput = inscStartWrap.querySelector('input');
+          if (inscInput) {
+            inscInput.value = formatHumanFromIso(iso);
+            inscInput.dataset.iso = iso;
+          }
+        }
+      }
+
       /* Si soy "from" y el "to" actual queda anterior, lo limpio
          con flash visual + helper temporal de aviso. */
       if (rangeRole === 'from' && rangeName) {
@@ -842,8 +993,11 @@ function formatHumanFromIso(iso) {
 }
 
 /* ─── Iconos inline ────────────────────────────────────────────────── */
-function closeIcon()    { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'; }
+function closeIcon()      { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'; }
+function closeIconSmall() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'; }
+function checkIcon()      { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'; }
 function calendarIcon() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'; }
+function lockIcon()     { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 1 1 8 0v4"/></svg>'; }
 function chevronDown()  { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'; }
 function plusIcon()     { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'; }
 function minusIcon()    { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>'; }
