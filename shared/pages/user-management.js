@@ -106,9 +106,7 @@ const _state = {
   docTypeFilter: 'all',
   roleFilter: 'all',
   page: 1,
-  pageSize: 10,
-  /* Search interno por dropdown — independiente del search general de la tabla */
-  ddSearch: { docType: '', role: '' }
+  pageSize: 10
 };
 
 /* ─── Helpers ──────────────────────────────────────────────────────── */
@@ -143,11 +141,7 @@ export function renderUserManagementPage(rootEl) {
      Lo agregamos UNA vez al document para que sobreviva re-renders. */
   if (!document._umClickOutBound) {
     document.addEventListener('click', () => {
-      document.querySelectorAll('.um-dropdown.is-open').forEach((el) => {
-        el.classList.remove('is-open');
-        const ddType = el.getAttribute('data-dd-type');
-        if (ddType && _state.ddSearch) _state.ddSearch[ddType] = '';
-      });
+      document.querySelectorAll('.um-dropdown.is-open').forEach((el) => el.classList.remove('is-open'));
       document.querySelectorAll('.um-actions.is-open').forEach((el) => el.classList.remove('is-open'));
     });
     document._umClickOutBound = true;
@@ -213,32 +207,36 @@ function paintTableOnly() {
   }
 }
 
-/* ─── Render: tabs (DS naowee-tabs--animated con indicator) ───────── */
+/* ─── Render: tabs (DS oficial naowee-tabs--animated) ───────────── */
 function renderTabs() {
   return `
-    <div class="um-tabs" id="umTabs" role="tablist">
-      <button class="um-tab ${_state.tab === 'persona' ? 'is-active' : ''}" data-tab="persona" role="tab">
+    <div class="naowee-tabs naowee-tabs--animated um-tabs" id="umTabs" role="tablist">
+      <button class="naowee-tab ${_state.tab === 'persona' ? 'naowee-tab--selected' : ''}"
+              data-tab="persona" role="tab" type="button"
+              aria-selected="${_state.tab === 'persona'}">
         Persona Natural
       </button>
-      <button class="um-tab ${_state.tab === 'organizacion' ? 'is-active' : ''}" data-tab="organizacion" role="tab">
+      <button class="naowee-tab ${_state.tab === 'organizacion' ? 'naowee-tab--selected' : ''}"
+              data-tab="organizacion" role="tab" type="button"
+              aria-selected="${_state.tab === 'organizacion'}">
         Organización
       </button>
-      <span class="um-tabs__indicator" id="umTabsIndicator"></span>
+      <span class="naowee-tabs__indicator" id="umTabsIndicator"></span>
     </div>
   `;
 }
 
-/* Posiciona el indicator debajo del tab activo (ancho exacto del label).
-   Se llama después de cada paint y al cambiar de tab. */
+/* Posiciona el indicator del DS debajo del tab activo.
+   Patrón oficial: getBoundingClientRect del tab activo → translateX + width. */
 function updateTabIndicator() {
   const tabs = _state.rootEl.querySelector('#umTabs');
   const ind = _state.rootEl.querySelector('#umTabsIndicator');
   if (!tabs || !ind) return;
-  const active = tabs.querySelector('.um-tab.is-active');
+  const active = tabs.querySelector('.naowee-tab--selected');
   if (!active) return;
   const tRect = tabs.getBoundingClientRect();
   const aRect = active.getBoundingClientRect();
-  const left = aRect.left - tRect.left;
+  const left = aRect.left - tRect.left + tabs.scrollLeft;
   ind.style.transform = `translateX(${left}px)`;
   ind.style.width = `${aRect.width}px`;
 }
@@ -267,16 +265,10 @@ function renderToolbarLeft() {
   `;
 }
 
-/* Dropdown con search interno — filtra opciones live al tipear */
+/* Dropdown simple (sin search interno) — solo lista de opciones */
 function renderDropdown(ddType, placeholder, options, selectedCode) {
-  const ddSearch = (_state.ddSearch[ddType] || '').toLowerCase();
-  const filtered = ddSearch
-    ? options.filter((o) => o.label.toLowerCase().includes(ddSearch))
-    : options;
   const current = options.find((o) => o.code === selectedCode) || options[0];
-  const triggerLabel = selectedCode === 'all'
-    ? placeholder
-    : current.label;
+  const triggerLabel = selectedCode === 'all' ? placeholder : current.label;
 
   return `
     <div class="um-dropdown" data-dd-type="${ddType}">
@@ -285,25 +277,14 @@ function renderDropdown(ddType, placeholder, options, selectedCode) {
         <span class="um-dropdown__chev">${getIcon('chevron')}</span>
       </button>
       <div class="um-dropdown__menu">
-        <div class="um-dropdown__search">
-          <span class="um-dropdown__search-icon">${searchIcon()}</span>
-          <input type="text" class="um-dropdown__search-input"
-                 data-dd-search="${ddType}"
-                 placeholder="Buscar..."
-                 value="${escapeHtml(_state.ddSearch[ddType] || '')}" />
-        </div>
-        <div class="um-dropdown__list">
-          ${filtered.length === 0 ? `
-            <div class="um-dropdown__no-results">Sin coincidencias</div>
-          ` : filtered.map((o) => `
-            <button type="button" class="um-dropdown__opt"
-                    data-dd="${ddType}" data-value="${o.code}"
-                    aria-selected="${o.code === selectedCode}">
-              <span>${escapeHtml(o.label)}</span>
-              <span class="um-dropdown__opt-check">${getIcon('check')}</span>
-            </button>
-          `).join('')}
-        </div>
+        ${options.map((o) => `
+          <button type="button" class="um-dropdown__opt"
+                  data-dd="${ddType}" data-value="${o.code}"
+                  aria-selected="${o.code === selectedCode}">
+            <span>${escapeHtml(o.label)}</span>
+            <span class="um-dropdown__opt-check">${getIcon('check')}</span>
+          </button>
+        `).join('')}
       </div>
     </div>
   `;
@@ -359,7 +340,7 @@ function renderTable(filtered) {
             <td>${renderBadge(u.status)}</td>
             <td class="um-cell-actions">
               <div class="um-actions" data-row="${idx}">
-                <button class="um-actions__trigger" type="button" aria-label="Acciones">
+                <button class="naowee-btn naowee-btn--icon naowee-btn--mute naowee-btn--small um-actions__trigger" type="button" aria-label="Acciones">
                   ${dotsIcon()}
                 </button>
                 <div class="um-actions__menu">
@@ -385,14 +366,15 @@ function renderTable(filtered) {
   `;
 }
 
+/* Badges del DS oficial — naowee-badge variants quiet (tinted) */
 function renderBadge(status) {
   const map = {
-    active:   { cls: 'um-badge--active',   label: 'Activo' },
-    pending:  { cls: 'um-badge--pending',  label: 'Pendiente' },
-    inactive: { cls: 'um-badge--inactive', label: 'Inactivo' }
+    active:   { cls: 'naowee-badge naowee-badge--positive naowee-badge--quiet', label: 'Activo' },
+    pending:  { cls: 'naowee-badge naowee-badge--caution naowee-badge--quiet',  label: 'Pendiente' },
+    inactive: { cls: 'naowee-badge naowee-badge--neutral naowee-badge--quiet',  label: 'Inactivo' }
   };
   const m = map[status] || map.inactive;
-  return `<span class="um-badge ${m.cls}">${m.label}</span>`;
+  return `<span class="${m.cls}">${m.label}</span>`;
 }
 
 function renderEmpty() {
@@ -457,73 +439,24 @@ function bindToolbarEvents() {
     trigger?.addEventListener('click', (e) => {
       e.stopPropagation();
       _state.rootEl.querySelectorAll('.um-dropdown.is-open').forEach((other) => {
-        if (other !== dd) {
-          other.classList.remove('is-open');
-          /* Reset del search interno cuando se cierra otro dropdown */
-          const otherType = other.getAttribute('data-dd-type');
-          if (otherType) _state.ddSearch[otherType] = '';
-        }
+        if (other !== dd) other.classList.remove('is-open');
       });
       dd.classList.toggle('is-open');
-      /* Si se abrió, focus en el search interno para tipear directo */
-      if (dd.classList.contains('is-open')) {
-        const ddSearchInput = dd.querySelector('.um-dropdown__search-input');
-        ddSearchInput?.focus();
-      }
-    });
-    /* Click dentro del menu (excepto en options) NO cierra */
-    dd.querySelector('.um-dropdown__menu')?.addEventListener('click', (e) => e.stopPropagation());
-  });
-
-  /* Dropdown search interno — filter live sin cerrar el dropdown */
-  _state.rootEl.querySelectorAll('.um-dropdown__search-input').forEach((input) => {
-    input.addEventListener('input', (e) => {
-      const ddType = input.getAttribute('data-dd-search');
-      _state.ddSearch[ddType] = e.target.value;
-      /* Re-render solo la lista del dropdown — mantiene focus del input */
-      const dd = input.closest('.um-dropdown');
-      const list = dd.querySelector('.um-dropdown__list');
-      if (!list) return;
-
-      const opts = ddType === 'docType' ? docTypes() : rolesList();
-      const q = e.target.value.toLowerCase();
-      const filtered = q ? opts.filter((o) => o.label.toLowerCase().includes(q)) : opts;
-      const selectedCode = ddType === 'docType' ? _state.docTypeFilter : _state.roleFilter;
-
-      list.innerHTML = filtered.length === 0
-        ? `<div class="um-dropdown__no-results">Sin coincidencias</div>`
-        : filtered.map((o) => `
-            <button type="button" class="um-dropdown__opt"
-                    data-dd="${ddType}" data-value="${o.code}"
-                    aria-selected="${o.code === selectedCode}">
-              <span>${escapeHtml(o.label)}</span>
-              <span class="um-dropdown__opt-check">${getIcon('check')}</span>
-            </button>
-          `).join('');
-
-      /* Re-bind options en la nueva lista */
-      list.querySelectorAll('.um-dropdown__opt').forEach((opt) => {
-        opt.addEventListener('click', onDropdownOptClick);
-      });
     });
   });
 
   /* Dropdown options */
   _state.rootEl.querySelectorAll('.um-dropdown__opt').forEach((opt) => {
-    opt.addEventListener('click', onDropdownOptClick);
+    opt.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const ddType = opt.getAttribute('data-dd');
+      const value = opt.getAttribute('data-value');
+      if (ddType === 'docType') _state.docTypeFilter = value;
+      if (ddType === 'role')    _state.roleFilter = value;
+      _state.page = 1;
+      paintFull();
+    });
   });
-}
-
-function onDropdownOptClick(e) {
-  e.stopPropagation();
-  const opt = e.currentTarget;
-  const ddType = opt.getAttribute('data-dd');
-  const value = opt.getAttribute('data-value');
-  if (ddType === 'docType') _state.docTypeFilter = value;
-  if (ddType === 'role')    _state.roleFilter = value;
-  _state.ddSearch[ddType] = '';
-  _state.page = 1;
-  paintFull();
 }
 
 function bindPaginationEvents() {
