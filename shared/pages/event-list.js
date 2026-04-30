@@ -109,7 +109,7 @@ function paintFull() {
           <h1 class="naowee-page-header__title">Listado de eventos</h1>
           <p class="naowee-page-header__subtitle">Monitoreo y control de cupos</p>
         </div>
-        <button class="naowee-btn naowee-btn--loud naowee-btn--small" id="evBtnCreate" type="button">
+        <button class="naowee-btn naowee-btn--loud naowee-btn--large" id="evBtnCreate" type="button">
           <span class="ev-btn-icon">${userPlusIcon()}</span>
           Crear nuevo evento
         </button>
