@@ -36,18 +36,28 @@
   height:36px;
 }
 
-/* ─── Card sin grow vertical
-   El .naowee-table-card es flex-column. Cuando la página tiene pocos
-   elementos (página 2 con 7 filas en lugar de 15), el card podía
-   mostrar espacio extra debajo de la última fila por flex grow heredado
-   o min-height implícito. Forzamos altura natural. */
+/* ─── Card sin grow vertical y sin scroll interno
+   El .naowee-table-card es flex-column. Forzamos altura natural y
+   sin overflow para eliminar scroll horizontal innecesario y el
+   espacio reservado por scrollbar gutter. */
 .um-page .naowee-table-card{
   flex:0 0 auto;
   min-height:0;
+  height:auto;
 }
 .um-page .naowee-table-card__table-wrap{
   flex:0 0 auto;
   min-height:0;
+  height:auto;
+  overflow:visible;             /* sin scroll horizontal interno */
+}
+
+/* ─── Reducir padding-bottom del shell .page específicamente
+   en esta vista para que no haya espacio fantasma debajo del card.
+   El shell pone padding-bottom:72px para footer flotante; en eventos-lista
+   el footer no es prioridad visual, podemos achicar. */
+.page:has(.um-page){
+  padding-bottom:32px !important;
 }
 
 /* ─── Tabla: checkboxes primera columna ──────────────────────────── */
