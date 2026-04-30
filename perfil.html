@@ -22,8 +22,11 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/naowee-tech/naowee-design-system@v1.8.0/dist/design-system.css">
 
 <link rel="stylesheet" href="shared/shell.css">
+<link rel="stylesheet" href="shared/components/success-modal.css">
+<link rel="stylesheet" href="shared/components/phase-modal.css">
 <link rel="stylesheet" href="shared/pages/user-management.css">
 <link rel="stylesheet" href="shared/pages/event-list.css">
+<link rel="stylesheet" href="shared/pages/evento-detalle.css">
 <link rel="stylesheet" href="shared/pages/sedes-list.css">
 <link rel="stylesheet" href="shared/pages/mapa-escenarios.css">
 </head>
@@ -63,6 +66,7 @@
   import { mountSidebar, mountHeader, mountDemoRoleSwitcher, getRoleFromQuery } from './shared/sidebar.js';
   import { renderUserManagementPage } from './shared/pages/user-management.js';
   import { renderEventListPage } from './shared/pages/event-list.js';
+  import { renderEventoDetallePage } from './shared/pages/evento-detalle.js';
   import { renderSedesListPage } from './shared/pages/sedes-list.js';
   import { renderSedeDetailPage } from './shared/pages/sede-detail.js';
   import { renderDocsReviewPage } from './shared/pages/docs-review.js';
@@ -83,6 +87,13 @@
 
     if (currentActive === 'eventos' || currentActive === 'eventos-lista') {
       renderEventListPage(pageEl);
+      return;
+    }
+
+    if (currentActive === 'evento-detalle') {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      renderEventoDetallePage(pageEl, { id });
       return;
     }
 

@@ -60,6 +60,15 @@
   padding-bottom:32px !important;
 }
 
+/* ─── Full width en eventos-lista ────────────────────────────────
+   `.um-page` tiene max-width:1400px (compartido con user-management).
+   En eventos-lista la tabla tiene 7 columnas + filtros wide → necesita
+   todo el ancho disponible. Detectamos la vista por #evToolbar (único)
+   y liftamos el cap. Patrón equivalente al de sedes-list (.sd-page). */
+.um-page:has(#evToolbar){
+  max-width:none;
+}
+
 /* ─── Tabla: checkboxes primera columna ──────────────────────────── */
 .ev-table .ev-th-check,
 .ev-table .ev-td-check{
@@ -72,6 +81,113 @@
 }
 .ev-row-checked:hover{
   background:#fff3e6 !important;
+}
+
+/* Nombre clickable para eventos abribles (creado / en-curso) */
+.ev-name-link{
+  color:var(--accent, #d74009);
+  font-weight:600;
+  cursor:pointer;
+  text-decoration:none;
+  border-radius:4px;
+  transition:color .12s, background .12s;
+}
+.ev-name-link:hover{
+  color:var(--naowee-color-orange-800, #b83100);
+  text-decoration:underline;
+  text-underline-offset:2px;
+}
+.ev-name-link:focus-visible{
+  outline:2px solid var(--accent, #d74009);
+  outline-offset:2px;
+}
+
+/* Total participantes — icono outline + número, alineados verticalmente.
+   El icono usa el mismo gris muted que la fila para no competir visualmente. */
+.ev-participants{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.ev-participants svg{
+  width:16px;
+  height:16px;
+  flex-shrink:0;
+  color:var(--naowee-color-icon-secondary, #646587);
+}
+
+/* ─── Eliminar evento — botón destructivo (override de loud) ─────────
+   El DS no expone una variante negative para .naowee-btn loud, así que
+   pintamos el bg con el token feedback-fill-negative-loud (rojo 700) y
+   un hover ligeramente más oscuro. Mantiene la geometría/typo del DS. */
+.ev-btn--danger.naowee-btn--loud{
+  background:var(--naowee-color-feedback-fill-negative-loud, #d11f1f);
+  color:var(--naowee-color-feedback-text-negative-loud-on-fill, #fff);
+}
+.ev-btn--danger.naowee-btn--loud:hover{
+  background:var(--naowee-color-red-800, #a8181c);
+}
+.ev-btn--danger.naowee-btn--loud:active{
+  background:var(--naowee-color-red-900, #861217);
+}
+.ev-btn--danger.naowee-btn--loud svg{
+  stroke:#fff;
+  color:#fff;
+}
+
+/* Subtitle del modal de confirmación */
+.ev-delete-overlay .naowee-modal__subtitle{
+  color:var(--naowee-color-text-secondary, #646587);
+}
+
+/* ─── Toast bottom-right con undo y barra de progreso 20s ───────────
+   Usa el componente DS naowee-message--positive (verde quiet) sin
+   override de bg/borde. Solo aporta:
+   - posicionamiento floating bottom-right
+   - barra de progreso animada que decrece junto al timeout
+   - layout del action button (Deshacer) */
+.ev-undo-toast{
+  position:fixed;
+  right:24px;
+  bottom:24px;
+  z-index:1100;
+  width:380px;
+  max-width:calc(100vw - 32px);
+  opacity:0;
+  transform:translateY(12px);
+  transition:opacity .22s, transform .22s cubic-bezier(.4,0,.2,1);
+  filter:drop-shadow(0 12px 32px rgba(40,40,52,.18));
+}
+.ev-undo-toast--show{
+  opacity:1;
+  transform:translateY(0);
+}
+.ev-undo-toast .naowee-message{
+  position:relative;
+  overflow:hidden;
+}
+.ev-undo-toast__action{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:8px;
+  padding-left:32px; /* alinea con el body después del icon */
+}
+.ev-undo-toast__undo{
+  font-weight:700;
+}
+.ev-undo-toast__progress{
+  position:absolute;
+  left:0;
+  bottom:0;
+  height:3px;
+  width:100%;
+  background:var(--naowee-color-feedback-fill-positive-loud, #1f8923);
+  transform-origin:left center;
+  animation:evUndoProgress 20s linear forwards;
+}
+@keyframes evUndoProgress{
+  from{ transform:scaleX(1); }
+  to  { transform:scaleX(0); }
 }
 
 /* ─── Modal Crear Evento — overrides mínimos sobre componentes DS ─── */
@@ -88,6 +204,14 @@
 .ev-modal{
   width:720px !important;            /* Más ancho para que el stepper de 4 pasos entre cómodo */
   max-width:calc(100vw - 48px);
+  transition:width .25s cubic-bezier(.4, 0, .2, 1);
+}
+/* Step 4 (Modalidades y Pruebas) — modal MUY ancho porque la tabla
+   tiene 1 columna por categoría seleccionada (hasta 7) y cada celda
+   carga checkbox + label "H•M" + chevron. Con 720px se rompe el
+   layout cuando hay 4+ categorías. */
+.ev-modal--wide{
+  width:1100px !important;
 }
 
 /* Stepper compacto en el modal — solo padding interno.
@@ -105,6 +229,14 @@
 /* Body padding ajustado para el contenido del form */
 .ev-modal__body{
   padding:20px 24px;
+  /* DS le aplica `flex: 1` al body — eso hace que el body crezca hasta
+     ocupar toda la altura disponible del modal, dejando un hueco blanco
+     debajo del form cuando el contenido es corto (paso 3 con pocos
+     campos visibles, por ejemplo). Con `flex: 0 1 auto` el body se
+     ajusta al contenido y el modal entero se reduce a su tamaño natural.
+     Si el contenido excede el max-height del modal, el `overflow-y:auto`
+     del DS sigue activo y el shrink del flex lo deja scrolleable. */
+  flex: 0 1 auto !important;
 }
 
 /* ─── Multi-select dropdown: option-check + tags ────────────────────
@@ -230,6 +362,16 @@
   margin-top:4px;
 }
 
+/* El DS solo aplica el asterisco rojo a `.naowee-textfield__label--required`,
+   no al `.naowee-dropdown__label--required` que usamos en los multi/single
+   selects. Reproducimos la regla del DS local para los dropdowns para que
+   los campos requeridos (Categoría, Deportes, Sedes, Catálogo de delegaciones,
+   etc.) muestren el `*` rojo consistente. */
+.naowee-dropdown__label--required::after{
+  content: ' *';
+  color: var(--naowee-color-feedback-fill-negative-loud, #e53935);
+}
+
 /* Footer con botones full-width */
 .ev-modal__footer .naowee-btn{
   flex:1;
@@ -254,6 +396,627 @@
   text-transform:uppercase;
   color:#9ca0b8;
   margin:8px 0 -4px 0;
+}
+
+/* ─── Step 2: Asignar deportes ─────────────────────────────────────
+   Visual: H3 con título del paso + banner de aviso (DS message
+   --caution) + multi-select dropdown del catálogo. Search adentro
+   del menú con icono y clear-on-Esc. Botón "Seleccionar todos" sticky
+   al pie. Empty state inline cuando search no matchea. */
+.ev-step2__title{
+  font-size:18px;
+  font-weight:700;
+  color:var(--naowee-color-text-primary, #282834);
+  margin:0;
+}
+.ev-step2__notice{
+  width:100%;
+}
+
+/* Menú extendido del dropdown — más alto que el default para que la
+   lista de 95 deportes scrollee internamente sin saturar el modal. */
+.ev-sports-menu{
+  display:flex;
+  flex-direction:column;
+  max-height:340px;
+  padding:0;
+  overflow:hidden;          /* el list scrollea adentro */
+}
+
+/* Search input al tope (sticky-style por orden flex) — mismo look que
+   un naowee-textfield--small con icono prefix. */
+.ev-sports-menu__search{
+  position:relative;
+  padding:10px 12px;
+  border-bottom:1px solid var(--naowee-color-border-default, #e7e9f3);
+  background:#fff;
+  flex:0 0 auto;
+}
+.ev-sports-menu__search-icon{
+  position:absolute;
+  left:22px;
+  top:50%;
+  transform:translateY(-50%);
+  width:16px;
+  height:16px;
+  color:var(--naowee-color-text-secondary, #646587);
+  pointer-events:none;
+  display:flex;
+}
+.ev-sports-menu__search-icon svg{
+  width:16px;
+  height:16px;
+}
+.ev-sports-menu__search-input{
+  width:100%;
+  height:36px;
+  padding:0 12px 0 34px;
+  border:1px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius:8px;
+  font-size:13px;
+  font-family:inherit;
+  color:var(--naowee-color-text-primary, #282834);
+  background:#fff;
+  transition:border-color .12s, box-shadow .12s;
+}
+.ev-sports-menu__search-input:focus{
+  outline:none;
+  border-color:var(--naowee-color-interactive-fill-loud-idle, #d74009);
+  box-shadow:0 0 0 3px rgba(215, 64, 9, .12);
+}
+.ev-sports-menu__search-input::placeholder{
+  color:var(--naowee-color-text-secondary, #646587);
+}
+
+/* Lista scrollable */
+.ev-sports-menu__list{
+  flex:1 1 auto;
+  overflow-y:auto;
+  min-height:0;
+  padding:6px 0;
+}
+
+/* Empty state — italic gris centrado, sin border (idéntico al screenshot) */
+.ev-sports-menu__empty{
+  padding:20px 16px;
+  text-align:center;
+  font-size:13px;
+  font-style:italic;
+  color:var(--naowee-color-text-secondary, #646587);
+}
+
+/* "Seleccionar todos / Deseleccionar todos" — link-style accent al pie,
+   border-top para separar del listado. Idéntico patrón al screenshot. */
+.ev-sports-menu__toggle-all{
+  flex:0 0 auto;
+  border:none;
+  border-top:1px solid var(--naowee-color-border-default, #e7e9f3);
+  background:#fff;
+  color:var(--naowee-color-interactive-fill-loud-idle, #d74009);
+  font-family:inherit;
+  font-size:13px;
+  font-weight:700;
+  padding:12px;
+  cursor:pointer;
+  transition:background .12s;
+  text-align:center;
+}
+.ev-sports-menu__toggle-all:hover{
+  background:#fff8f3;
+}
+
+/* ─── Step 3: Fases del evento ─────────────────────────────────────
+   Pills de fases en cabecera (1, 2, 3...) + "+" para agregar. La fase
+   activa muestra su form completo abajo. Patrón inspirado en Linear /
+   Asana phase configurators. */
+.ev-step3__title{
+  font-size:18px;
+  font-weight:700;
+  color:var(--naowee-color-text-primary, #282834);
+  margin:0;
+}
+
+.ev-phase-tabs{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:4px;
+}
+
+/* Pill de fase: contenedor con el botón principal (activa la fase) +
+   botón X (elimina la fase). El borde del pill cambia según activo, y
+   ambos botones internos se renderizan inline para que el pill se vea
+   como una unidad visual. */
+.ev-phase-tab{
+  display:inline-flex;
+  align-items:center;
+  border:1px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius:9999px;
+  background:#fff;
+  transition:border-color .12s, background .12s;
+  position:relative;
+}
+.ev-phase-tab:hover{
+  border-color:var(--naowee-color-border-default-hover, #d0d4e6);
+}
+.ev-phase-tab--active{
+  border-color:var(--naowee-color-interactive-fill-loud-idle, #d74009);
+}
+
+/* Botón principal del pill — abre/activa la fase. */
+.ev-phase-tab__main{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 12px 6px 6px;
+  border:none;
+  background:transparent;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:600;
+  color:var(--naowee-color-text-secondary, #646587);
+  cursor:pointer;
+  border-radius:9999px;
+  transition:color .12s;
+}
+.ev-phase-tab__main:hover{
+  color:var(--naowee-color-text-primary, #282834);
+}
+.ev-phase-tab--active .ev-phase-tab__main{
+  color:var(--naowee-color-text-primary, #282834);
+  padding-right:6px;            /* aprieta el gap visual con el X cuando activo */
+}
+.ev-phase-tab__num{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:24px;
+  height:24px;
+  border-radius:9999px;
+  background:#fff8f3;
+  color:var(--naowee-color-interactive-fill-loud-idle, #d74009);
+  font-size:12px;
+  font-weight:700;
+}
+.ev-phase-tab--active .ev-phase-tab__num{
+  background:var(--naowee-color-interactive-fill-loud-idle, #d74009);
+  color:#fff;
+}
+
+/* X del pill — visible siempre cuando hay >1 fase (el render lo oculta
+   con phases.length === 1). Hover gris suave, al click rojo de borrado. */
+.ev-phase-tab__close{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:22px;
+  height:22px;
+  border-radius:9999px;
+  border:none;
+  background:transparent;
+  color:var(--naowee-color-text-secondary, #646587);
+  cursor:pointer;
+  margin-right:6px;
+  padding:0;
+  transition:background .12s, color .12s;
+}
+.ev-phase-tab__close svg{ width:12px; height:12px; }
+.ev-phase-tab__close:hover{
+  background:#fff0ee;
+  color:var(--naowee-color-feedback-fill-negative-loud, #e53935);
+}
+
+/* Botón "+" — usa naowee-btn--quiet --icon del DS (NO --mute).
+     --mute  → idle TRANSPARENTE, cream solo al hover (botón invisible al idle)
+     --quiet → idle CREAM (#FFEDC7), cream darker (#FFDAA3) al hover
+   El usuario quería la cream box visible siempre (per playground#button) —
+   eso es --quiet. La sensación de "sombra interna" antes era: idle invisible
+   + hover cream apareciendo + focus ring (3px accent shadow) sumándose.
+   Con --quiet sale limpio. */
+.ev-phase-tab__add{
+  flex-shrink:0;
+}
+
+/* Fila checkbox + label horizontal — usado en "Cupos" y
+   "Cargue de documentos". */
+.ev-check-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  cursor:pointer;
+  user-select:none;
+}
+.ev-check-row__label{
+  font-size:14px;
+  color:var(--naowee-color-text-primary, #282834);
+}
+.ev-check-row__info{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:18px;
+  height:18px;
+  border-radius:9999px;
+  /* Naranja accent (no azul info) — alineado al sistema visual de
+     dev-sports.naoweesuite.com donde el (i) inline usa el color de la
+     marca para destacar parametrizaciones requeridas. */
+  color:var(--naowee-color-interactive-fill-loud-idle, #d74009);
+  cursor:help;
+  outline:none;
+}
+.ev-check-row__info svg{ width:16px; height:16px; }
+.ev-check-row__info:focus-visible{
+  box-shadow:0 0 0 3px rgba(215, 64, 9, .18);
+}
+
+/* ─── Tooltip oscuro on-hover/focus ─────────────────────────────
+   Pattern minimalista con pseudo-elementos. Cualquier elemento con
+   .ev-tooltip[data-tooltip="..."] muestra el bubble al hover/focus.
+   .ev-tooltip--wide aumenta el max-width para textos largos como el
+   del "Cargue de documentos". */
+.ev-tooltip{ position:relative; }
+.ev-tooltip::after{
+  content: attr(data-tooltip);
+  position:absolute;
+  bottom:calc(100% + 8px);
+  left:50%;
+  transform:translateX(-50%);
+  background:#282834;
+  color:#fff;
+  font-size:12px;
+  font-weight:500;
+  line-height:1.35;
+  padding:8px 10px;
+  border-radius:8px;
+  white-space:normal;
+  width:max-content;
+  max-width:160px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .12s ease;
+  z-index:10000;
+  box-shadow:0 6px 16px rgba(0, 0, 0, .25);
+}
+.ev-tooltip::before{
+  content:'';
+  position:absolute;
+  bottom:calc(100% + 2px);
+  left:50%;
+  transform:translateX(-50%);
+  border:6px solid transparent;
+  border-top-color:#282834;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .12s ease;
+  z-index:10000;
+}
+.ev-tooltip:hover::after,
+.ev-tooltip:hover::before,
+.ev-tooltip:focus::after,
+.ev-tooltip:focus::before,
+.ev-tooltip:focus-visible::after,
+.ev-tooltip:focus-visible::before{
+  opacity:1;
+}
+.ev-tooltip--wide::after{ max-width:260px; }
+
+/* Radio group "Modalidad de resultados" — vertical stack con label */
+.ev-radio-group{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.ev-radio-row{
+  cursor:pointer;
+  user-select:none;
+}
+
+/* Escenarios — grupos por sede cuando hay >1 sede seleccionada.
+   Cada grupo tiene un header uppercase gris (mismo treatment que los
+   ev-form-section labels) seguido de las opciones bajo esa sede. */
+.ev-esc-group{
+  padding:6px 0;
+  border-bottom:1px solid var(--naowee-color-border-default, #e7e9f3);
+}
+.ev-esc-group:last-child{ border-bottom:none; }
+.ev-esc-group__header{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  color:#9ca0b8;
+  padding:6px 14px 4px;
+}
+
+/* ─── Step 4: Modalidades y Pruebas ────────────────────────────
+   Tabla agrupada por deporte con columnas dinámicas (las categorías
+   del paso 1) y celdas con checkbox + dropdown de Sexo. */
+.ev-step4__title{
+  font-size:18px;
+  font-weight:700;
+  color:var(--naowee-color-text-primary, #282834);
+  margin:0;
+}
+.ev-step4__notice{ width:100%; }
+.ev-step4__empty{
+  padding:24px;
+  text-align:center;
+  color:var(--naowee-color-text-secondary, #646587);
+  font-size:14px;
+}
+.ev-step4__empty-table{
+  padding:32px 16px;
+  text-align:center;
+  color:var(--naowee-color-text-secondary, #646587);
+  font-size:14px;
+  border:1px dashed var(--naowee-color-border-default, #e7e9f3);
+  border-radius:12px;
+}
+
+/* Filter row: deporte dropdown a la izquierda con ancho compacto +
+   search expandible a la derecha. Antes el deporte tenía flex:1 y se
+   estiraba a ~700px con el modal --wide → el menú fixed posicionado
+   con width=trigger.width quedaba descomunal. */
+.ev-step4__filters{
+  display:flex;
+  gap:16px;
+  align-items:flex-end;
+  flex-wrap:wrap;
+}
+.ev-step4__deporte-dd{
+  flex:0 0 280px;
+  width:280px;
+}
+.ev-step4__search{
+  position:relative;
+  flex:1 1 280px;
+  min-width:240px;
+  max-width:420px;
+  margin-left:auto;        /* empuja el search al extremo derecho */
+}
+.ev-step4__search-icon{
+  position:absolute;
+  left:14px;
+  top:50%;
+  transform:translateY(-50%);
+  width:18px;
+  height:18px;
+  color:var(--naowee-color-text-secondary, #646587);
+  pointer-events:none;
+  display:flex;
+}
+.ev-step4__search-icon svg{ width:18px; height:18px; }
+.ev-step4__search-input{
+  width:100%;
+  height:42px;
+  padding:0 40px 0 40px;     /* deja espacio a la derecha para el clear (X) */
+  border:1px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius:9999px;
+  font-size:14px;
+  font-family:inherit;
+  background:#fff;
+  transition:border-color .12s, box-shadow .12s;
+}
+.ev-step4__search-input:focus{
+  outline:none;
+  border-color:var(--naowee-color-interactive-fill-loud-idle, #d74009);
+  box-shadow:0 0 0 3px rgba(215, 64, 9, .12);
+}
+
+/* Clear button — visible solo cuando hay valor (toggle vía clase
+   --has-value en el wrapper). Hover gris suave. Pattern alineado al
+   `.naowee-searchbox__clear` del DS. */
+.ev-step4__search-clear{
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  width:22px;
+  height:22px;
+  border-radius:9999px;
+  border:none;
+  background:transparent;
+  color:var(--naowee-color-text-secondary, #646587);
+  cursor:pointer;
+  padding:0;
+  transition:background .12s, color .12s;
+}
+.ev-step4__search--has-value .ev-step4__search-clear{
+  display:inline-flex;
+}
+.ev-step4__search-clear:hover{
+  background:#f5f6fa;
+  color:var(--naowee-color-text-primary, #282834);
+}
+.ev-step4__search-clear svg{ width:14px; height:14px; }
+
+/* Tabs Individual / Conjunto / Paradeportes — usa DS naowee-tabs */
+.ev-step4__tabs{
+  margin-top:8px;
+}
+
+/* Tabla de modalidades */
+.ev-mod-table{
+  display:flex;
+  flex-direction:column;
+  border:1px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius:12px;
+  overflow:hidden;
+  background:#fff;
+}
+/* Header de la tabla — sigue la receta de naowee-table thead th del DS:
+   font 12px / medium / text-secondary / letter-spacing-caps + uppercase
+   (text-transform: uppercase es el ajuste pedido por el usuario para
+   que "Disciplinas" / "Infantil" / "Prejuvenil" salgan en mayúsculas). */
+.ev-mod-table__head{
+  display:flex;
+  align-items:center;
+  background:#f5f6fa;
+  border-bottom:1px solid var(--naowee-color-border-default, #e7e9f3);
+  padding:12px 16px;
+  font-size:12px;
+  font-weight:600;
+  color:var(--naowee-color-text-secondary, #646587);
+  letter-spacing:var(--naowee-font-letter-spacing-caps, .5px);
+  text-transform:uppercase;
+}
+.ev-mod-table__cell{
+  flex:1;
+  min-width:0;
+}
+.ev-mod-table__cell--name{
+  flex:2;
+  padding-right:8px;
+}
+.ev-mod-table__cell--cat{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* Grupo (sport con header colapsable + body con pruebas) */
+.ev-mod-group{
+  border-bottom:1px solid var(--naowee-color-border-default, #e7e9f3);
+}
+.ev-mod-group:last-child{ border-bottom:none; }
+.ev-mod-group__header{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
+  border:none;
+  background:#fff;
+  cursor:pointer;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:500;       /* peso medium — antes era bold (700) */
+  color:var(--naowee-color-text-primary, #282834);
+  transition:background .12s;
+}
+.ev-mod-group__header:hover{ background:#fafafc; }
+.ev-mod-group__name{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+}
+.ev-mod-group__emoji{
+  font-size:18px;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+}
+.ev-mod-group__chevron{
+  display:inline-flex;
+  width:18px;
+  height:18px;
+  color:var(--naowee-color-text-secondary, #646587);
+  transition:transform .15s;
+}
+.ev-mod-group__chevron svg{ width:18px; height:18px; }
+.ev-mod-group--collapsed .ev-mod-group__chevron{
+  transform:rotate(-90deg);
+}
+.ev-mod-group__body{
+  display:flex;
+  flex-direction:column;
+}
+
+/* Row de prueba */
+.ev-mod-row{
+  display:flex;
+  align-items:center;
+  padding:10px 16px;
+  border-top:1px solid var(--naowee-color-border-default, #e7e9f3);
+  font-size:14px;
+  color:var(--naowee-color-text-primary, #282834);
+}
+.ev-mod-row:hover{ background:#fafafc; }
+
+/* Botón "Sexo" — dropdown trigger inline en la celda */
+.ev-mod-cell__sexo{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 10px;
+  border:none;
+  background:transparent;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:500;
+  color:var(--naowee-color-text-primary, #282834);
+  cursor:pointer;
+  border-radius:6px;
+  transition:background .12s, color .12s;
+}
+.ev-mod-cell__sexo:hover:not([disabled]){
+  background:#fff8f3;
+  color:var(--naowee-color-interactive-fill-loud-idle, #d74009);
+}
+.ev-mod-cell__sexo[disabled]{
+  color:var(--naowee-color-text-disabled, #9c9ebf);
+  cursor:not-allowed;
+  opacity:.6;
+}
+.ev-mod-cell__sexo-chevron{
+  display:inline-flex;
+  width:14px;
+  height:14px;
+  color:var(--naowee-color-interactive-fill-loud-idle, #d74009);
+  transition:transform .15s;
+}
+.ev-mod-cell__sexo-chevron svg{ width:14px; height:14px; }
+.ev-mod-cell__sexo--open .ev-mod-cell__sexo-chevron{
+  transform:rotate(180deg);
+}
+
+/* Sexo dropdown menu — pequeño popup con 3 opciones */
+.ev-mod-cell__sexo-menu{
+  position:absolute;
+  top:calc(100% + 4px);
+  left:8px;
+  background:#fff;
+  border:1px solid var(--naowee-color-border-default, #e7e9f3);
+  border-radius:10px;
+  box-shadow:0 8px 24px rgba(0, 0, 0, .12);
+  padding:4px;
+  z-index:200;
+  min-width:140px;
+}
+.ev-mod-cell__sexo-opt{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 8px;
+  border-radius:6px;
+  cursor:pointer;
+  user-select:none;
+  font-size:13px;
+  color:var(--naowee-color-text-primary, #282834);
+}
+.ev-mod-cell__sexo-opt:hover{
+  background:#f5f6fa;
+}
+
+/* Required asterisk inline */
+.ev-required{
+  color:var(--naowee-color-feedback-fill-negative-loud, #e53935);
+  margin-left:2px;
+}
+
+/* Single-select dropdown value (Catálogo de delegaciones) */
+.ev-dd-value{
+  flex:1;
+  font-size:14px;
+  color:var(--naowee-color-text-primary, #282834);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 
 /* Step placeholders (steps 2-4) */
@@ -285,3 +1048,131 @@
   .ev-page-header{flex-direction:column !important;align-items:stretch !important}
   .ev-page-header .naowee-btn{align-self:flex-start}
 }
+
+/* ─── Publicar evento — modal de confirmación ───────────────────────
+   Reusa los componentes DS (naowee-modal + naowee-message--caution).
+   Lo que aportamos:
+   - Header con título centrado (spec del Figma)
+   - Listado de "checks" verdes con circle-check icon
+   - Sección de ayuda con uppercase eyebrow + email link en accent
+   - Footer spread (Cancelar quiet a la izq, CTA loud a la der) */
+.ev-publish-modal{
+  width:560px;
+  max-width:calc(100vw - 32px);
+}
+.ev-publish-modal__header{
+  /* Centra el título — el dismiss queda absoluto a la derecha */
+  position:relative;
+  justify-content:center;
+}
+.ev-publish-modal__header .naowee-modal__dismiss{
+  position:absolute;
+  right:24px;
+  top:50%;
+  transform:translateY(-50%);
+}
+.ev-publish-modal__title{
+  text-align:center;
+  width:100%;
+}
+.ev-publish-modal__body{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+.ev-publish-modal__lead{
+  margin:0;
+  text-align:center;
+  font-size:15px;
+  color:var(--naowee-color-text-primary, #282834);
+}
+.ev-publish-modal__lead strong{
+  font-weight:700;
+}
+
+/* La naowee-message del DS por default es flex column (header arriba,
+   text abajo). Acá la usamos solo con header (icon + texto inline). */
+.ev-publish-modal__warning{
+  margin:0;
+}
+.ev-publish-modal__warning .naowee-message__header{
+  align-items:flex-start;
+  gap:12px;
+}
+.ev-publish-modal__warning .naowee-message__text{
+  margin:0;
+  line-height:1.5;
+}
+
+/* Lista de "checks" — circle-check verde + texto */
+.ev-publish-modal__checks{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.ev-publish-modal__check{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  font-size:14px;
+  color:var(--naowee-color-text-primary, #282834);
+  line-height:1.5;
+}
+.ev-publish-modal__check strong{
+  font-weight:700;
+}
+.ev-publish-modal__check-icon{
+  flex-shrink:0;
+  width:22px;
+  height:22px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--naowee-color-feedback-fill-positive-loud, #1f8923);
+}
+.ev-publish-modal__check-icon svg{ width:22px; height:22px; }
+
+/* Help section */
+.ev-publish-modal__help{
+  border-top:1px solid var(--naowee-color-border-default, #e7e9f3);
+  padding-top:16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.ev-publish-modal__help-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.6px;
+  text-transform:uppercase;
+  color:var(--naowee-color-text-secondary, #646587);
+}
+.ev-publish-modal__help-title svg{
+  color:var(--naowee-color-text-secondary, #646587);
+}
+.ev-publish-modal__help p{
+  margin:0;
+  font-size:14px;
+  color:var(--naowee-color-text-primary, #282834);
+  line-height:1.5;
+}
+.ev-publish-modal__email{
+  font-size:14px;
+  font-weight:700;
+  color:var(--naowee-color-text-accent, #d74009);
+  text-decoration:none;
+  align-self:flex-start;
+}
+.ev-publish-modal__email:hover{
+  text-decoration:underline;
+}
+
+/* Override para el toast cuando NO queremos barra de progreso (publicar). */
+.ev-undo-toast--no-progress .ev-undo-toast__progress{ display:none; }

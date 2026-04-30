@@ -1291,11 +1291,15 @@
   padding-left:18px !important;
   padding-right:0 !important;
 }
-.dr-table thead th:nth-child(2){ width:auto !important; }              /* Escenario o sede — toma el resto */
-.dr-table thead th:nth-child(3){ width:140px !important; }             /* ID único */
-.dr-table thead th:nth-child(4){ width:70px !important; }              /* CAR */
-.dr-table thead th:nth-child(5){ width:130px !important; }             /* Estado */
-.dr-table thead th:nth-child(6){ width:240px !important; }             /* Última actualización (con autor "De Juan Hernandez Granados" sin wrap) */
+/* Distribución por porcentajes — con table-layout:fixed, usar `auto` en la
+   col 2 hacía que absorbiera TODO el espacio sobrante (gap enorme entre
+   "Escenario" e "ID único"). Con %, el browser escala proporcionalmente
+   y todas las columnas crecen parejo cuando hay viewport ancho. */
+.dr-table thead th:nth-child(2){ width:28% !important; }    /* Escenario o sede */
+.dr-table thead th:nth-child(3){ width:14% !important; }    /* ID único */
+.dr-table thead th:nth-child(4){ width:9%  !important; }    /* CAR */
+.dr-table thead th:nth-child(5){ width:13% !important; }    /* Estado */
+.dr-table thead th:nth-child(6){ width:28% !important; }    /* Última actualización + autor */
 .dr-table thead th:nth-child(7),
 .dr-table tbody td:nth-child(7){
   width:60px !important;
@@ -1340,12 +1344,6 @@
 .dr-cell-modified__user{
   font-size:12px;
   color:var(--naowee-color-text-secondary, #646587);
-}
-
-/* Spacer when row is not reviewable (no checkbox) */
-.dr-check-spacer{
-  width:18px;
-  height:18px;
 }
 
 /* Row 3-dots menu */
@@ -1545,67 +1543,25 @@
 }
 
 /* ─── Toast (bottom-right floating) ───────────────────────────
-   Position bottom-right (no top) — convención más común para toasts
-   de acción exitosa, no compite con el header del producto. */
+   El componente naowee-message del DS ya trae:
+     - quiet green/red background
+     - border-radius pill (containers default)
+     - icon badge circle (verde/rojo) + tipografía
+   NO overrideamos NADA del componente — solo posicionamos el
+   wrapper floating bottom-right + drop shadow para flotar sobre
+   la página. Pattern idéntico al playground#message. */
 .dr-toast{
   position:fixed;
   bottom:24px;
   right:24px;
   z-index:10000;
-  width:min(380px, calc(100vw - 48px));
+  width:min(388px, calc(100vw - 48px));
   opacity:0;
   transform:translateY(20px);
   transition:opacity .25s ease, transform .25s ease;
+  filter:drop-shadow(0 12px 32px rgba(0, 0, 0, .14));
 }
 .dr-toast--show{
   opacity:1;
   transform:none;
 }
-.dr-toast .naowee-message{
-  background:#fff;
-  border:1px solid var(--naowee-color-border-default, #e7e9f3);
-  box-shadow:0 12px 32px rgba(0, 0, 0, .14);
-  padding:14px 16px;
-}
-.dr-toast .naowee-message--positive{
-  border-left:4px solid var(--naowee-color-feedback-fill-positive-loud, #1f8923);
-}
-.dr-toast .naowee-message--negative{
-  border-left:4px solid var(--naowee-color-feedback-fill-negative-loud, #e53935);
-}
-/* Badge icon: el DS lo hace verde/rojo automáticamente con
-   --message--positive/--negative. Solo aseguramos el size. */
-.dr-toast .naowee-message__icon{
-  width:20px;
-  height:20px;
-  flex-shrink:0;
-}
-.dr-toast .naowee-message__title{
-  font-size:14px;
-  line-height:18px;
-  margin:0;
-}
-.dr-toast .naowee-message__text{
-  font-size:13px;
-  line-height:18px;
-  color:var(--naowee-color-text-secondary, #646587);
-  margin:2px 0 0;
-}
-.dr-toast__body{
-  flex:1;
-  min-width:0;
-}
-.dr-toast__dismiss{
-  width:24px; height:24px;
-  border:none;
-  background:transparent;
-  color:var(--naowee-color-text-secondary, #646587);
-  cursor:pointer;
-  border-radius:6px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-shrink:0;
-  transition:background .12s;
-}
-.dr-toast__dismiss:hover{ background:#f5f6fa; }

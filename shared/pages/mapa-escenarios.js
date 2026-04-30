@@ -999,7 +999,7 @@ function showSvgLayer() {
   if (!root) return;
   root.querySelector('#meSvgLayer')?.classList.remove('me-map-layer--hidden');
   root.querySelector('#meLeafletLayer')?.classList.add('me-map-layer--hidden');
-  root.querySelector('#meZoom')?.removeAttribute('hidden');
+  /* `.me-zoom` siempre visible — funciona para SVG y Leaflet (ver bindZoomEvents). */
 }
 function hideSvgLayer() {
   const root = _state.rootEl;
@@ -1011,7 +1011,6 @@ function showLeafletLayer() {
   if (!root) return;
   root.querySelector('#meLeafletLayer')?.classList.remove('me-map-layer--hidden');
   root.querySelector('#meSvgLayer')?.classList.add('me-map-layer--hidden');
-  root.querySelector('#meZoom')?.setAttribute('hidden', 'true');
 }
 function hideLeafletLayer() {
   const root = _state.rootEl;
@@ -1126,7 +1125,10 @@ function initLeafletCity(city) {
   }
   const mapEl = document.getElementById('meLeafletMap');
   if (!mapEl) return;
-  const map = window.L.map(mapEl, { zoomControl: true, attributionControl: true })
+  /* zoomControl:false → desactivamos los +/- nativos de Leaflet (top-left)
+     porque ya tenemos `.me-zoom` custom que funciona para SVG y Leaflet.
+     Tener ambos producía dos pares de botones apilados en la misma esquina. */
+  const map = window.L.map(mapEl, { zoomControl: false, attributionControl: true })
     .setView([city.lat, city.lon], 14);
   window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
@@ -1261,9 +1263,10 @@ function renderScenarioDetailPanel(esc) {
     <div class="me-detail">
       <button type="button" class="me-detail__close" data-detail-close aria-label="Cerrar ficha">${closeIcon()}</button>
 
-      <!-- Banner con foto real de Unsplash matching el tipo de escenario.
-           onerror fallback al gradient (style.cssText con --tipo-color)
-           si la imagen falla a cargar (offline / CDN error). -->
+      <!-- Banner: foto hero estática (sin nav, sin dots). El carrousel
+           navegable vive en la sección de thumbnails dentro del primer
+           tab — patrón Airbnb (hero arriba + galería navegable abajo).
+           onerror fallback al gradient con --tipo-color si Unsplash falla. -->
       <div class="me-detail__carrousel" style="--tipo-color:${TIPO_COLORS[esc.tipo]}">
         <img class="me-detail__photo-img"
              src="${tipoPhotoUrl(esc.tipo, 0, 600, 360)}"
@@ -1294,20 +1297,29 @@ function renderScenarioDetailPanel(esc) {
       </div>
 
       <div class="me-detail__tab-content" data-tab-content="info">
-        <!-- Photo grid con 3 fotos reales del tipo de escenario. onerror
-             fallback al gradient con --tipo-color si Unsplash no responde. -->
-        <div class="me-detail__photo-grid">
-          <div class="me-detail__photo-thumb" style="--tipo-color:${TIPO_COLORS[esc.tipo]}">
-            <img src="${tipoPhotoUrl(esc.tipo, 0, 200, 200)}" alt=""
-                 onerror="this.style.display='none';this.parentElement.classList.add('me-detail__photo-thumb--fallback')" />
+        <!-- Galería navegable de thumbs: 3 slides full-width con prev/next
+             overlay. Cada slide es una foto del tipo de escenario; los
+             dots indican la posición. Patrón Airbnb (gallery con nav). -->
+        <div class="me-detail__photo-gallery" data-car-root>
+          <div class="me-detail__gallery-track" data-car-track>
+            ${[0, 1, 2].map(i => `
+              <div class="me-detail__gallery-slide" style="--tipo-color:${TIPO_COLORS[esc.tipo]}">
+                <img src="${tipoPhotoUrl(esc.tipo, i, 600, 360)}" alt="${escapeHtml(esc.tipo)} — foto ${i + 1}"
+                     onerror="this.style.display='none';this.parentElement.classList.add('me-detail__gallery-slide--fallback')" />
+              </div>
+            `).join('')}
           </div>
-          <div class="me-detail__photo-thumb" style="--tipo-color:${TIPO_COLORS[esc.tipo]}">
-            <img src="${tipoPhotoUrl(esc.tipo, 1, 200, 200)}" alt=""
-                 onerror="this.style.display='none';this.parentElement.classList.add('me-detail__photo-thumb--fallback')" />
-          </div>
-          <div class="me-detail__photo-thumb" style="--tipo-color:${TIPO_COLORS[esc.tipo]}">
-            <img src="${tipoPhotoUrl(esc.tipo, 2, 200, 200)}" alt=""
-                 onerror="this.style.display='none';this.parentElement.classList.add('me-detail__photo-thumb--fallback')" />
+          <button type="button" class="me-detail__car-nav me-detail__car-nav--prev" data-car-prev aria-label="Foto anterior">
+            ${chevronLeftIcon()}
+          </button>
+          <button type="button" class="me-detail__car-nav me-detail__car-nav--next" data-car-next aria-label="Foto siguiente">
+            ${chevronRightIcon()}
+          </button>
+          <div class="me-detail__car-dots" role="tablist" aria-label="Paginación de fotos">
+            ${[0, 1, 2].map(i => `
+              <button type="button" class="me-detail__car-dot ${i === 0 ? 'me-detail__car-dot--active' : ''}"
+                      data-car-dot="${i}" role="tab" aria-label="Ir a foto ${i + 1}"></button>
+            `).join('')}
           </div>
         </div>
 
@@ -1587,9 +1599,31 @@ function bindDetailPanelEvents(pageEl) {
       });
     });
   });
-  /* (Carrousel sin dots — quitamos el view indicator. Una sola foto
-     placeholder en el banner principal. Los thumbs del photo-grid en
-     la primera tab actúan como vista de fotos del scenario.) */
+  /* Carrousel: 3 slides en el track, prev/next + dots. El track usa
+     translateX(-100% × idx) para mostrar el slide activo. State local
+     vive en el dataset del root del carrousel — no se persiste. */
+  const carRoot = pageEl.querySelector('[data-car-root]');
+  if (carRoot) {
+    const track = carRoot.querySelector('[data-car-track]');
+    const dots = carRoot.querySelectorAll('[data-car-dot]');
+    const total = dots.length;
+    const setSlide = (idx) => {
+      const next = ((idx % total) + total) % total;
+      carRoot.dataset.carIdx = String(next);
+      track.style.transform = `translateX(-${next * 100}%)`;
+      dots.forEach((d, i) => d.classList.toggle('me-detail__car-dot--active', i === next));
+    };
+    carRoot.dataset.carIdx = '0';
+    carRoot.querySelector('[data-car-prev]')?.addEventListener('click', () => {
+      setSlide(parseInt(carRoot.dataset.carIdx || '0', 10) - 1);
+    });
+    carRoot.querySelector('[data-car-next]')?.addEventListener('click', () => {
+      setSlide(parseInt(carRoot.dataset.carIdx || '0', 10) + 1);
+    });
+    dots.forEach((d, i) => {
+      d.addEventListener('click', () => setSlide(i));
+    });
+  }
 }
 /* Re-render de city pins (depto level) o scenario markers (city level)
    según el nav state actual. Llamado después de cualquier cambio de
@@ -1793,7 +1827,13 @@ function bindZoomEvents(pageEl) {
   pageEl.querySelectorAll('[data-zoom]').forEach(btn => {
     btn.addEventListener('click', () => {
       const dir = btn.getAttribute('data-zoom');
-      /* Zoom in/out manual: factor 1.25× sobre el centro del viewBox */
+      /* En city level Leaflet está activo → delegamos zoom al map nativo.
+         En depto/country el SVG está activo → zoom manual del viewBox. */
+      if (_state.nav.level === 'city' && _state.leafletMap) {
+        if (dir === 'in') _state.leafletMap.zoomIn();
+        else _state.leafletMap.zoomOut();
+        return;
+      }
       const vb = _state.viewBox;
       const factor = dir === 'in' ? 1 / 1.25 : 1.25;
       const newW = vb.w * factor;
@@ -1843,5 +1883,7 @@ function closeIconSmall(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="
 function chevronDown()   { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'; }
 function checkIcon()     { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'; }
 function chevronRight()  { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>'; }
+function chevronLeftIcon() { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>'; }
+function chevronRightIcon(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'; }
 function plusIcon()      { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'; }
 function minusIcon()     { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>'; }
