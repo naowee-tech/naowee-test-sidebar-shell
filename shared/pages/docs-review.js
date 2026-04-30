@@ -463,7 +463,7 @@ function openApproveDialog(ids) {
       <p class="dr-dialog__text">Estás a punto de aprobar ${ids.length === 1 ? 'este registro' : `${ids.length} registros`}.</p>
       <p class="dr-dialog__sub">Una vez aprobado${ids.length > 1 ? 's' : ''}, el estado cambiará a "Activo" y ${ids.length === 1 ? 'el escenario quedará habilitado' : 'los escenarios quedarán habilitados'} en el sistema. ¿Deseas continuar?</p>
       <div class="dr-dialog__footer">
-        <button type="button" class="naowee-btn naowee-btn--link dr-dialog__cancel" data-dlg-cancel>Cancelar</button>
+        <button type="button" class="naowee-btn naowee-btn--mute dr-dialog__cancel" data-dlg-cancel>Cancelar</button>
         <button type="button" class="naowee-btn naowee-btn--loud dr-dialog__confirm--positive" data-dlg-confirm>
           ${checkIcon()} Confirmar aprobación
         </button>
@@ -507,7 +507,7 @@ function openRejectDialog(ids) {
         </div>
       </div>
       <div class="dr-dialog__footer">
-        <button type="button" class="naowee-btn naowee-btn--link dr-dialog__cancel" data-dlg-cancel>Cancelar</button>
+        <button type="button" class="naowee-btn naowee-btn--mute dr-dialog__cancel" data-dlg-cancel>Cancelar</button>
         <button type="button" class="naowee-btn naowee-btn--loud dr-dialog__confirm--negative" data-dlg-confirm disabled>
           ${closeIcon()} Confirmar rechazo
         </button>
