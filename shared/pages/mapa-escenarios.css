@@ -131,6 +131,10 @@
   /* Padding reducido y simétrico (10px L/R) — antes el DS usaba
      14px left + 12px right que dejaba aire visual desbalanceado. */
   padding:4px 10px !important;
+  /* text-align:left CRÍTICO: el browser por default aplica text-align:
+     center a los <button>, lo que centraba el texto truncado y
+     creaba whitespace fantasma a la izquierda. Forzamos left. */
+  text-align:left !important;
   /* overflow:hidden acá para que el LABEL trunque sin afectar el menu
      (que es sibling del trigger, no descendiente). */
   overflow:hidden;
@@ -146,6 +150,7 @@
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
+  text-align:left;
 }
 /* Chev a la derecha: tamaño fijo, no shrinkear, no crece */
 .me-dd .naowee-filter-dropdown__chev{
