@@ -204,6 +204,7 @@ export const MENU_BY_ROLE = {
 
   EVENT_COORDINATOR: [
     { section: null,                       items: [ITEMS.inicio] },
+    { section: 'EVENTOS',                  items: [ITEMS.eventos] },
     { section: 'COMPETENCIAS',             items: [ITEMS.competencias] },
     { section: 'RESULTADOS & RANKING',     items: [ITEMS.resultados] }
   ],
