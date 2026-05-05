@@ -71,7 +71,9 @@
   import {
     renderMiDigitacionPage,
     renderDigitadoresPage,
-    renderCoordinadoresPage
+    renderCoordinadoresPage,
+    renderDigitadorInicioPage,
+    renderCompetenciasPage
   } from './shared/pages/digitacion-portal.js';
 
   const roleCode = getRoleFromQuery();
@@ -129,7 +131,12 @@
       return;
     }
 
-    /* ─── Digitación: 3 vistas vía iframe portal a naowee-test-digitacion ─── */
+    /* ─── Digitación: vistas vía iframe portal a naowee-test-digitacion ─── */
+    // Inicio del DIGITIZER → dashboard personal (estadísticas + historial)
+    if (currentActive === 'inicio' && role && role.code === 'DIGITIZER') {
+      renderDigitadorInicioPage(pageEl);
+      return;
+    }
     if (currentActive === 'mi-digitacion') {
       renderMiDigitacionPage(pageEl);
       return;
@@ -140,6 +147,11 @@
     }
     if (currentActive === 'coordinadores') {
       renderCoordinadoresPage(pageEl);
+      return;
+    }
+    // Competencias → listado completo (roles ROOT/ADMIN/EVENT_COORDINATOR/EVENT_MANAGER)
+    if (currentActive === 'competencias' || currentActive === 'competencias-lista') {
+      renderCompetenciasPage(pageEl);
       return;
     }
 
