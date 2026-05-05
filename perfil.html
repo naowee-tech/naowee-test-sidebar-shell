@@ -26,6 +26,7 @@
 <link rel="stylesheet" href="shared/pages/event-list.css">
 <link rel="stylesheet" href="shared/pages/sedes-list.css">
 <link rel="stylesheet" href="shared/pages/mapa-escenarios.css">
+<link rel="stylesheet" href="shared/pages/digitacion-portal.css">
 </head>
 <body>
 
@@ -67,6 +68,11 @@
   import { renderSedeDetailPage } from './shared/pages/sede-detail.js';
   import { renderDocsReviewPage } from './shared/pages/docs-review.js';
   import { renderMapaEscenariosPage } from './shared/pages/mapa-escenarios.js';
+  import {
+    renderMiDigitacionPage,
+    renderDigitadoresPage,
+    renderCoordinadoresPage
+  } from './shared/pages/digitacion-portal.js';
 
   const roleCode = getRoleFromQuery();
   const activeId = new URLSearchParams(window.location.search).get('active') || 'inicio';
@@ -120,6 +126,20 @@
 
     if (currentActive === 'mapa-escenarios') {
       renderMapaEscenariosPage(pageEl);
+      return;
+    }
+
+    /* ─── Digitación: 3 vistas vía iframe portal a naowee-test-digitacion ─── */
+    if (currentActive === 'mi-digitacion') {
+      renderMiDigitacionPage(pageEl);
+      return;
+    }
+    if (currentActive === 'digitadores') {
+      renderDigitadoresPage(pageEl);
+      return;
+    }
+    if (currentActive === 'coordinadores') {
+      renderCoordinadoresPage(pageEl);
       return;
     }
 
