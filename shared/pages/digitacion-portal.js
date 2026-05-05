@@ -46,3 +46,20 @@ export function renderDigitadoresPage(pageEl) {
 export function renderCoordinadoresPage(pageEl) {
   mountPortal(pageEl, 'coordinadores-portal', 'Coordinadores');
 }
+
+/**
+ * Inicio del rol DIGITIZER (Digitador) — embebe el dashboard
+ * personal del digitador (estadísticas + historial de competencias).
+ */
+export function renderDigitadorInicioPage(pageEl) {
+  mountPortal(pageEl, 'dashboard-portal', 'Inicio digitador');
+}
+
+/**
+ * Vista "Competencias" — listado completo de competencias deportivas
+ * (la página /lista.html del repo digitación). Lo ven los roles
+ * EVENT_COORDINATOR / EVENT_MANAGER / ADMIN / ROOT.
+ */
+export function renderCompetenciasPage(pageEl) {
+  mountPortal(pageEl, 'lista-portal', 'Competencias');
+}
