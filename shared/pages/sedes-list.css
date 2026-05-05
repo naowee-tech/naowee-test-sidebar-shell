@@ -3,7 +3,31 @@
    La mayoría viene del DS oficial. Acá solo lo específico:
    - Cells custom de la tabla (nombre / código / car / modificación)
    - Modal de pre-validación: step badge, grid 2-col, map placeholder
+   - Portal iframe overlay (v2.0+): el modal se monta vía iframe al repo
+     escenarios (ver shared/pages/sede-create-modal.js)
    ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Portal iframe overlay ─────────────────────────────────────────
+   El modal completo (3 pasos del wizard) se carga vía iframe desde
+   naowee-test-escenarios/registrar-portal.html. El overlay del padre
+   sólo provee el viewport — el dim azul lo aporta el portal mismo. */
+.sede-portal-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:transparent;
+  animation:sedePortalFadeIn .2s ease;
+}
+.sede-portal-iframe{
+  width:100%;height:100%;
+  border:none;background:transparent;
+  display:block;
+}
+@keyframes sedePortalFadeIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+@media (prefers-reduced-motion: reduce){
+  .sede-portal-overlay{animation:none}
+}
 
 /* ─── Layout de la page ─────────────────────────────────────────────
    Sedes usa todo el ancho disponible (no se centra como .um-page con
