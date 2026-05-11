@@ -607,6 +607,18 @@ a{color:inherit;text-decoration:none}
 .naowee-floating-footer__text{font-weight:500;line-height:1}
 .naowee-floating-footer__text strong{color:var(--text-primary);font-weight:700}
 
+/* Cuando el .page hospeda una página iframeada (eventos / mapa / etc.),
+   el shell NO puede reaccionar al scroll del contenido porque el evento
+   queda atrapado dentro del iframe. Ocultamos el footer + el role-switcher
+   en esos casos para evitar duplicados con los que renderiza la página
+   iframeada (que ya trae su propio footer y switcher vía shell modules). */
+.shell:has(.page.digitacion-portal-host) ~ .naowee-floating-footer,
+.shell:has(.page.mapa-portal-host) ~ .naowee-floating-footer,
+.shell:has(.page.digitacion-portal-host) ~ #demoRoleSwitcherRoot,
+.shell:has(.page.mapa-portal-host) ~ #demoRoleSwitcherRoot {
+  display: none !important;
+}
+
 /* Page placeholder (sandbox-only) */
 .page-placeholder{
   background:var(--surface);
