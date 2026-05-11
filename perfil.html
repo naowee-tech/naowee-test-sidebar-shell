@@ -79,10 +79,22 @@
   const roleCode = getRoleFromQuery();
   const activeId = new URLSearchParams(window.location.search).get('active') || 'inicio';
 
+  /* Clases que cada renderer agrega a .page para sus estilos propios.
+     Como la navegación es SPA (history.pushState), las clases se acumulan
+     entre renders y .page.digitacion-portal-host / .mapa-portal-host
+     pisan al .dr-page con padding:0 + overflow:hidden, dejando el
+     contenido "pegado arriba". Limpiamos antes de cada dispatch. */
+  const PAGE_VARIANT_CLASSES = [
+    'um-page', 'me-page', 'sd-page', 'dr-page',
+    'digitacion-portal-host', 'mapa-portal-host'
+  ];
+
   /* Routing interno por activeId — qué página se renderiza en .page */
   function renderPage(currentActive, role) {
     const pageEl = document.getElementById('pageContent');
     if (!pageEl) return;
+
+    pageEl.classList.remove(...PAGE_VARIANT_CLASSES);
 
     if (currentActive === 'user-management') {
       renderUserManagementPage(pageEl);
