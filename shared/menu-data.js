@@ -163,7 +163,9 @@ export const MENU_BY_ROLE = {
     { section: 'EVENTOS',                  items: [ITEMS.eventos, ITEMS.cupos] },
     { section: 'COMPETENCIAS',             items: [ITEMS.competencias] },
     { section: 'INSCRIPCIONES',            items: [ITEMS.inscripciones] },
-    { section: 'DIGITACIÓN',               items: [ITEMS.miDigitacion, ITEMS.digitadores, ITEMS.coordinadores] },
+    /* Mi digitación NO aparece para ROOT — esa vista es exclusiva
+       del rol DIGITIZER. ROOT supervisa via Digitadores/Coordinadores. */
+    { section: 'DIGITACIÓN',               items: [ITEMS.digitadores, ITEMS.coordinadores] },
     { section: 'DOCUMENTACIÓN',            items: [ITEMS.documentacion] },
     { section: 'ESCENARIOS',               items: [ITEMS.sedes, ITEMS.mapaEscenarios] },
     { section: 'INCENTIVOS',               items: [ITEMS.asignarIncentivos] },
@@ -180,7 +182,8 @@ export const MENU_BY_ROLE = {
     { section: 'EVENTOS',                  items: [ITEMS.eventos, ITEMS.cupos] },
     { section: 'COMPETENCIAS',             items: [ITEMS.competencias] },
     { section: 'INSCRIPCIONES',            items: [ITEMS.inscripciones] },
-    { section: 'DIGITACIÓN',               items: [ITEMS.miDigitacion, ITEMS.digitadores, ITEMS.coordinadores] },
+    /* Mi digitación NO aparece para ADMIN — solo para el rol DIGITIZER. */
+    { section: 'DIGITACIÓN',               items: [ITEMS.digitadores, ITEMS.coordinadores] },
     { section: 'DOCUMENTACIÓN',            items: [ITEMS.documentacion] },
     { section: 'ESCENARIOS',               items: [ITEMS.sedes, ITEMS.mapaEscenarios] },
     { section: 'INCENTIVOS',               items: [ITEMS.asignarIncentivos] },

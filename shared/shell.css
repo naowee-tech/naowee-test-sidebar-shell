@@ -633,3 +633,37 @@ a{color:inherit;text-decoration:none}
   .sidebar .nav-row .icon{margin-left:0}
   .user-info{display:none}
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   BOTÓN PRIMARIO LOUD — glow elevation naranja en hover
+   ───────────────────────────────────────────────────────────────
+   Patrón canónico Naowee (paridad con naowee-test-escenarios y el
+   PLAYBOOK-REFINAMIENTO). Aplica a:
+     • .naowee-btn--loud  (Design System oficial)
+     • .btn-orange        (legacy del shell)
+     • .btn-accent        (legacy de acciones primarias)
+
+   Idle: mantiene background sin oscurecer
+   Hover: lift -1px + sombra accent (naranja vibrante)
+   Active: vuelve al baseline con sombra interna sutil
+   ═══════════════════════════════════════════════════════════════ */
+.naowee-btn--loud,
+.btn-orange,
+.btn-accent{
+  transition:box-shadow .25s cubic-bezier(.32,.72,0,1),
+             transform .2s ease,
+             background .15s ease;
+}
+.naowee-btn--loud:hover:not(:disabled):not([disabled]),
+.btn-orange:hover:not(:disabled):not([disabled]),
+.btn-accent:hover:not(:disabled):not([disabled]){
+  box-shadow:0 8px 22px rgba(215,64,9,.32),
+             0 2px 6px rgba(215,64,9,.18);
+  transform:translateY(-1px);
+}
+.naowee-btn--loud:active:not(:disabled):not([disabled]),
+.btn-orange:active:not(:disabled):not([disabled]),
+.btn-accent:active:not(:disabled):not([disabled]){
+  transform:translateY(0);
+  box-shadow:0 2px 8px rgba(215,64,9,.22);
+}
