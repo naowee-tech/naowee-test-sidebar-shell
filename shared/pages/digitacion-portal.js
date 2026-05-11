@@ -1,14 +1,24 @@
 /**
- * Digitación — IFRAME PORTAL EDITION
+ * Digitación — IFRAME EDITION (single source of truth)
  *
- * Las 3 vistas del módulo de digitación (Mi digitación, Digitadores,
- * Coordinadores) se montan como iframes apuntando al repo
- * `naowee-test-digitacion`. Las sub-navegaciones internas (dashboard,
- * eventos, evento-detalle, lista, detalle, stepper, preview) viven
- * dentro del iframe — el shell sólo provee el frame.
+ * v2.1.0 (2026-05-11+): las vistas del módulo de digitación se montan
+ * como iframes apuntando a los archivos standalone del repo
+ * `naowee-test-digitacion`. Ya no se mantienen `-portal.html`
+ * separados — cada página detecta que está en iframe vía
+ * embed-mode.js y oculta su chrome (sidebar + header) por sí sola.
  *
- * Garantiza paridad 100% con el módulo de digitación. Cualquier ajuste
- * futuro allá se sincroniza automáticamente acá.
+ * Slugs:
+ *   • mi-digitacion → digitador.html  (vista personal del digitador)
+ *   • digitadores   → digitadores.html
+ *   • coordinadores → coordinadores.html
+ *   • dashboard     → dashboard.html  (inicio del rol DIGITIZER)
+ *   • competencias  → lista.html
+ *
+ * Beneficio: cuando se refina una página standalone, el shell
+ * muestra los mismos cambios automáticamente. Cero duplicación.
+ *
+ * Las sub-navegaciones internas (evento-detalle, stepper, detalle,
+ * preview) viven dentro del iframe.
  */
 
 const PORTAL_PATH = '/naowee-test-digitacion';
@@ -36,15 +46,15 @@ function mountPortal(pageEl, slug, title) {
 }
 
 export function renderMiDigitacionPage(pageEl) {
-  mountPortal(pageEl, 'mi-digitacion-portal', 'Mi digitación');
+  mountPortal(pageEl, 'digitador', 'Mi digitación');
 }
 
 export function renderDigitadoresPage(pageEl) {
-  mountPortal(pageEl, 'digitadores-portal', 'Digitadores');
+  mountPortal(pageEl, 'digitadores', 'Digitadores');
 }
 
 export function renderCoordinadoresPage(pageEl) {
-  mountPortal(pageEl, 'coordinadores-portal', 'Coordinadores');
+  mountPortal(pageEl, 'coordinadores', 'Coordinadores');
 }
 
 /**
@@ -52,14 +62,14 @@ export function renderCoordinadoresPage(pageEl) {
  * personal del digitador (estadísticas + historial de competencias).
  */
 export function renderDigitadorInicioPage(pageEl) {
-  mountPortal(pageEl, 'dashboard-portal', 'Inicio digitador');
+  mountPortal(pageEl, 'dashboard', 'Inicio digitador');
 }
 
 /**
  * Vista "Competencias" — listado completo de competencias deportivas
- * (la página /lista.html del repo digitación). Lo ven los roles
+ * (lista.html del repo digitación). Lo ven los roles
  * EVENT_COORDINATOR / EVENT_MANAGER / ADMIN / ROOT.
  */
 export function renderCompetenciasPage(pageEl) {
-  mountPortal(pageEl, 'lista-portal', 'Competencias');
+  mountPortal(pageEl, 'lista', 'Competencias');
 }
